@@ -32,3 +32,17 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
+
+# Monorepo generated artifacts
+apps/web/playwright-report/
+apps/web/test-results/
+apps/web/.nyc_output/
+apps/web/coverage/
+apps/api/coverage/
+
+# Local helper scratch files
+tmp_*
+
+# Local archives / dumps
+*.zip
+!infrastructure/*.zip
