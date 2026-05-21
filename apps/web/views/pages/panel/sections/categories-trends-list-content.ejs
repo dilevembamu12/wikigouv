@@ -1,0 +1,85 @@
+<section class="rocket-page">
+  <div class="rocket-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="h2 fw-bold mb-0">Trending Categories</h2>
+    </div>
+  </div>
+
+  <div class="rocket-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h3 class="h5 fw-bold mb-1">Trending Categories</h3>
+        <div class="text-muted">Easily manage and review all related items in this list.</div>
+      </div>
+      <a href="/admin/categories/trends/create" class="btn btn-primary rounded-pill px-4">+ Nouvelle categorie tendance</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-borderless align-middle rocket-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Background Color</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (data.trends ?? []).forEach((trend) => { %>
+            <tr>
+              <td><%= trend?.category?.title ?? '-' %></td>
+              <td>
+                <div class="trend-pill" style="background-color: <%= trend.color %>"><%= trend.color %></div>
+              </td>
+              <td>
+                <details class="position-relative d-inline-block">
+                  <summary class="btn btn-light rounded-circle px-2 py-1 border-0">•••</summary>
+                  <div class="dropdown-menu show position-absolute p-2" style="min-width: 140px; right: 0; left: auto;">
+                    <a href="/admin/categories/trends/<%= trend.id %>/edit" class="dropdown-item text-primary">Edit</a>
+                    <form method="post" action="/admin/categories/trends/<%= trend.id %>/delete" class="js-delete-trend">
+                      <button type="submit" class="dropdown-item text-danger">Delete</button>
+                    </form>
+                  </div>
+                </details>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <section class="card mt-4">
+    <div class="card-body">
+      <h5 class="mb-2">Hints</h5>
+      <div class="text-primary fw-semibold">Trends Functionality</div>
+      <div class="text-muted">Trend categories will be displayed on the home page.</div>
+    </div>
+  </section>
+</section>
+
+<style>
+  .rocket-page-header{background:#fff;border-radius:18px;padding:22px 26px}
+  .rocket-table thead th{background:#f4f6fb;color:#98a3bf;font-weight:700;border:0}
+  .rocket-table td,.rocket-table th{padding:16px 14px}
+  .trend-pill{border-radius:999px;padding:6px 12px;color:#fff;font-weight:700;display:inline-block;min-width:140px}
+  details summary{list-style:none}
+  details summary::-webkit-details-marker{display:none}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.querySelectorAll('.js-delete-trend').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Delete trend category?',
+        showCancelButton: true,
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel'
+      }).then(function (result) {
+        if (result.isConfirmed) form.submit();
+      });
+    });
+  });
+</script>

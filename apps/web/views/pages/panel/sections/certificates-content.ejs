@@ -1,0 +1,50 @@
+<section class="rocket-card p-4 mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <h1 class="h5 rocket-title mb-1">Certificates</h1>
+      <p class="rocket-muted mb-0">Suivi des certificats délivrés, statut et vérification interne.</p>
+    </div>
+    <button class="btn btn-primary"><i class="fa-solid fa-certificate me-2"></i>Issue Certificate</button>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-md-3"><div class="rocket-card p-3"><div class="rocket-muted">Issued</div><div class="fs-3 fw-bold"><%= (certificates || []).length %></div></div></div>
+  <div class="col-md-3"><div class="rocket-card p-3"><div class="rocket-muted">Active</div><div class="fs-3 fw-bold"><%= (certificates || []).filter((c) => c.status === 'ACTIVE').length %></div></div></div>
+  <div class="col-md-3"><div class="rocket-card p-3"><div class="rocket-muted">Revoked</div><div class="fs-3 fw-bold"><%= (certificates || []).filter((c) => c.status === 'REVOKED').length %></div></div></div>
+  <div class="col-md-3"><div class="rocket-card p-3"><div class="rocket-muted">API Status</div><div class="fs-3 fw-bold"><%= certificatesStatus ?? 0 %></div></div></div>
+</section>
+
+<section class="rocket-card p-0 overflow-hidden">
+  <div class="p-3 border-bottom">
+    <h2 class="h6 mb-0 rocket-title">Latest Certificates</h2>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Certificate #</th>
+          <th>User</th>
+          <th>Course</th>
+          <th>Status</th>
+          <th class="text-end">Verify</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (certificates && certificates.length > 0) { %>
+          <% for (const cert of certificates) { %>
+            <tr>
+              <td><%= cert.certificateNumber ?? cert.id ?? '-' %></td>
+              <td><%= cert.userId ?? '-' %></td>
+              <td><%= cert.courseId ?? '-' %></td>
+              <td><span class="badge text-bg-light border"><%= cert.status ?? '-' %></span></td>
+              <td class="text-end"><button class="btn btn-sm btn-outline-primary">Open</button></td>
+            </tr>
+          <% } %>
+        <% } else { %>
+          <tr><td colspan="5" class="text-center text-muted py-4">No certificates found (API status: <%= certificatesStatus ?? 0 %>)</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>

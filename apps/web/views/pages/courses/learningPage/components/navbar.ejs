@@ -1,0 +1,48 @@
+<div class="learning-page-navbar d-flex align-items-lg-center justify-content-between flex-column flex-lg-row px-15 px-lg-35 py-10">
+  <div class="d-flex align-items-lg-center flex-column flex-lg-row flex-grow-1 learning-navbar-main">
+    <div class="learning-page-logo-card d-flex align-items-center justify-content-between justify-content-lg-start">
+      <a class="navbar-brand d-flex align-items-center justify-content-center mr-0 learning-brand" href="/">
+        <span class="font-weight-bold text-dark-blue">WIKIGouv</span>
+      </a>
+      <div class="d-flex align-items-center d-lg-none ml-20 learning-navbar-mobile-links">
+        <a href="/courses/<%= encodeURIComponent(String(course?.slug ?? '')) %>" class="btn learning-page-navbar-btn btn-sm border-gray200 d-none d-md-inline-flex">Page du cours</a>
+        <a href="/courses" class="btn learning-page-navbar-btn btn-sm border-gray200 ml-0 ml-md-10">Mes cours</a>
+      </div>
+    </div>
+
+    <div class="learning-page-progress-card d-flex flex-column learning-progress-card-modern">
+      <a href="/courses/<%= encodeURIComponent(String(course?.slug ?? '')) %>" class="learning-page-navbar-title">
+        <span class="font-weight-bold course-title"><%= title %></span>
+      </a>
+      <div class="d-flex align-items-center progress-row">
+        <div class="progress course-progress d-flex align-items-center flex-grow-1 bg-white border border-gray200 rounded-sm shadow-none mt-5">
+          <span id="learningTopProgressBar" class="progress-bar rounded-sm bg-warning" style="width: <%= Number(pct || 0) %>%"></span>
+        </div>
+        <span id="learningTopProgressPct" class="ml-10 font-weight-600 font-14 text-gray progress-pill"><%= Number(pct || 0) %>% terminé</span>
+      </div>
+      <button id="learningResumeBtn" type="button" class="learning-resume-btn d-none mt-5 learning-resume-btn-modern">
+        <i class="fa-solid fa-clock-rotate-left mr-5"></i>
+        <span id="learningResumeBtnText">Continuer : dernière leçon</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center mt-5 mt-md-0 learning-navbar-actions">
+    <% if (Number(noticeboardsCount || 0) > 0) { %>
+      <a href="/course/learning/<%= encodeURIComponent(String(course?.slug ?? '')) %>/noticeboards" class="btn learning-page-navbar-btn noticeboard-btn btn-sm border-gray200 mr-10" aria-label="Notifications du cours">
+        <i class="fa-regular fa-bell"></i>
+        <span class="noticeboard-btn-badge d-flex align-items-center justify-content-center text-white bg-danger rounded-circle font-12"><%= Number(noticeboardsCount || 0) %></span>
+      </a>
+    <% } %>
+    <% if (forumEnabled) { %>
+      <a href="/course/learning/<%= encodeURIComponent(String(course?.slug ?? '')) %>/forum" class="btn learning-page-navbar-btn btn-sm border-gray200 mr-10">Forum du cours</a>
+    <% } %>
+    <div class="d-none align-items-center d-lg-flex learning-navbar-quick-links">
+      <a href="/courses/<%= encodeURIComponent(String(course?.slug ?? '')) %>" class="btn learning-page-navbar-btn btn-sm border-gray200">Page du cours</a>
+      <a href="/courses" class="btn learning-page-navbar-btn btn-sm border-gray200 ml-10">Mes cours</a>
+    </div>
+    <button id="collapseBtn" type="button" class="btn-transparent ml-auto ml-lg-20 learning-navbar-menu-btn" aria-label="Afficher ou masquer le panneau de droite">
+      <i class="fa-solid fa-bars" width="20" height="20"></i>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,297 @@
+<%
+  const isEditMode = String(typeof formMode !== 'undefined' ? formMode : '') === 'edit';
+  const formAction = isEditMode ? `/admin/webinars/${encodeURIComponent(String(webinarId || ''))}/edit/course` : '/admin/webinars/create';
+  const c = isEditMode && course ? course : {};
+  const m = c && typeof c.metadata === 'object' && c.metadata ? c.metadata : {};
+  const selectedType = String(c.type ?? m.type ?? 'course');
+  const selectedLocale = String(m.locale ?? 'FR');
+  const selectedStatus = String(c.status ?? 'DRAFT');
+  const selectedCategoryId = String(m.categoryId ?? c.categoryId ?? '');
+  const selectedTeacherId = String(m.teacherId ?? c.createdById ?? '');
+  const selectedSubCategories = Array.isArray(m.subCategoryIds)
+    ? m.subCategoryIds.map(String)
+    : String(m.subCategoryIds ?? '')
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean);
+  const selectedCategoryFilters = Array.isArray(m.categoryFilters)
+    ? m.categoryFilters.map(String)
+    : String(m.categoryFilters ?? '')
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean);
+%>
+
+<section class="rocket-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 fw-bold mb-0"><%= isEditMode ? ('Modifier le cours #' + String(webinarId || '')) : 'Nouveau cours' %></h2>
+    <% if (isEditMode) { %>
+      <div class="d-flex gap-2">
+        <a href="/admin/webinars/<%= encodeURIComponent(String(webinarId || '')) %>/edit/course" class="btn btn-primary btn-sm">Modifier le cours</a>
+        <a href="/admin/webinars/<%= encodeURIComponent(String(webinarId || '')) %>/edit" class="btn btn-outline-primary btn-sm">Modifier les sections</a>
+      </div>
+    <% } %>
+  </div>
+  <form method="post" action="<%= formAction %>" class="row g-4">
+    <input type="hidden" name="draft" value="no" id="forDraft">
+    <input type="hidden" name="subCategoriesSerialized" id="subCategoriesSerializedInput" value="<%= selectedSubCategories.join(',') %>">
+    <input type="hidden" name="categoryFiltersSerialized" id="categoryFiltersSerializedInput" value="<%= selectedCategoryFilters.join(',') %>">
+
+    <div class="col-12 col-md-5">
+      <h3 class="h6 fw-bold border-start border-3 border-primary ps-2 mb-3">Informations de base</h3>
+
+      <div class="mb-3">
+        <label class="form-label">Langue <span class="text-danger">*</span></label>
+        <select name="locale" class="form-select">
+          <option value="FR" <%= selectedLocale === 'FR' ? 'selected' : '' %>>Francais</option>
+          <option value="EN" <%= selectedLocale === 'EN' ? 'selected' : '' %>>Anglais</option>
+        </select>
+        <div class="form-text">Langue principale du contenu pedagogique.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Type de cours <span class="text-danger">*</span></label>
+        <select name="type" class="form-select" required>
+          <option value="webinar" <%= selectedType === 'webinar' ? 'selected' : '' %>>Live Class</option>
+          <option value="course" <%= selectedType === 'course' ? 'selected' : '' %>>Video Course</option>
+          <option value="text_lesson" <%= selectedType === 'text_lesson' ? 'selected' : '' %>>Text Course</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Titre <span class="text-danger">*</span></label>
+        <input type="text" name="title" id="courseTitleInput" class="form-control" required placeholder="Ex: Controle LCB/FT pour agents ARTF" value="<%= String(c.title ?? '').replace(/^\[(COURSE|LIVE|TEXT)\]\s*/i, '') %>">
+        <div class="form-text">Titre clair et actionnable pour l'agent.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Points</label>
+        <input type="number" name="points" class="form-control" placeholder="Empty means inactive this mode" value="<%= m.points ?? '' %>">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">URL du cours <span class="text-danger">*</span></label>
+        <input type="text" name="slug" id="courseSlugInput" class="form-control" required placeholder="controle-lcb-ft-agents-artf" value="<%= String(c.slug ?? m.slug ?? '') %>">
+        <div class="form-text">URL unique, sans espaces. Generee automatiquement depuis le titre.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Select an Instructor <span class="text-danger">*</span></label>
+        <select name="teacherId" id="teacherIdSelect" class="form-select" required>
+          <option value="">Select an Instructor</option>
+          <% (instructors || []).forEach(function (inst) { %>
+            <option value="<%= inst.id %>" data-name="<%= inst.fullName %>" <%= selectedTeacherId === String(inst.id) ? 'selected' : '' %>>
+              <%= inst.fullName %> (<%= inst.email %>)
+            </option>
+          <% }) %>
+        </select>
+        <input type="hidden" name="instructor" id="instructorNameInput" value="<%= String(m.instructor ?? '') %>">
+        <div class="form-text">Le formateur responsable du cours.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">SEO Meta Description</label>
+        <input type="text" name="seoDescription" class="form-control" value="<%= String(m.seoDescription ?? '') %>">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Thumbnail</label>
+        <input type="text" name="thumbnail" class="form-control" placeholder="Internal upload path" value="<%= String(m.thumbnail ?? '') %>">
+        <div class="d-flex gap-2 mt-2">
+          <input type="file" class="form-control form-control-sm js-file-local" data-target="thumbnail" accept="image/*">
+          <button type="button" class="btn btn-outline-primary btn-sm js-open-library" data-target="thumbnail">Library</button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Cover Image</label>
+        <input type="text" name="coverImage" class="form-control" placeholder="Internal upload path" value="<%= String(m.coverImage ?? '') %>">
+        <div class="d-flex gap-2 mt-2">
+          <input type="file" class="form-control form-control-sm js-file-local" data-target="coverImage" accept="image/*">
+          <button type="button" class="btn btn-outline-primary btn-sm js-open-library" data-target="coverImage">Library</button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Course Icon (Optional)</label>
+        <input type="text" name="icon" class="form-control" placeholder="Internal upload path" value="<%= String(m.icon ?? '') %>">
+        <div class="d-flex gap-2 mt-2">
+          <input type="file" class="form-control form-control-sm js-file-local" data-target="icon" accept="image/*">
+          <button type="button" class="btn btn-outline-primary btn-sm js-open-library" data-target="icon">Library</button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Demo Video Source</label>
+        <select name="videoDemoSource" class="form-select js-video-demo-source">
+          <% const vds = String(m.videoDemoSource ?? 'upload'); %>
+          <option value="upload" <%= vds === 'upload' ? 'selected' : '' %>>Upload</option>
+          <option value="youtube" <%= vds === 'youtube' ? 'selected' : '' %>>YouTube</option>
+          <option value="vimeo" <%= vds === 'vimeo' ? 'selected' : '' %>>Vimeo</option>
+          <option value="external_link" <%= vds === 'external_link' ? 'selected' : '' %>>External Link</option>
+          <option value="google_drive" <%= vds === 'google_drive' ? 'selected' : '' %>>Google Drive</option>
+          <option value="iframe" <%= vds === 'iframe' ? 'selected' : '' %>>iFrame</option>
+          <option value="s3" <%= vds === 's3' ? 'selected' : '' %>>Amazon S3</option>
+          <option value="secure_host" <%= vds === 'secure_host' ? 'selected' : '' %>>Secure Host (Bunny)</option>
+          <option value="minio_internal" <%= vds === 'minio_internal' ? 'selected' : '' %>>MinIO Internal</option>
+        </select>
+      </div>
+
+      <div class="mb-3 js-video-demo-path-group">
+        <label class="form-label">Demo Video Path</label>
+        <input type="text" name="videoDemo" class="form-control" placeholder="URL, object key, or iframe" value="<%= String(m.videoDemo ?? '') %>">
+        <div class="form-text">Selon la source choisie: lien externe, iframe, ou chemin objet.</div>
+      </div>
+
+      <div class="mb-3 d-none js-video-demo-file-group">
+        <label class="form-label">Demo Video File</label>
+        <input type="file" name="videoDemoFile" class="form-control" accept="video/*">
+        <div class="form-text">Upload local direct (video/*).</div>
+      </div>
+
+      <div class="mb-3 d-none js-video-demo-minio-group">
+        <label class="form-label">MinIO Bucket</label>
+        <input type="text" name="videoDemoMinioBucket" class="form-control" placeholder="e.g. course-videos" value="<%= String(m.videoDemoMinioBucket ?? '') %>">
+        <label class="form-label mt-2">MinIO Object Key</label>
+        <input type="text" name="videoDemoMinioKey" class="form-control" placeholder="e.g. webinars/intro.mp4" value="<%= String(m.videoDemoMinioKey ?? '') %>">
+        <div class="form-text">Reference interne MinIO (bucket + object key).</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Summary</label>
+        <textarea name="summary" rows="5" class="form-control" placeholder="A brief summary of the course content, ideally between 50 and 160 characters."><%= String(m.summary ?? '') %></textarea>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-7">
+      <h3 class="h6 fw-bold border-start border-3 border-primary ps-2 mb-3">Informations complementaires</h3>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="DRAFT" <%= selectedStatus === 'DRAFT' ? 'selected' : '' %>>Draft</option>
+            <option value="PUBLISHED" <%= selectedStatus === 'PUBLISHED' ? 'selected' : '' %>>Published</option>
+            <option value="ARCHIVED" <%= selectedStatus === 'ARCHIVED' ? 'selected' : '' %>>Archived</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Category <span class="text-danger">*</span></label>
+          <select name="category" id="courseCategoryInput" class="form-select" required>
+            <option value="">Select Category</option>
+            <% (categories || []).forEach(function (cat) { %>
+              <option value="<%= cat.name %>" data-category-id="<%= cat.id %>" <%= selectedCategoryId === String(cat.id) ? 'selected' : '' %>><%= cat.name %></option>
+            <% }) %>
+          </select>
+          <input type="hidden" name="categoryId" id="courseCategoryIdInput" value="<%= selectedCategoryId %>">
+          <div class="form-text">Obligatoire. Sans categorie, le cours ne peut pas etre publie.</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Subcategories</label>
+          <div id="courseSubcategoriesWrap" class="border rounded p-3 d-none"></div>
+          <div class="form-text">Cochez une ou plusieurs sous-catégories selon le contenu du cours.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Timezone</label>
+          <select name="timezone" class="form-select">
+            <% const tz = String(m.timezone ?? 'Africa/Brazzaville'); %>
+            <option value="Africa/Brazzaville" <%= tz === 'Africa/Brazzaville' ? 'selected' : '' %>>Africa/Brazzaville</option>
+            <option value="UTC" <%= tz === 'UTC' ? 'selected' : '' %>>UTC</option>
+            <option value="Africa/Lagos" <%= tz === 'Africa/Lagos' ? 'selected' : '' %>>Africa/Lagos</option>
+            <option value="Europe/Paris" <%= tz === 'Europe/Paris' ? 'selected' : '' %>>Europe/Paris</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Access Duration (Days)</label>
+          <input type="number" name="accessDays" class="form-control" min="0" value="<%= m.accessDays ?? '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Capacity</label>
+          <input name="capacity" class="form-control" placeholder="Leave blank for unlimited" value="<%= String(m.capacity ?? '') %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Tags</label>
+          <input name="tags" class="form-control" placeholder="Type tags separated by comma (max 5)" value="<%= String(m.tags ?? '') %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Price</label>
+          <input class="form-control" placeholder="Enter 0 to make it free" disabled>
+          <small class="text-muted">Institutional mode: pricing controls are disabled.</small>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Prerequisite</label>
+          <select name="hasPrerequisite" class="form-select">
+            <option value="no" <%= String(m.hasPrerequisite ?? 'no') === 'no' ? 'selected' : '' %>>No prerequisite</option>
+            <option value="yes" <%= String(m.hasPrerequisite ?? 'no') === 'yes' ? 'selected' : '' %>>Has prerequisite</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description <span class="text-danger">*</span></label>
+          <textarea name="description" class="form-control" rows="10" placeholder="Write course description..." required><%= String(c.description ?? '') %></textarea>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-md-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="supportSwitch" name="support" <%= m.settings && m.settings.support ? 'checked' : '' %>>
+            <label class="form-check-label" for="supportSwitch">Support</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="includeCertificateSwitch" name="certificate" <%= m.settings && m.settings.certificate ? 'checked' : '' %>>
+            <label class="form-check-label" for="includeCertificateSwitch">Completion Certificate</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="downloadableSwitch" name="downloadable" <%= m.settings && m.settings.downloadable ? 'checked' : '' %>>
+            <label class="form-check-label" for="downloadableSwitch">Downloadable</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="forumSwitch" name="forum" <%= m.settings && m.settings.forum ? 'checked' : '' %>>
+            <label class="form-check-label" for="forumSwitch">Course Forum</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="privateSwitch" name="private" <%= m.settings && m.settings.private ? 'checked' : '' %>>
+            <label class="form-check-label" for="privateSwitch">Private</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="waitlistSwitch" name="enableWaitlist" <%= m.settings && m.settings.enableWaitlist ? 'checked' : '' %>>
+            <label class="form-check-label" for="waitlistSwitch">Enable Waitlist</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <h3 class="h6 fw-bold border-start border-3 border-primary ps-2 mb-3">Category Filters</h3>
+        <div id="categoryFiltersWrap" class="row g-3 d-none"></div>
+      </div>
+
+      <div class="mt-4">
+        <h3 class="h6 fw-bold border-start border-3 border-primary ps-2 mb-3">Message to Reviewer</h3>
+        <textarea name="messageForReviewer" class="form-control" rows="4" placeholder="Optional reviewer note"><%= String(m.reviewerMessage ?? '') %></textarea>
+      </div>
+    </div>
+
+    <div class="col-12 d-flex justify-content-end gap-2">
+      <button type="submit" id="saveAsDraftBtn" class="btn btn-outline-secondary px-4" <%= isEditMode ? 'disabled title="Draft mode is only available on create"' : '' %>>
+        Enregistrer en brouillon
+      </button>
+      <button type="submit" id="saveAndContinueBtn" class="btn btn-success px-4">
+        <%= isEditMode ? 'Enregistrer le cours' : 'Enregistrer et continuer' %>
+      </button>
+    </div>
+  </form>
+  <div id="courseCategoriesData" data-json="<%- encodeURIComponent(JSON.stringify(categories || [])) %>" class="d-none"></div>
+</section>
+
+<script src="/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="/js/webinars-create.js"></script>

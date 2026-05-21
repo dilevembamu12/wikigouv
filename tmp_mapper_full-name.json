@@ -1,0 +1,11 @@
+{
+    "protocolMapper":  "oidc-full-name-mapper",
+    "protocol":  "openid-connect",
+    "name":  "full-name",
+    "consentRequired":  false,
+    "config":  {
+                   "userinfo.token.claim":  "true",
+                   "access.token.claim":  "true",
+                   "id.token.claim":  "true"
+               }
+}

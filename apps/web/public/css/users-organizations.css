@@ -1,0 +1,120 @@
+.org-page .rocket-page-header {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px 26px;
+}
+
+.org-page .rocket-card {
+  border-radius: 18px;
+}
+
+.org-metric-card {
+  min-height: 138px;
+}
+
+.org-metric-title {
+  color: #97a4c0;
+  font-size: 31px;
+  font-size: 1.85rem;
+  line-height: 1.2;
+  transform: scale(0.5);
+  transform-origin: left top;
+  white-space: nowrap;
+}
+
+.org-metric-value {
+  margin-top: 10px;
+  font-size: 42px;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: scale(0.5);
+  transform-origin: left top;
+}
+
+.org-metric-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.org-result-btn {
+  height: 60px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.org-page .rocket-table thead th {
+  background: #f4f6fb;
+  color: #98a3bf;
+  font-weight: 700;
+  border: 0;
+}
+
+.org-table td,
+.org-table th {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+.org-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #e8edff;
+  color: #4f7eea;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.org-status-badge {
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.org-status-badge.active {
+  color: #1fa855;
+  background: #d9f5e5;
+}
+
+.org-status-badge.inactive {
+  color: #9c2b2b;
+  background: #fde3e3;
+}
+
+.org-actions summary {
+  list-style: none;
+}
+
+.org-actions summary::-webkit-details-marker {
+  display: none;
+}
+
+.org-actions-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 0;
+  background: #eef2f8;
+  color: #8ea0be;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.org-hint-title {
+  color: #0d6efd;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+

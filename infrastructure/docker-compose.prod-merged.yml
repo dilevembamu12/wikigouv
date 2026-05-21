@@ -1,0 +1,202 @@
+version: "2.2"
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ai_ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "127.0.0.1:11435:11434"
+    networks:
+      - ai_net
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: ai_openwebui
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - openwebui_data:/app/backend/data
+    ports:
+      - "127.0.0.1:3002:8080"
+    networks:
+      - ai_net
+
+  openclaw:
+    image: 1panel/openclaw:latest
+    container_name: ai_openclaw
+    restart: unless-stopped
+    volumes:
+      - openclaw_data:/home/node
+    ports:
+      - "127.0.0.1:18790:18789"
+    networks:
+      - ai_net
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: ai_n8n
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - minio
+      - qdrant
+    environment:
+      - N8N_HOST=127.0.0.1
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://127.0.0.1:5679/
+      - GENERIC_TIMEZONE=America/Port-au-Prince
+    volumes:
+      - n8n_data:/home/node/.n8n
+    ports:
+      - "127.0.0.1:5679:5678"
+    networks:
+      - ai_net
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ai_qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - "127.0.0.1:6335:6333"
+      - "127.0.0.1:6336:6334"
+    networks:
+      - ai_net
+
+  minio:
+    image: minio/minio:latest
+    container_name: ai_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=change_me_strong_password
+    volumes:
+      - minio_data:/data
+    ports:
+      - "127.0.0.1:9002:9000"
+      - "127.0.0.1:9003:9001"
+    networks:
+      - ai_net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: apn_postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=apn_portal
+      - POSTGRES_USER=apn_user
+      - POSTGRES_PASSWORD=change_me_apn_db_password
+      - TZ=America/Port-au-Prince
+      - PGTZ=America/Port-au-Prince
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apn_user -d apn_portal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai_net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: apn_pgadmin
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@apn.local
+      - PGADMIN_DEFAULT_PASSWORD=change_me_pgadmin_password
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "127.0.0.1:5051:80"
+    networks:
+      - ai_net
+
+  apn_db_init:
+    image: postgres:16-alpine
+    container_name: apn_db_init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "if [ -f /docker-entrypoint-initdb.d/apn_schema_postgres.sql ]; then
+         PGPASSWORD=change_me_apn_db_password psql -h postgres -U apn_user -d apn_portal -f /docker-entrypoint-initdb.d/apn_schema_postgres.sql;
+       else
+         echo 'No ./db/init/apn_schema_postgres.sql found, skipping schema import.';
+       fi"
+    networks:
+      - ai_net
+    restart: "no"
+
+  wikigouv_mysql:
+    image: mysql:8.4
+    container_name: wikigouv_mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=wikigouv
+      - MYSQL_USER=wikigouv
+      - MYSQL_PASSWORD=wikigouv
+      - MYSQL_ROOT_PASSWORD=change_me_wikigouv_root
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - wikigouv_mysql_data:/var/lib/mysql
+    networks:
+      - ai_net
+
+  wikigouv_keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: wikigouv_keycloak
+    command: start-dev --import-realm
+    restart: unless-stopped
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=change_me_keycloak_admin
+      - KC_DB=mysql
+      - KC_DB_URL_HOST=wikigouv_mysql
+      - KC_DB_URL_DATABASE=wikigouv
+      - KC_DB_USERNAME=root
+      - KC_DB_PASSWORD=change_me_wikigouv_root
+      - KC_PROXY=edge
+      - KC_HOSTNAME=kifekwa.com
+      - KC_HTTP_ENABLED=true
+    ports:
+      - "0.0.0.0:18080:8080"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import
+    depends_on:
+      - wikigouv_mysql
+    networks:
+      - ai_net
+
+networks:
+  ai_net:
+    driver: bridge
+
+volumes:
+  ollama_data:
+  openwebui_data:
+  qdrant_data:
+  n8n_data:
+  minio_data:
+  openclaw_data:
+  postgres_data:
+  pgadmin_data:
+  wikigouv_mysql_data:

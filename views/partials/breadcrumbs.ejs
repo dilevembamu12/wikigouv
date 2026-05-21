@@ -1,0 +1,14 @@
+<% if (page?.breadcrumbs?.length) { %>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <% for (const item of page.breadcrumbs) { %>
+        <% if (item.href) { %>
+          <li class="breadcrumb-item"><a href="<%= item.href %>"><%= item.label %></a></li>
+        <% } else { %>
+          <li class="breadcrumb-item active" aria-current="page"><%= item.label %></li>
+        <% } %>
+      <% } %>
+    </ol>
+  </nav>
+<% } %>
+

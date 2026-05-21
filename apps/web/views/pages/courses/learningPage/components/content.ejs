@@ -1,0 +1,32 @@
+<div class="learning-content" id="learningPageContent" data-active-type="<%= String(initialItem?.type ?? 'item').toLowerCase() %>">
+  <div id="learningPlayerLoading" class="learning-content-loading align-items-center justify-content-center flex-column w-100 h-100 d-flex">
+    <img src="/assets/default/img/loading.gif" alt="">
+    <p class="mt-10">Veuillez patienter pendant le chargement du contenu...</p>
+  </div>
+  <div id="learningPlayerContent" class="d-none p-15">
+    <div class="learning-content-video-player rounded-sm bg-black" id="learningPlayerStage">
+      <div class="learning-player-placeholder">
+        <i class="fa-regular fa-circle-play"></i>
+        <p>Selectionnez un contenu pour demarrer</p>
+      </div>
+    </div>
+    <article class="learning-item-detail-card mt-15" id="learningItemDetailCard">
+      <div class="learning-item-detail-head">
+        <span id="learningCurrentType" class="learning-item-type-pill"><%= initialItem?.type ?? 'element' %></span>
+      </div>
+      <h2 id="learningCurrentTitle" class="learning-item-detail-title"><%= initialItem?.title ?? 'Aucun contenu disponible' %></h2>
+      <p id="learningCurrentDesc" class="learning-item-detail-desc"><%= initialItem?.description || 'Selectionnez un element dans la liste du contenu.' %></p>
+      <div class="learning-item-detail-foot">
+        <button type="button" id="learningPassToggle" class="learning-pass-toggle-btn" aria-pressed="false" aria-label="Marquer cette lecon terminee">
+          <span class="dot"></span>
+        </button>
+        <span class="learning-pass-label">I completed this lesson</span>
+      </div>
+    </article>
+    <button class="d-none" id="learningPrevBtn"></button>
+    <button class="d-none" id="learningNextBtn"></button>
+    <button class="d-none" id="learningDoneBtn"></button>
+    <textarea id="learningPersonalNote" class="d-none"></textarea>
+    <button type="button" class="d-none" id="learningSaveNoteBtn"></button>
+  </div>
+</div>

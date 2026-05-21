@@ -1,0 +1,14 @@
+{
+    "protocolMapper":  "oidc-usermodel-property-mapper",
+    "protocol":  "openid-connect",
+    "name":  "family-name",
+    "consentRequired":  false,
+    "config":  {
+                   "access.token.claim":  "true",
+                   "user.attribute":  "lastName",
+                   "claim.name":  "family_name",
+                   "jsonType.label":  "String",
+                   "id.token.claim":  "true",
+                   "userinfo.token.claim":  "true"
+               }
+}

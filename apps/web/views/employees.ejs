@@ -1,0 +1,1386 @@
+<% /* ============================================================================
+   employees.ejs — WikiGouv / ARTF Employee Directory
+   ✅ Header + footer WikiGouv conservés
+   ✅ Datatable propre avec pagination
+   ✅ Employés cliquables
+   ✅ Modal détaillée + édition
+   ✅ Dropdown rôle/fonction
+   ✅ Description de poste + aide Ollama
+   ✅ Compatible avec employees.json OCR
+   ============================================================================ */ %>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WikiGouv | Répertoire des employés</title>
+
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <script src="/vendor/tailwind/tailwindcdn.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wikiBlue: '#123C73',
+            wikiRed: '#B91C1C',
+            wikiGold: '#D4A017',
+            wikiDark: '#0B172A',
+            wikiLight: '#F8FAFC',
+            wikiGreen: '#166534',
+            wikiTeal: '#0F766E',
+            wikiSlate: '#334155',
+            wikiIndigo: '#3730A3'
+          },
+          boxShadow: {
+            soft: '0 10px 30px rgba(0,0,0,0.08)',
+            glow: '0 14px 40px rgba(18,60,115,0.18)',
+            hero: '0 20px 60px rgba(0,0,0,0.25)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
+  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    .hero-overlay {
+      background:
+        linear-gradient(120deg, rgba(11,23,42,.95), rgba(18,60,115,.80)),
+        radial-gradient(circle at top right, rgba(212,160,23,.18), transparent 35%),
+        radial-gradient(circle at bottom left, rgba(15,118,110,.18), transparent 32%);
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .hero-badge {
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .08;
+      background-image:
+        radial-gradient(circle at 20% 20%, #fff 1px, transparent 1px),
+        radial-gradient(circle at 80% 40%, #fff 1px, transparent 1px),
+        radial-gradient(circle at 40% 80%, #fff 1px, transparent 1px);
+      background-size: 120px 120px;
+    }
+
+    .soft-panel {
+      background: white;
+      border: 1px solid rgb(226 232 240);
+      box-shadow: 0 10px 30px rgba(15,23,42,.06);
+    }
+
+    .soft-input {
+      border: 1px solid rgb(203 213 225);
+      background: white;
+      transition: all .2s ease;
+    }
+
+    .soft-input:focus {
+      outline: none;
+      border-color: #123C73;
+      box-shadow: 0 0 0 4px rgba(18,60,115,.08);
+    }
+
+    .avatar-circle {
+      width: 46px;
+      height: 46px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #dbeafe, #fef3c7);
+      color: #0B172A;
+      font-weight: 800;
+      font-size: .95rem;
+      flex-shrink: 0;
+      border: 1px solid rgba(18,60,115,.08);
+    }
+
+    .badge-active {
+      background: rgba(22,101,52,.10);
+      color: #166534;
+      border: 1px solid rgba(22,101,52,.18);
+    }
+
+    .badge-inactive {
+      background: rgba(185,28,28,.10);
+      color: #B91C1C;
+      border: 1px solid rgba(185,28,28,.18);
+    }
+
+    .badge-metier {
+      background: rgba(18,60,115,.08);
+      color: #123C73;
+      border: 1px solid rgba(18,60,115,.14);
+    }
+
+    .badge-technique {
+      background: rgba(15,118,110,.08);
+      color: #0F766E;
+      border: 1px solid rgba(15,118,110,.14);
+    }
+
+    .badge-ouvert {
+      background: rgba(212,160,23,.10);
+      color: #8A6700;
+      border: 1px solid rgba(212,160,23,.20);
+    }
+
+    .table-row-hover:hover {
+      background: rgba(248,250,252,.95);
+    }
+
+    .row-clickable {
+      cursor: pointer;
+    }
+
+    .wiki-btn {
+      transition: all .2s ease;
+    }
+
+    .wiki-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .page-btn-active {
+      background: #123C73;
+      color: white;
+      border-color: #123C73;
+    }
+
+    .page-btn {
+      border: 1px solid rgb(203 213 225);
+      background: white;
+      color: rgb(51 65 85);
+    }
+
+    .page-btn:hover {
+      background: rgb(248 250 252);
+    }
+
+    .modal-backdrop-custom {
+      background: rgba(11,23,42,.55);
+      backdrop-filter: blur(3px);
+    }
+
+    .sticky-mobile-actions {
+      position: sticky;
+      bottom: 0;
+      background: rgba(248,250,252,.98);
+      backdrop-filter: blur(8px);
+    }
+
+    @media (max-width: 767px) {
+      .mobile-card {
+        border: 1px solid rgb(226 232 240);
+        border-radius: 1.5rem;
+        background: white;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <%
+    const currentUser = (typeof user !== 'undefined' && user) ? user : null;
+    const isLogged = typeof isAuthenticated !== 'undefined' ? isAuthenticated : !!currentUser;
+    const ENV = (typeof env !== 'undefined' && env) ? env : {};
+    const API_KEY = String(
+      ENV.API_KEY ||
+      ENV.WP_APPKEY ||
+      ENV.WAPPLETS_APPKEY ||
+      ENV.X_API_KEY ||
+      "regoil"
+    );
+    const OLLAMA_MODEL = String(ENV.OLLAMA_MODEL || "llama3.1:8b");
+  %>
+
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3">
+        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-wikiBlue via-wikiTeal to-wikiGold text-white flex items-center justify-center shadow-soft">
+          <i class="fas fa-landmark text-lg"></i>
+        </div>
+        <div>
+          <div class="text-xl font-extrabold tracking-tight">Wiki<span class="text-wikiRed">Gouv</span></div>
+          <div class="text-xs text-slate-500 -mt-1">wikigouv.com · Centre souverain de knowledge transfer gouvernemental</div>
+        </div>
+      </a>
+
+      <div class="hidden md:flex items-center gap-7">
+        <a href="/#vision" class="text-slate-600 hover:text-wikiBlue font-medium">Vision</a>
+        <a href="/#persona" class="text-slate-600 hover:text-wikiBlue font-medium">Persona</a>
+        <a href="/#raghouse" class="text-slate-600 hover:text-wikiBlue font-medium">RAGHouse</a>
+        <a href="/#services" class="text-slate-600 hover:text-wikiBlue font-medium">Services</a>
+        <a href="/#security" class="text-slate-600 hover:text-wikiBlue font-medium">Sécurité</a>
+        <a href="#contact" class="text-slate-600 hover:text-wikiBlue font-medium">Contact</a>
+
+        <% if (isLogged) { %>
+          <a href="/my/" class="bg-wikiBlue text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-900 transition">
+            <i class="fas fa-graduation-cap mr-2"></i>Mon espace
+          </a>
+        <% } else { %>
+          <a href="/login/index.php" class="bg-wikiBlue text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-900 transition">
+            <i class="fas fa-right-to-bracket mr-2"></i>Connexion
+          </a>
+        <% } %>
+      </div>
+
+      <button id="mobileMenuBtn" class="md:hidden text-slate-700 text-2xl">
+        <i class="fas fa-bars"></i>
+      </button>
+    </nav>
+
+    <div id="mobileMenu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-3">
+      <a href="/#vision" class="block text-slate-700 font-medium">Vision</a>
+      <a href="/#persona" class="block text-slate-700 font-medium">Persona</a>
+      <a href="/#raghouse" class="block text-slate-700 font-medium">RAGHouse</a>
+      <a href="/#services" class="block text-slate-700 font-medium">Services</a>
+      <a href="/#security" class="block text-slate-700 font-medium">Sécurité</a>
+      <a href="#contact" class="block text-slate-700 font-medium">Contact</a>
+      <% if (isLogged) { %>
+        <a href="/my/" class="block text-center bg-wikiBlue text-white px-4 py-3 rounded-xl font-semibold">Mon espace</a>
+      <% } else { %>
+        <a href="/login/index.php" class="block text-center bg-wikiBlue text-white px-4 py-3 rounded-xl font-semibold">Connexion</a>
+      <% } %>
+    </div>
+  </header>
+
+  <main>
+    <section class="relative overflow-hidden">
+      <div class="absolute inset-0 hero-overlay z-10"></div>
+      <div class="grain z-20"></div>
+      <div class="absolute inset-0 opacity-25" style="background-image:url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1800&q=80'); background-size:cover; background-position:center;"></div>
+
+      <div class="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-14">
+        <div class="flex flex-col gap-6">
+          <div class="text-white">
+            <div class="inline-flex items-center gap-2 hero-badge rounded-full px-4 py-2 mb-5">
+              <i class="fas fa-users text-wikiGold"></i>
+              <span class="text-sm md:text-base font-medium">WikiGouv · Répertoire des employés · Préparation FinTraX</span>
+            </div>
+
+            <h1 class="text-3xl md:text-5xl font-black leading-tight">
+              Répertoire des employés
+            </h1>
+
+            
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="glass rounded-2xl p-4 text-center">
+              <div class="text-2xl font-extrabold text-wikiGold" id="heroTotalEmployees">0</div>
+              <div class="text-sm text-slate-100">Employés</div>
+            </div>
+            <div class="glass rounded-2xl p-4 text-center">
+              <div class="text-2xl font-extrabold text-wikiGold" id="heroDirections">0</div>
+              <div class="text-sm text-slate-100">Directions</div>
+            </div>
+            <div class="glass rounded-2xl p-4 text-center">
+              <div class="text-2xl font-extrabold text-wikiGold" id="heroMetier">0</div>
+              <div class="text-sm text-slate-100">Métiers</div>
+            </div>
+            <div class="glass rounded-2xl p-4 text-center">
+              <div class="text-2xl font-extrabold text-wikiGold" id="heroTechnique">0</div>
+              <div class="text-sm text-slate-100">Techniques</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-8 md:py-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="soft-panel rounded-3xl overflow-hidden">
+          <div class="px-5 md:px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-black text-slate-900">Datatable employés</h2>
+                <p class="text-slate-600 mt-1">
+                  Source : <code class="text-wikiBlue font-semibold">/assets/data/employees.json</code>
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white text-sm text-slate-700">
+                  <i class="fas fa-users text-wikiBlue"></i> Employés : <strong id="employeesCount">0</strong>
+                </span>
+                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white text-sm text-slate-700">
+                  <i class="fas fa-filter text-wikiTeal"></i> Visibles : <strong id="visibleCount">0</strong>
+                </span>
+                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white text-sm text-slate-700">
+                  <i class="fas fa-robot text-wikiGold"></i> Ollama : <strong id="ollamaStatus">Vérification...</strong>
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 mt-5">
+              <div class="lg:col-span-4">
+                <div class="relative">
+                  <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                  <input id="searchInput" type="text" placeholder="Rechercher nom, direction, groupe, rôle..." class="soft-input w-full rounded-2xl pl-11 pr-4 py-3 text-sm">
+                </div>
+              </div>
+
+              <div class="lg:col-span-2">
+                <select id="filterDirection" class="soft-input w-full rounded-2xl px-4 py-3 text-sm">
+                  <option value="">Toutes les directions</option>
+                </select>
+              </div>
+
+              <div class="lg:col-span-2">
+                <select id="filterCategory" class="soft-input w-full rounded-2xl px-4 py-3 text-sm">
+                  <option value="">Toutes les catégories</option>
+                  <option value="metier">Métier</option>
+                  <option value="technique">Technique</option>
+                  <option value="ouvert">Ouvert à tous</option>
+                </select>
+              </div>
+
+              <div class="lg:col-span-2">
+                <select id="filterRole" class="soft-input w-full rounded-2xl px-4 py-3 text-sm">
+                  <option value="">Tous les rôles</option>
+                </select>
+              </div>
+
+              <div class="lg:col-span-2">
+                <select id="pageSizeSelect" class="soft-input w-full rounded-2xl px-4 py-3 text-sm">
+                  <option value="10">10 / page</option>
+                  <option value="20" selected>20 / page</option>
+                  <option value="50">50 / page</option>
+                  <option value="100">100 / page</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 mt-4">
+              <button id="btnAddEmployee" class="wiki-btn inline-flex items-center justify-center gap-2 rounded-2xl bg-wikiBlue text-white px-5 py-3 font-semibold hover:bg-blue-900">
+                <i class="fas fa-user-plus"></i> Ajouter
+              </button>
+              <button id="btnExportJson" class="wiki-btn inline-flex items-center justify-center gap-2 rounded-2xl bg-wikiGold text-wikiDark px-5 py-3 font-semibold hover:bg-yellow-400">
+                <i class="fas fa-file-code"></i> Export JSON
+              </button>
+              <button id="btnExportCsv" class="wiki-btn inline-flex items-center justify-center gap-2 rounded-2xl bg-wikiTeal text-white px-5 py-3 font-semibold hover:bg-teal-800">
+                <i class="fas fa-file-csv"></i> Export CSV
+              </button>
+              <button id="btnReload" class="wiki-btn inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50">
+                <i class="fas fa-rotate-right"></i> Recharger
+              </button>
+              <button id="btnClearFilters" class="wiki-btn inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50">
+                <i class="fas fa-filter-circle-xmark"></i> Réinitialiser
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 md:p-6">
+            <div id="employeesTableWrap"></div>
+
+            <div class="mt-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div id="paginationInfo" class="text-sm text-slate-500"></div>
+              <div id="paginationControls" class="flex flex-wrap items-center gap-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button id="btnFabAdd" class="fixed md:hidden bottom-5 right-5 h-14 w-14 rounded-full bg-gradient-to-br from-wikiBlue via-wikiTeal to-wikiGold text-white flex items-center justify-center shadow-2xl z-40">
+    <i class="fas fa-plus text-lg"></i>
+  </button>
+
+  <!-- DETAIL / EDIT MODAL -->
+  <div id="employeeModal" class="hidden fixed inset-0 z-[70]">
+    <div class="absolute inset-0 modal-backdrop-custom"></div>
+    <div class="relative h-full overflow-y-auto">
+      <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-6">
+        <div class="w-full md:max-w-6xl bg-white md:rounded-3xl shadow-hero overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+            <div>
+              <h3 class="text-xl font-black text-slate-900">
+                <i class="fas fa-id-card mr-2 text-wikiBlue"></i>
+                <span id="employeeModalTitle">Détails employé</span>
+              </h3>
+              <p class="text-sm text-slate-500 mt-1">Rôle, fonction, description et accompagnement IA</p>
+            </div>
+            <button data-close-modal="employeeModal" class="h-10 w-10 rounded-full hover:bg-slate-100">
+              <i class="fas fa-xmark text-slate-700"></i>
+            </button>
+          </div>
+
+          <div class="p-5 md:p-6">
+            <input type="hidden" id="empId">
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div class="soft-panel rounded-3xl p-5">
+                <div class="flex items-center gap-3 mb-5">
+                  <div id="modalAvatar" class="avatar-circle">AR</div>
+                  <div>
+                    <div class="text-lg font-black text-slate-900" id="modalNamePreview">Nom employé</div>
+                    <div class="text-sm text-slate-500" id="modalCodePreview">ARTF-0001</div>
+                  </div>
+                </div>
+
+                <label class="block text-sm font-bold text-slate-700 mb-2">Matricule / ID</label>
+                <input type="text" class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empCode" placeholder="ARTF-0001">
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Nom complet</label>
+                <input type="text" class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empName">
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Direction</label>
+                <input type="text" class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empDirection">
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Groupe</label>
+                <input type="text" class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empGroup">
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Statut</label>
+                <select class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empStatus">
+                  <option value="Actif">Actif</option>
+                  <option value="Inactif">Inactif</option>
+                </select>
+              </div>
+
+              <div class="soft-panel rounded-3xl p-5">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Catégorie</label>
+                <select class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empCategory">
+                  <option value="metier">Métier</option>
+                  <option value="technique">Technique</option>
+                  <option value="ouvert">Ouvert à tous</option>
+                </select>
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Rôle / fonction</label>
+                <select class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empRole">
+                  <option value="">Sélectionner un rôle</option>
+                  <option value="Agent métier">Agent métier</option>
+                  <option value="Agent technique">Agent technique</option>
+                  <option value="Chef de service">Chef de service</option>
+                  <option value="Chef de division">Chef de division</option>
+                  <option value="Analyste conformité">Analyste conformité</option>
+                  <option value="Contrôleur">Contrôleur</option>
+                  <option value="Administrateur">Administrateur</option>
+                  <option value="Archiviste">Archiviste</option>
+                  <option value="Support opérationnel">Support opérationnel</option>
+                  <option value="Parcours ouvert">Parcours ouvert</option>
+                </select>
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Thème</label>
+                <input type="text" class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empTheme">
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Module</label>
+                <input type="text" class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empModule">
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Email</label>
+                <input type="email" class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empEmail">
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Téléphone</label>
+                <input type="text" class="soft-input w-full rounded-2xl px-4 py-3 text-sm" id="empPhone">
+              </div>
+
+              <div class="soft-panel rounded-3xl p-5">
+                <div class="flex items-center justify-between gap-3 mb-2">
+                  <label class="block text-sm font-bold text-slate-700">Description de poste</label>
+                  <button id="btnAiHelp" type="button" class="wiki-btn inline-flex items-center gap-2 rounded-xl bg-wikiGold text-wikiDark px-3 py-2 text-sm font-bold hover:bg-yellow-400">
+                    <i class="fas fa-robot"></i> Aide IA
+                  </button>
+                </div>
+
+                <textarea id="empJobDescription" class="soft-input w-full rounded-2xl px-4 py-3 text-sm min-h-[220px]" placeholder="Décris les responsabilités, objectifs, tâches, compétences, contrôles, outils et interactions du poste..."></textarea>
+
+                <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div class="text-xs uppercase tracking-wide text-slate-400 font-bold">Contexte OCR</div>
+                  <div class="mt-2 text-sm text-slate-600" id="ocrContext">—</div>
+                </div>
+
+                <label class="block text-sm font-bold text-slate-700 mb-2 mt-4">Notes</label>
+                <textarea id="empNotes" class="soft-input w-full rounded-2xl px-4 py-3 text-sm min-h-[100px]"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="sticky-mobile-actions px-5 py-4 border-t border-slate-200 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+            <button class="hidden rounded-2xl bg-red-50 text-wikiRed border border-red-200 px-5 py-3 font-semibold" id="btnDeleteInModal">
+              <i class="fas fa-trash mr-2"></i>Supprimer
+            </button>
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:ml-auto">
+              <button data-close-modal="employeeModal" class="rounded-2xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+                Fermer
+              </button>
+              <button id="btnSaveEmployee" class="rounded-2xl bg-wikiBlue text-white px-5 py-3 font-semibold hover:bg-blue-900 transition">
+                <i class="fas fa-floppy-disk mr-2"></i>Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer id="contact" class="bg-wikiDark text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="grid md:grid-cols-3 gap-10">
+        <div>
+          <h3 class="text-xl font-black mb-4">WikiGouv</h3>
+          <p class="text-slate-300 leading-relaxed">
+            Centre souverain de knowledge transfer gouvernemental, d’apprentissage métier, d’assistance IA sécurisée,
+            de protection documentaire et de transformation administrative.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-black mb-4">Liens rapides</h3>
+          <ul class="space-y-2 text-slate-300">
+            <li><a href="/#vision" class="hover:text-white">Vision</a></li>
+            <li><a href="/#persona" class="hover:text-white">Persona</a></li>
+            <li><a href="/#raghouse" class="hover:text-white">RAGHouse</a></li>
+            <li><a href="/course/index.php" class="hover:text-white">Catalogue</a></li>
+            <li><a href="/employees" class="hover:text-white">Employés</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-black mb-4">Contact</h3>
+          <div class="space-y-2 text-slate-300">
+            <p><i class="fas fa-globe mr-2 text-wikiGold"></i>wikigouv.com</p>
+            <p><i class="fas fa-envelope mr-2 text-wikiGold"></i>contact@wikigouv.com</p>
+            <p><i class="fas fa-shield-check mr-2 text-wikiGold"></i>Souveraineté · Confidentialité · Knowledge transfer</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-white/10 mt-10 pt-6 text-center text-slate-400 text-sm">
+        &copy; 2026 WikiGouv · Répertoire des employés · Powered by WikiGouv.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const DATA_URL = '/assets/data/employees.json';
+    const STORAGE_KEY = 'employees_directory_local_v4';
+    const AI_ENDPOINT = '/api/ollama/chat';
+    const API_KEY = <%- JSON.stringify(API_KEY || "regoil") %>;
+    const OLLAMA_MODEL = <%- JSON.stringify(OLLAMA_MODEL || "llama3.1:8b") %>;
+
+    let employeesData = [];
+    let filteredDataCache = [];
+    let currentPage = 1;
+    let pageSize = 20;
+
+    const $ = (s, root = document) => root.querySelector(s);
+    const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+
+    function safeJSON(v) {
+      try { return JSON.parse(v); } catch { return null; }
+    }
+
+    function uid(prefix = 'emp') {
+      return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    function slugify(str) {
+      return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .toLowerCase();
+    }
+
+    function escapeHTML(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function initials(name) {
+      return String(name || '')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(s => s[0]?.toUpperCase() || '')
+        .join('') || 'AR';
+    }
+
+    function inferDirection(emp) {
+      const pages = Array.isArray(emp.source_pages) ? emp.source_pages : [];
+      if (!pages.length) return 'Administration générale';
+      const first = Math.min(...pages);
+      if (first <= 4) return 'Direction Réglementation';
+      if (first <= 8) return 'Direction Contrôle';
+      if (first <= 12) return 'Direction Opérations';
+      if (first <= 16) return 'Direction Support';
+      return 'Direction Générale';
+    }
+
+    function inferGroup(emp) {
+      const occ = Number(emp.occurrences || 0);
+      if (occ >= 10) return 'Groupe A';
+      if (occ >= 7) return 'Groupe B';
+      if (occ >= 4) return 'Groupe C';
+      return 'Groupe D';
+    }
+
+    function inferCategory(emp) {
+      const occ = Number(emp.occurrences || 0);
+      if (occ >= 8) return 'metier';
+      if (occ >= 4) return 'technique';
+      return 'ouvert';
+    }
+
+    function inferTheme(emp) {
+      const occ = Number(emp.occurrences || 0);
+      if (occ >= 10) return 'Knowledge transfer';
+      if (occ >= 7) return 'Conformité';
+      if (occ >= 4) return 'Transition numérique';
+      return 'Intégration';
+    }
+
+    function inferModule(emp) {
+      const occ = Number(emp.occurrences || 0);
+      if (occ >= 10) return 'Module expert';
+      if (occ >= 7) return 'Module avancé';
+      if (occ >= 4) return 'Module intermédiaire';
+      return 'Module de base';
+    }
+
+    function inferRole(emp) {
+      const category = inferCategory(emp);
+      if (category === 'metier') return 'Agent métier';
+      if (category === 'technique') return 'Agent technique';
+      return 'Parcours ouvert';
+    }
+
+    function badgeCategory(category) {
+      if (category === 'metier') return 'badge-metier';
+      if (category === 'technique') return 'badge-technique';
+      return 'badge-ouvert';
+    }
+
+    function categoryLabel(category) {
+      if (category === 'metier') return 'Métier';
+      if (category === 'technique') return 'Technique';
+      return 'Ouvert';
+    }
+
+    function mapEmployee(raw, index) {
+      const fullName = raw.full_name || `Employé ${index + 1}`;
+      const stableId = 'emp_' + slugify(fullName || String(index + 1));
+
+      return {
+        id: stableId,
+        code: 'ARTF-' + String(index + 1).padStart(4, '0'),
+        name: fullName,
+        direction: inferDirection(raw),
+        group: inferGroup(raw),
+        category: inferCategory(raw),
+        theme: inferTheme(raw),
+        module: inferModule(raw),
+        role: inferRole(raw),
+        email: '',
+        phone: '',
+        status: 'Actif',
+        notes: `Occurrences OCR: ${raw.occurrences || 0} · Pages: ${(raw.source_pages || []).join(', ')}`,
+        jobDescription: '',
+        source_pages: Array.isArray(raw.source_pages) ? raw.source_pages : [],
+        occurrences: Number(raw.occurrences || 0),
+        source_full_name: raw.full_name || ''
+      };
+    }
+
+    function isValidLocalEmployeeArray(arr) {
+      return Array.isArray(arr) && arr.every(emp => typeof emp === 'object' && (emp.name || emp.full_name));
+    }
+
+    async function loadEmployees() {
+      const local = safeJSON(localStorage.getItem(STORAGE_KEY));
+
+      if (isValidLocalEmployeeArray(local)) {
+        employeesData = local;
+        hydrateFilters();
+        renderEmployees();
+        return;
+      }
+
+      try {
+        const res = await fetch(DATA_URL, { cache: 'no-store' });
+        const data = await res.json();
+
+        let rawEmployees = [];
+        if (Array.isArray(data)) rawEmployees = data;
+        else if (Array.isArray(data.employees)) rawEmployees = data.employees;
+
+        employeesData = rawEmployees.map(mapEmployee);
+
+        saveLocal();
+        hydrateFilters();
+        renderEmployees();
+      } catch (err) {
+        console.error(err);
+        $('#employeesTableWrap').innerHTML = `
+          <div class="rounded-3xl border-2 border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+            <div class="text-lg font-bold text-slate-700">Impossible de charger employees.json</div>
+            <div class="mt-2 text-sm">Vérifie le chemin <code class="text-wikiBlue">${DATA_URL}</code></div>
+          </div>
+        `;
+      }
+    }
+
+    function saveLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(employeesData, null, 2));
+    }
+
+    function hydrateFilters() {
+      const directions = new Set();
+      const roles = new Set();
+
+      employeesData.forEach(emp => {
+        if (emp.direction) directions.add(emp.direction);
+        if (emp.role) roles.add(emp.role);
+      });
+
+      $('#filterDirection').innerHTML =
+        '<option value="">Toutes les directions</option>' +
+        Array.from(directions).sort().map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`).join('');
+
+      $('#filterRole').innerHTML =
+        '<option value="">Tous les rôles</option>' +
+        Array.from(roles).sort().map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`).join('');
+    }
+
+    function getFilteredEmployees() {
+      const q = $('#searchInput').value.trim().toLowerCase();
+      const direction = $('#filterDirection').value.trim();
+      const category = $('#filterCategory').value.trim();
+      const role = $('#filterRole').value.trim();
+
+      return employeesData.filter(emp => {
+        const blob = [
+          emp.id,
+          emp.code,
+          emp.name,
+          emp.direction,
+          emp.group,
+          emp.category,
+          emp.theme,
+          emp.module,
+          emp.role,
+          emp.email,
+          emp.phone,
+          emp.status,
+          emp.notes,
+          emp.jobDescription,
+          emp.source_full_name
+        ].join(' ').toLowerCase();
+
+        const okQ = !q || blob.includes(q);
+        const okDirection = !direction || emp.direction === direction;
+        const okCategory = !category || emp.category === category;
+        const okRole = !role || emp.role === role;
+
+        return okQ && okDirection && okCategory && okRole;
+      });
+    }
+
+    function renderStats(visible) {
+      const total = employeesData.length;
+      const metier = employeesData.filter(e => e.category === 'metier').length;
+      const technique = employeesData.filter(e => e.category === 'technique').length;
+      const directions = new Set(employeesData.map(e => e.direction).filter(Boolean)).size;
+
+      $('#employeesCount').textContent = total;
+      $('#visibleCount').textContent = visible.length;
+      $('#heroTotalEmployees').textContent = total;
+      $('#heroDirections').textContent = directions;
+      $('#heroMetier').textContent = metier;
+      $('#heroTechnique').textContent = technique;
+    }
+
+    function paginate(items) {
+      const total = items.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      return {
+        total,
+        totalPages,
+        start,
+        end: Math.min(end, total),
+        items: items.slice(start, end)
+      };
+    }
+
+    function renderPagination(total, totalPages, start, end) {
+      $('#paginationInfo').textContent = total
+        ? `Affichage ${start + 1} à ${end} sur ${total} employé(s)`
+        : 'Aucun résultat';
+
+      const container = $('#paginationControls');
+
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let buttons = [];
+
+      buttons.push(`
+        <button class="page-btn ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''} px-4 py-2 rounded-xl font-semibold" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      `);
+
+      const maxAround = 2;
+      let startPage = Math.max(1, currentPage - maxAround);
+      let endPage = Math.min(totalPages, currentPage + maxAround);
+
+      if (startPage > 1) {
+        buttons.push(`<button class="page-btn px-4 py-2 rounded-xl font-semibold" data-page="1">1</button>`);
+        if (startPage > 2) buttons.push(`<span class="px-2 text-slate-400">…</span>`);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        buttons.push(`
+          <button class="${i === currentPage ? 'page-btn-active' : 'page-btn'} px-4 py-2 rounded-xl font-semibold" data-page="${i}">
+            ${i}
+          </button>
+        `);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) buttons.push(`<span class="px-2 text-slate-400">…</span>`);
+        buttons.push(`<button class="page-btn px-4 py-2 rounded-xl font-semibold" data-page="${totalPages}">${totalPages}</button>`);
+      }
+
+      buttons.push(`
+        <button class="page-btn ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''} px-4 py-2 rounded-xl font-semibold" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      `);
+
+      container.innerHTML = buttons.join('');
+
+      $$('[data-page]', container).forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentPage = Number(btn.getAttribute('data-page'));
+          renderEmployees();
+        });
+      });
+    }
+
+    function renderEmployees() {
+      filteredDataCache = getFilteredEmployees();
+      renderStats(filteredDataCache);
+
+      if (!filteredDataCache.length) {
+        $('#employeesTableWrap').innerHTML = `
+          <div class="rounded-3xl border-2 border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+            <div class="text-lg font-bold text-slate-700">Aucun employé trouvé</div>
+            <div class="mt-2 text-sm">Essaie un autre filtre ou recharge le fichier.</div>
+          </div>
+        `;
+        renderPagination(0, 1, 0, 0);
+        return;
+      }
+
+      const page = paginate(filteredDataCache);
+
+      $('#employeesTableWrap').innerHTML = `
+        <div class="hidden md:block overflow-x-auto rounded-3xl border border-slate-200">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="px-4 py-4 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Employé</th>
+                <th class="px-4 py-4 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Direction</th>
+                <th class="px-4 py-4 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Rôle / Fonction</th>
+                <th class="px-4 py-4 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Catégorie</th>
+                <th class="px-4 py-4 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Thème / Module</th>
+                <th class="px-4 py-4 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">OCR</th>
+                <th class="px-4 py-4 text-right text-xs font-extrabold uppercase tracking-wide text-slate-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              ${page.items.map(emp => `
+                <tr class="table-row-hover">
+                  <td class="px-4 py-4 row-clickable employee-open" data-id="${escapeHTML(emp.id)}">
+                    <div class="flex items-center gap-3">
+                      <div class="avatar-circle">${escapeHTML(initials(emp.name))}</div>
+                      <div>
+                        <div class="font-bold text-slate-900">${escapeHTML(emp.name || '—')}</div>
+                        <div class="text-sm text-slate-500">${escapeHTML(emp.code || '—')} • ${escapeHTML(emp.group || '—')}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4 text-sm text-slate-700">${escapeHTML(emp.direction || '—')}</td>
+                  <td class="px-4 py-4 text-sm text-slate-700 font-semibold">${escapeHTML(emp.role || '—')}</td>
+                  <td class="px-4 py-4">
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${badgeCategory(emp.category)}">
+                      ${escapeHTML(categoryLabel(emp.category))}
+                    </span>
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="font-semibold text-slate-800">${escapeHTML(emp.theme || '—')}</div>
+                    <div class="text-sm text-slate-500">${escapeHTML(emp.module || '—')}</div>
+                  </td>
+                  <td class="px-4 py-4 text-sm text-slate-500">
+                    ${escapeHTML(String(emp.occurrences || 0))} occ.
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex justify-end gap-2">
+                      <button class="employee-open inline-flex items-center justify-center h-10 w-10 rounded-xl border border-slate-200 text-wikiBlue hover:bg-blue-50" data-id="${escapeHTML(emp.id)}">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="btn-delete inline-flex items-center justify-center h-10 w-10 rounded-xl border border-red-200 text-wikiRed hover:bg-red-50" data-id="${escapeHTML(emp.id)}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid md:hidden gap-4">
+          ${page.items.map(emp => `
+            <div class="mobile-card shadow-sm">
+              <button class="employee-open w-full text-left" data-id="${escapeHTML(emp.id)}">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="avatar-circle">${escapeHTML(initials(emp.name))}</div>
+                    <div class="min-w-0">
+                      <div class="font-bold text-slate-900 truncate">${escapeHTML(emp.name || '—')}</div>
+                      <div class="text-sm text-slate-500 truncate">${escapeHTML(emp.code || '—')} • ${escapeHTML(emp.direction || '—')}</div>
+                    </div>
+                  </div>
+                  <i class="fas fa-chevron-right text-slate-400 mt-1"></i>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div class="text-slate-400 uppercase text-[11px] font-bold tracking-wide">Rôle</div>
+                    <div class="mt-1 text-slate-700">${escapeHTML(emp.role || '—')}</div>
+                  </div>
+                  <div>
+                    <div class="text-slate-400 uppercase text-[11px] font-bold tracking-wide">Catégorie</div>
+                    <div class="mt-1">
+                      <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${badgeCategory(emp.category)}">
+                        ${escapeHTML(categoryLabel(emp.category))}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-slate-400 uppercase text-[11px] font-bold tracking-wide">Thème</div>
+                    <div class="mt-1 text-slate-700">${escapeHTML(emp.theme || '—')}</div>
+                  </div>
+                  <div>
+                    <div class="text-slate-400 uppercase text-[11px] font-bold tracking-wide">OCR</div>
+                    <div class="mt-1 text-slate-700">${escapeHTML(String(emp.occurrences || 0))} occurrence(s)</div>
+                  </div>
+                </div>
+              </button>
+
+              <div class="mt-4 flex justify-end">
+                <button class="btn-delete inline-flex items-center justify-center h-10 w-10 rounded-xl border border-red-200 text-wikiRed hover:bg-red-50" data-id="${escapeHTML(emp.id)}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      bindRowActions();
+      renderPagination(page.total, page.totalPages, page.start, page.end);
+    }
+
+    function getEmployeeById(id) {
+      return employeesData.find(e => String(e.id) === String(id));
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('hidden');
+      if (!document.querySelector('#employeeModal:not(.hidden)')) {
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function syncModalPreview() {
+      const name = $('#empName').value.trim() || 'Nom employé';
+      const code = $('#empCode').value.trim() || 'ARTF-0001';
+      $('#modalNamePreview').textContent = name;
+      $('#modalCodePreview').textContent = code;
+      $('#modalAvatar').textContent = initials(name);
+    }
+
+    function openEmployeeModal(id = null) {
+      const isNew = !id;
+      const emp = isNew ? {
+        id: '',
+        code: '',
+        name: '',
+        direction: '',
+        group: '',
+        category: 'metier',
+        theme: '',
+        module: '',
+        role: '',
+        email: '',
+        phone: '',
+        status: 'Actif',
+        notes: '',
+        jobDescription: '',
+        source_pages: [],
+        occurrences: 1,
+        source_full_name: ''
+      } : getEmployeeById(id);
+
+      if (!emp) return;
+
+      $('#employeeModalTitle').textContent = isNew ? 'Ajouter un employé' : 'Détails employé';
+      $('#btnDeleteInModal').classList.toggle('hidden', isNew);
+
+      $('#empId').value = emp.id || '';
+      $('#empCode').value = emp.code || '';
+      $('#empName').value = emp.name || '';
+      $('#empDirection').value = emp.direction || '';
+      $('#empGroup').value = emp.group || '';
+      $('#empCategory').value = emp.category || 'metier';
+      $('#empRole').value = emp.role || '';
+      $('#empTheme').value = emp.theme || '';
+      $('#empModule').value = emp.module || '';
+      $('#empEmail').value = emp.email || '';
+      $('#empPhone').value = emp.phone || '';
+      $('#empStatus').value = emp.status || 'Actif';
+      $('#empNotes').value = emp.notes || '';
+      $('#empJobDescription').value = emp.jobDescription || '';
+      $('#ocrContext').textContent = `Occurrences OCR: ${emp.occurrences || 0} · Pages source: ${(emp.source_pages || []).join(', ') || '—'}`;
+
+      $('#btnDeleteInModal').onclick = () => {
+        const currentId = $('#empId').value;
+        if (currentId) deleteEmployee(currentId, true);
+      };
+
+      syncModalPreview();
+      openModal('employeeModal');
+    }
+
+    function collectEmployeeForm() {
+      return {
+        id: $('#empId').value.trim() || uid(),
+        code: $('#empCode').value.trim(),
+        name: $('#empName').value.trim(),
+        direction: $('#empDirection').value.trim(),
+        group: $('#empGroup').value.trim(),
+        category: $('#empCategory').value.trim(),
+        theme: $('#empTheme').value.trim(),
+        module: $('#empModule').value.trim(),
+        role: $('#empRole').value.trim(),
+        email: $('#empEmail').value.trim(),
+        phone: $('#empPhone').value.trim(),
+        status: $('#empStatus').value.trim(),
+        notes: $('#empNotes').value.trim(),
+        jobDescription: $('#empJobDescription').value.trim(),
+        source_pages: [],
+        occurrences: 1,
+        source_full_name: $('#empName').value.trim()
+      };
+    }
+
+    function saveEmployee() {
+      const emp = collectEmployeeForm();
+
+      if (!emp.name) {
+        alert('Le nom est obligatoire.');
+        return;
+      }
+
+      const idx = employeesData.findIndex(e => String(e.id) === String(emp.id));
+      if (idx >= 0) employeesData[idx] = { ...employeesData[idx], ...emp };
+      else employeesData.push(emp);
+
+      saveLocal();
+      hydrateFilters();
+      renderEmployees();
+      closeModal('employeeModal');
+    }
+
+    function deleteEmployee(id, closeCurrent = false) {
+      if (!confirm('Supprimer cet employé ?')) return;
+
+      employeesData = employeesData.filter(e => String(e.id) !== String(id));
+      saveLocal();
+      hydrateFilters();
+      renderEmployees();
+
+      if (closeCurrent) closeModal('employeeModal');
+    }
+
+    async function testOllama() {
+      try {
+        const res = await fetch(AI_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(API_KEY ? { 'x-api-key': API_KEY } : {})
+          },
+          body: JSON.stringify({
+            model: OLLAMA_MODEL,
+            messages: [
+              { role: 'system', content: 'You are helpful.' },
+              { role: 'user', content: 'Say OK' }
+            ],
+            stream: false,
+            temperature: 0.2
+          })
+        });
+
+        const txt = await res.text();
+        if (!res.ok) throw new Error(txt);
+        $('#ollamaStatus').textContent = 'Connecté';
+        $('#ollamaStatus').className = 'text-wikiGreen font-bold';
+      } catch (err) {
+        console.error(err);
+        $('#ollamaStatus').textContent = 'Indisponible';
+        $('#ollamaStatus').className = 'text-wikiRed font-bold';
+      }
+    }
+
+    async function aiHelpJobDescription() {
+      const name = $('#empName').value.trim();
+      const direction = $('#empDirection').value.trim();
+      const group = $('#empGroup').value.trim();
+      const category = $('#empCategory').value.trim();
+      const role = $('#empRole').value.trim();
+      const theme = $('#empTheme').value.trim();
+      const module = $('#empModule').value.trim();
+      const notes = $('#empNotes').value.trim();
+      const currentText = $('#empJobDescription').value.trim();
+
+      if (!name) {
+        alert("Renseigne d'abord le nom de l'employé.");
+        return;
+      }
+
+      const btn = $('#btnAiHelp');
+      const oldHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+
+      try {
+        const res = await fetch(AI_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(API_KEY ? { 'x-api-key': API_KEY } : {})
+          },
+          body: JSON.stringify({
+            model: OLLAMA_MODEL,
+            messages: [
+              {
+                role: 'system',
+                content: `Tu es un expert en administration publique, organisation du travail, knowledge transfer et transition papier-vers-numérique.
+Rédige une description de poste claire, institutionnelle, concrète et structurée en français.
+Le texte doit pouvoir servir à la formation et à l'accompagnement d'un agent dans WikiGouv.
+Structure attendue:
+1. Mission du poste
+2. Responsabilités principales
+3. Activités quotidiennes
+4. Compétences requises
+5. Interactions avec les autres services
+6. Points de vigilance conformité et confidentialité`
+              },
+              {
+                role: 'user',
+                content:
+`Rédige une description de poste pour cet employé:
+Nom: ${name}
+Direction: ${direction}
+Groupe: ${group}
+Catégorie: ${category}
+Rôle/Fonction: ${role}
+Thème: ${theme}
+Module: ${module}
+Notes: ${notes}
+Description existante: ${currentText || 'Aucune'}
+
+Rédige un texte professionnel et exploitable.`
+              }
+            ],
+            stream: false,
+            temperature: 0.4
+          })
+        });
+
+        const txt = await res.text();
+        const data = safeJSON(txt);
+        if (!res.ok) throw new Error(txt);
+
+        const reply = data?.reply || data?.message?.content || data?.response || data?.text || data?.answer || txt;
+        $('#empJobDescription').value = String(reply || '').trim();
+      } catch (err) {
+        console.error(err);
+        alert("Impossible de générer la description avec Ollama.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+      }
+    }
+
+    function bindRowActions() {
+      $$('.employee-open').forEach(btn => btn.onclick = () => openEmployeeModal(btn.dataset.id));
+      $$('.btn-delete').forEach(btn => btn.onclick = () => deleteEmployee(btn.dataset.id));
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(employeesData, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'employees.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function exportCSV() {
+      const rows = [
+        ['id','code','name','direction','group','category','role','theme','module','email','phone','status','notes','jobDescription','occurrences','source_pages']
+      ];
+
+      employeesData.forEach(emp => {
+        rows.push([
+          emp.id || '',
+          emp.code || '',
+          emp.name || '',
+          emp.direction || '',
+          emp.group || '',
+          emp.category || '',
+          emp.role || '',
+          emp.theme || '',
+          emp.module || '',
+          emp.email || '',
+          emp.phone || '',
+          emp.status || '',
+          emp.notes || '',
+          emp.jobDescription || '',
+          emp.occurrences || '',
+          (emp.source_pages || []).join('|')
+        ]);
+      });
+
+      const csv = rows.map(row =>
+        row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
+      ).join('\n');
+
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'employees.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function bindPageActions() {
+      $('#searchInput').addEventListener('input', () => { currentPage = 1; renderEmployees(); });
+      $('#filterDirection').addEventListener('change', () => { currentPage = 1; renderEmployees(); });
+      $('#filterCategory').addEventListener('change', () => { currentPage = 1; renderEmployees(); });
+      $('#filterRole').addEventListener('change', () => { currentPage = 1; renderEmployees(); });
+
+      $('#pageSizeSelect').addEventListener('change', (e) => {
+        pageSize = Number(e.target.value || 20);
+        currentPage = 1;
+        renderEmployees();
+      });
+
+      $('#btnClearFilters').onclick = () => {
+        $('#searchInput').value = '';
+        $('#filterDirection').value = '';
+        $('#filterCategory').value = '';
+        $('#filterRole').value = '';
+        $('#pageSizeSelect').value = '20';
+        pageSize = 20;
+        currentPage = 1;
+        renderEmployees();
+      };
+
+      $('#btnAddEmployee').onclick = () => openEmployeeModal();
+      $('#btnFabAdd').onclick = () => openEmployeeModal();
+
+      $('#btnSaveEmployee').onclick = saveEmployee;
+      $('#btnReload').onclick = async () => {
+        localStorage.removeItem(STORAGE_KEY);
+        currentPage = 1;
+        await loadEmployees();
+      };
+      $('#btnExportJson').onclick = exportJSON;
+      $('#btnExportCsv').onclick = exportCSV;
+      $('#btnAiHelp').onclick = aiHelpJobDescription;
+
+      $('#empName').addEventListener('input', syncModalPreview);
+      $('#empCode').addEventListener('input', syncModalPreview);
+
+      $$('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close-modal')));
+      });
+
+      const modal = document.getElementById('employeeModal');
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal || e.target.classList.contains('modal-backdrop-custom')) {
+            closeModal('employeeModal');
+          }
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal('employeeModal');
+      });
+    }
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      bindPageActions();
+      await loadEmployees();
+      await testOllama();
+    });
+  </script>
+</body>
+</html>

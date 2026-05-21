@@ -1,0 +1,148 @@
+<section class="rocket-card p-4 mb-4" style="background: linear-gradient(135deg, #262b37, #20232c); color: #fff;">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="h3 fw-bold mb-2">Welcome, <%= page?.user?.preferredUsername ?? 'Admin' %>!</h1>
+      <p class="mb-3 text-white-50">Everything is under your control. Use quick-access buttons to manage actions easily.</p>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="/forum" class="rocket-pill"><i class="fa-regular fa-comment me-2"></i>Comments</a>
+        <a href="/support" class="rocket-pill"><i class="fa-regular fa-envelope me-2"></i>Tickets</a>
+        <a href="/audit-logs" class="rocket-pill"><i class="fa-regular fa-circle-question me-2"></i>Reports</a>
+      </div>
+    </div>
+    <div class="col-lg-4 text-end d-none d-lg-block">
+      <i class="fa-solid fa-graduation-cap" style="font-size: 72px; color: rgba(255,255,255,.20);"></i>
+    </div>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="rocket-metric">
+      <div class="rocket-muted">Course Type Daily Sales</div>
+      <div class="d-flex justify-content-between mt-3">
+        <div><div class="fs-4 fw-semibold"><%= dashboard?.kpis?.publishedCourses ?? 0 %></div><div class="rocket-muted">Published</div></div>
+        <div><div class="fs-4 fw-semibold"><%= dashboard?.kpis?.myEnrollments ?? dashboard?.kpis?.enrollments ?? 0 %></div><div class="rocket-muted">Enrollments</div></div>
+        <div><div class="fs-4 fw-semibold"><%= dashboard?.kpis?.myAttempts ?? dashboard?.kpis?.attempts ?? 0 %></div><div class="rocket-muted">Attempts</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="rocket-metric">
+      <div class="rocket-muted">Platform Income</div>
+      <div class="d-flex justify-content-between mt-3">
+        <div><div class="fs-4 fw-semibold"><%= dashboard?.kpis?.users ?? 0 %></div><div class="rocket-muted">Users</div></div>
+        <div><div class="fs-4 fw-semibold"><%= dashboard?.kpis?.courses ?? 0 %></div><div class="rocket-muted">Courses</div></div>
+        <div><div class="fs-4 fw-semibold"><%= dashboard?.kpis?.publishedCourses ?? 0 %></div><div class="rocket-muted">Published</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="rocket-metric">
+      <div class="rocket-muted">Sales Count</div>
+      <div class="d-flex justify-content-between mt-3">
+        <div><div class="fs-4 fw-semibold"><%= dashboard?.kpis?.certificates ?? 0 %></div><div class="rocket-muted">Certificates</div></div>
+        <div><div class="fs-4 fw-semibold"><%= dashboard?.kpis?.myAttempts ?? dashboard?.kpis?.attempts ?? 0 %></div><div class="rocket-muted">Quiz</div></div>
+        <div><div class="fs-4 fw-semibold"><%= dashboardStatus ?? 200 %></div><div class="rocket-muted">API Status</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-md-6 col-lg-3">
+    <div class="rocket-card p-3 d-flex align-items-center gap-3">
+      <div class="rocket-icon" style="background:#dcebff;color:#2f78ff;"><i class="fa-solid fa-cart-shopping"></i></div>
+      <div><div class="rocket-muted">New Sale</div><div class="fw-bold fs-5">12</div></div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-3">
+    <div class="rocket-card p-3 d-flex align-items-center gap-3">
+      <div class="rocket-icon" style="background:#ffe3e7;color:#ff6f85;"><i class="fa-solid fa-comment-dots"></i></div>
+      <div><div class="rocket-muted">New Comment</div><div class="fw-bold fs-5">2</div></div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-3">
+    <div class="rocket-card p-3 d-flex align-items-center gap-3">
+      <div class="rocket-icon" style="background:#ffeecf;color:#ffb326;"><i class="fa-solid fa-envelope-open"></i></div>
+      <div><div class="rocket-muted">Support Tickets</div><div class="fw-bold fs-5">0</div></div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-3">
+    <div class="rocket-card p-3 d-flex align-items-center gap-3">
+      <div class="rocket-icon" style="background:#daf7e8;color:#23b56e;"><i class="fa-solid fa-clipboard-check"></i></div>
+      <div><div class="rocket-muted">Pending Review</div><div class="fw-bold fs-5">0</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <div class="rocket-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h6 mb-0 rocket-title">Sales Statistics</h2>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-secondary">Month</button>
+          <button class="btn btn-primary">Year</button>
+        </div>
+      </div>
+      <div class="rounded-4 p-3" style="background:#f8faff;border:1px dashed #d9e4f8;height:260px;">
+        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+          <span>Chart placeholder (Apex/Chart.js à brancher)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="rocket-card p-4">
+      <h2 class="h6 mb-3 rocket-title">Recent Comments</h2>
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex gap-2"><div class="rocket-icon" style="width:36px;height:36px;background:#ecf3ff;color:#3a7cff;"><i class="fa-solid fa-user"></i></div><div><div class="fw-semibold small">Robert Randsell</div><div class="rocket-muted">Thank you for this excellent article.</div></div></div>
+        <div class="d-flex gap-2"><div class="rocket-icon" style="width:36px;height:36px;background:#ecf3ff;color:#3a7cff;"><i class="fa-solid fa-user"></i></div><div><div class="fw-semibold small">Owosso</div><div class="rocket-muted">We are very happy that you are satisfied.</div></div></div>
+        <div class="d-flex gap-2"><div class="rocket-icon" style="width:36px;height:36px;background:#ecf3ff;color:#3a7cff;"><i class="fa-solid fa-user"></i></div><div><div class="fw-semibold small">Jessica B. Gray</div><div class="rocket-muted">Great dashboard experience.</div></div></div>
+      </div>
+      <a href="/forum" class="btn btn-primary btn-sm mt-3 w-100">View All</a>
+    </div>
+  </div>
+</section>
+
+<section class="row g-3">
+  <div class="col-lg-4">
+    <div class="rocket-card overflow-hidden">
+      <div class="p-3 text-white" style="background: var(--rocket-blue);">
+        <div class="fw-semibold">Recent Support Tickets</div>
+        <small class="text-white-50">2 Pending Reply</small>
+      </div>
+      <div class="p-3">
+        <div class="small mb-2">Problem with quiz <span class="badge text-bg-warning ms-1">Pending</span></div>
+        <div class="small mb-2">Refund request <span class="badge text-bg-danger ms-1">Close</span></div>
+        <div class="small mb-2">Class delay <span class="badge text-bg-success ms-1">Replied</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="rocket-card overflow-hidden">
+      <div class="p-3 text-white" style="background: var(--rocket-blue);">
+        <div class="fw-semibold">Recent Live Classes</div>
+        <small class="text-white-50">0 Pending Review</small>
+      </div>
+      <div class="p-3">
+        <div class="small mb-2">New In-App Live System <span class="badge text-bg-success ms-1">Finished</span></div>
+        <div class="small mb-2">How to travel around world <span class="badge text-bg-success ms-1">Finished</span></div>
+        <div class="small mb-2">Active listening basics <span class="badge text-bg-success ms-1">Finished</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="rocket-card overflow-hidden">
+      <div class="p-3 text-white" style="background: var(--rocket-blue);">
+        <div class="fw-semibold">Recent Courses</div>
+        <small class="text-white-50">0 Pending Review</small>
+      </div>
+      <div class="p-3">
+        <div class="small mb-2">Backend Development with Node.js <span class="badge text-bg-success ms-1">Finished</span></div>
+        <div class="small mb-2">Python for Data Science <span class="badge text-bg-success ms-1">Finished</span></div>
+        <div class="small mb-2">Full Stack JavaScript Development <span class="badge text-bg-success ms-1">Finished</span></div>
+      </div>
+    </div>
+  </div>
+</section>

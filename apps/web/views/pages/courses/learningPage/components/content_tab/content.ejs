@@ -1,0 +1,89 @@
+<%
+  const itemIcon = it.type === 'file' ? 'fa-regular fa-file-lines'
+    : it.type === 'interactive_file' ? 'fa-regular fa-file-zipper'
+    : it.type === 'text_lesson' ? 'fa-regular fa-file-lines'
+    : it.type === 'session' ? 'fa-solid fa-video'
+    : it.type === 'quiz' ? 'fa-regular fa-clipboard'
+    : it.type === 'assignment' ? 'fa-regular fa-bookmark'
+    : 'fa-regular fa-file-lines';
+  const itemMeta = it.type === 'quiz'
+    ? `${String(it.payload?.time ?? 5)} Min | ${String(it.payload?.questionsCount ?? 5)} Questions`
+    : `${it.type === 'text_lesson' ? 'Text Lesson' : 'Video'}${it.payload?.volume ? ` | ${String(it.payload.volume)}.00 MB MB` : ''}`;
+  const hasMedia = String(it.mediaPath || '').trim().length > 0;
+  const canOpen = hasMedia && (it.type === 'file' || it.type === 'interactive_file' || it.type === 'session');
+  const canDownload = hasMedia && (it.type === 'file' || it.type === 'interactive_file');
+%>
+<button
+  type="button"
+  class="d-flex align-items-start p-10 cursor-pointer tab-item item-row js-learning-item learning-item-card <%= sIndex === 0 && idx === 0 ? 'active is-active' : '' %>"
+  data-item-key="<%= it.key %>"
+  data-item-id="<%= it.id %>"
+  data-item-title="<%- it.title %>"
+  data-item-type="<%= it.type %>"
+  data-item-desc="<%- it.description %>"
+  data-item-media="<%- it.mediaPath %>"
+  data-item-source="<%- it.source %>"
+  data-item-file-type="<%- it.fileType %>"
+  data-item-scorm-index="<%- it.scormIndex %>"
+  data-session-date="<%- String(it.payload?.date ?? '') %>"
+  data-session-duration="<%- String(it.payload?.duration ?? '') %>"
+  data-session-join-window="<%- String(it.payload?.extra_time_to_join ?? '') %>"
+  data-session-status="<%- String(it.payload?.status ?? '') %>"
+  data-quiz-time="<%- String(it.payload?.time ?? it.payload?.quiz_time ?? '') %>"
+  data-quiz-questions="<%- String(it.payload?.questionsCount ?? it.payload?.questions_count ?? '') %>"
+  data-quiz-pass-mark="<%- String(it.payload?.pass_mark ?? it.payload?.passingScore ?? '') %>"
+  data-quiz-attempts="<%- String(it.payload?.attempt ?? it.payload?.attempts ?? '') %>"
+  data-quiz-status="<%- String(it.payload?.status ?? '') %>"
+  data-assignment-deadline="<%- String(it.payload?.deadline ?? '') %>"
+  data-assignment-pass-grade="<%- String(it.payload?.pass_grade ?? '') %>"
+  data-assignment-attempts="<%- String(it.payload?.attempts ?? it.payload?.attempt ?? '') %>"
+  data-assignment-status="<%- String(it.payload?.status ?? '') %>"
+  data-item-section="<%- section.title %>"
+  data-item-index="<%= idx + 1 %>">
+  <span class="chapter-icon bg-gray300 mr-10 icon learning-item-icon"><i class="<%= itemIcon %> text-gray"></i></span>
+  <span class="flex-grow-1 body learning-item-body">
+    <span class="d-flex align-items-center justify-content-between learning-item-head">
+      <span class="font-weight-500 font-14 text-dark-blue d-block name learning-item-title"><%= it.title %></span>
+      <span class="item-state-badge is-not-started learning-item-state" data-item-state>Not started</span>
+    </span>
+    <span class="font-12 text-gray d-block meta learning-item-meta"><%= itemMeta %></span>
+    <span class="tab-item-info mt-15 d-block learning-item-extra">
+      <p class="font-12 text-gray d-block mb-2 learning-item-desc"><%= it.description || '' %></p>
+      <span class="d-flex align-items-center justify-content-between mt-10 learning-item-toggle-row">
+        <label class="mb-0 mr-10 cursor-pointer font-weight-normal font-14 text-dark-blue learning-item-toggle-label">Marquer comme terminée</label>
+        <span class="custom-control custom-switch learning-item-toggle-wrap">
+          <input
+            type="checkbox"
+            class="js-passed-lesson-toggle custom-control-input"
+            id="readToggle_<%= String(it.key).replace(/[^a-zA-Z0-9_-]/g, '_') %>"
+            data-item-key="<%= it.key %>">
+          <label class="custom-control-label" for="readToggle_<%= String(it.key).replace(/[^a-zA-Z0-9_-]/g, '_') %>"></label>
+        </span>
+      </span>
+    </span>
+  </span>
+  <span class="done d-none item-personal-note-icon d-flex-center bg-gray200 learning-item-done"><i class="fa-solid fa-check text-gray"></i></span>
+  <span class="item-actions d-flex align-items-center ml-10 learning-item-actions">
+    <% if (canOpen) { %>
+      <button
+        type="button"
+        class="item-action-btn item-action-open js-item-action"
+        data-action="open"
+        data-tooltip="<%= it.type === 'session' ? 'Join session' : 'Open resource' %>"
+        title="<%= it.type === 'session' ? 'Join session' : 'Open resource' %>"
+        aria-label="<%= it.type === 'session' ? 'Join session' : 'Open resource' %>">
+        <i class="<%= it.type === 'session' ? 'fa-solid fa-video' : 'fa-solid fa-up-right-from-square' %>"></i>
+      </button>
+    <% } %>
+    <% if (canDownload) { %>
+      <button type="button" class="item-action-btn js-item-action" data-action="download" data-tooltip="Download resource" title="Download resource" aria-label="Download resource">
+        <i class="fa-solid fa-download"></i>
+      </button>
+    <% } %>
+    <% if (it.type === 'quiz') { %>
+      <button type="button" class="item-action-btn js-item-action" data-action="switch-tab" data-target-tab="quizzes" data-tooltip="Go to quizzes" title="Go to quizzes" aria-label="Go to quizzes">
+        <i class="fa-regular fa-clipboard"></i>
+      </button>
+    <% } %>
+  </span>
+</button>

@@ -1,0 +1,20 @@
+<section class="bg-white border rounded-4 shadow-sm p-4">
+  <h2 class="h4 mb-3">Catalogue des formations</h2>
+  <form class="row g-3 mb-4">
+    <div class="col-md-5"><input class="form-control" placeholder="Rechercher un cours..." value="<%= data.filters.q %>" /></div>
+    <div class="col-md-3">
+      <select class="form-select">
+        <option value="all" <%= data.filters.level === 'all' ? 'selected' : '' %>>Niveau: Tous</option>
+        <option>Débutant</option><option>Intermédiaire</option><option>Avancé</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select class="form-select">
+        <option value="published" <%= data.filters.status === 'published' ? 'selected' : '' %>>Publié</option>
+      </select>
+    </div>
+    <div class="col-md-1"><button class="btn btn-primary w-100" type="button">Filtrer</button></div>
+  </form>
+  <div class="alert alert-info mb-0">Cette vue reprend la logique Rocket LMS (filtres + badges) en version institutionnelle ARTF.</div>
+</section>
+

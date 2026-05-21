@@ -1,0 +1,177 @@
+<% if (!data.allowed) { %>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h1 class="h5 mb-3">Access denied</h1>
+      <p class="text-muted mb-3">Your role cannot access this section.</p>
+      <a href="/unauthorized" class="btn btn-outline-secondary btn-sm">View details</a>
+    </div>
+  </div>
+<% } else { %>
+  <% const pathKey = page?.currentPath?.replace('/admin/', '') || ''; %>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h5 mb-0"><%= data.featureTitle %></h1>
+        <% if (data.comingSoon) { %><span class="badge text-bg-warning">Coming soon</span><% } %>
+      </div>
+
+      <% if (['supports', 'notifications', 'blog', 'categories', 'comments/webinars', 'reviews'].includes(pathKey)) { %>
+        <form method="post" action="/admin/action/create" class="row g-2 mb-3">
+          <input type="hidden" name="path" value="<%= pathKey %>">
+          <% if (['comments/webinars', 'reviews'].includes(pathKey)) { %>
+            <div class="col-md-2"><input class="form-control form-control-sm" name="courseId" placeholder="Course ID"></div>
+            <div class="col-md-2"><input class="form-control form-control-sm" name="authorName" placeholder="Author"></div>
+            <div class="col-md-2"><input class="form-control form-control-sm" name="authorEmail" placeholder="Email"></div>
+            <% if (pathKey === 'reviews') { %>
+              <div class="col-md-1"><input class="form-control form-control-sm" name="rating" type="number" min="1" max="5" value="5"></div>
+              <div class="col-md-3"><input class="form-control form-control-sm" name="message" placeholder="Review"></div>
+            <% } else { %>
+              <div class="col-md-4"><input class="form-control form-control-sm" name="message" placeholder="Comment"></div>
+            <% } %>
+            <div class="col-md-2 d-grid"><button class="btn btn-success btn-sm" type="submit">Post</button></div>
+          <% } else { %>
+            <div class="col-md-3"><input class="form-control form-control-sm" name="title" placeholder="Title/Name"></div>
+            <div class="col-md-5"><input class="form-control form-control-sm" name="message" placeholder="Message/Description"></div>
+            <div class="col-md-2"><input class="form-control form-control-sm" name="subject" placeholder="Subject/Status"></div>
+            <div class="col-md-2 d-grid"><button class="btn btn-success btn-sm" type="submit">Create</button></div>
+          <% } %>
+        </form>
+      <% } %>
+
+      <form method="get" class="row g-2 mb-3">
+        <div class="col-md-4">
+          <input type="text" name="q" class="form-control form-control-sm" placeholder="Search" value="<%= data.query?.q ?? '' %>">
+        </div>
+        <div class="col-md-3">
+          <input type="text" name="status" class="form-control form-control-sm" placeholder="Status" value="<%= data.query?.status ?? '' %>">
+        </div>
+        <div class="col-md-2">
+          <input type="number" min="1" name="pageSize" class="form-control form-control-sm" placeholder="Page size" value="<%= data.pageSize ?? 10 %>">
+        </div>
+        <div class="col-md-3 d-grid">
+          <button class="btn btn-primary btn-sm" type="submit">Filter</button>
+        </div>
+      </form>
+
+      <% if (data.listStatus !== 200 && !data.comingSoon) { %>
+        <div class="alert alert-warning">API unavailable (status <%= data.listStatus %>).</div>
+      <% } %>
+
+      <% if ((data.items ?? []).length === 0) { %>
+        <div class="text-muted">No data to display.</div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <% (data.tableColumns ?? []).forEach((column) => { %>
+                  <th><%= column %></th>
+                <% }); %>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.items.forEach((item) => { %>
+                <tr>
+                  <% (data.tableColumns ?? []).forEach((column) => { %>
+                    <td><%= item?.[column] ?? '-' %></td>
+                  <% }); %>
+                  <td class="text-end">
+                    <% const canStatus = ['supports','notifications','blog','categories','users/become-instructors/instructors'].includes(pathKey) && item?.id; %>
+                    <% const canModerate = ['comments/webinars','reviews'].includes(pathKey) && item?.id; %>
+                    <% if (canStatus) { %>
+                      <form method="post" action="/admin/action/status" class="d-inline-flex gap-1">
+                        <input type="hidden" name="path" value="<%= pathKey %>">
+                        <input type="hidden" name="id" value="<%= item?.id %>">
+                        <select name="status" class="form-select form-select-sm">
+                          <option value="OPEN">OPEN</option>
+                          <option value="IN_PROGRESS">IN_PROGRESS</option>
+                          <option value="CLOSED">CLOSED</option>
+                          <option value="SENT">SENT</option>
+                          <option value="ARCHIVED">ARCHIVED</option>
+                          <option value="DRAFT">DRAFT</option>
+                          <option value="PUBLISHED">PUBLISHED</option>
+                          <option value="ACTIVE">ACTIVE</option>
+                          <option value="APPROVED">APPROVED</option>
+                          <option value="REJECTED">REJECTED</option>
+                        </select>
+                        <button class="btn btn-outline-primary btn-sm" type="submit">Update</button>
+                      </form>
+                    <% } %>
+                    <% if (canModerate) { %>
+                      <form method="post" action="/admin/action/status" class="d-inline-flex gap-1 me-1">
+                        <input type="hidden" name="path" value="<%= pathKey %>">
+                        <input type="hidden" name="id" value="<%= item?.id %>">
+                        <select name="status" class="form-select form-select-sm">
+                          <option value="PUBLISHED">PUBLISHED</option>
+                          <option value="PENDING">PENDING</option>
+                          <option value="REJECTED">REJECTED</option>
+                        </select>
+                        <button class="btn btn-outline-primary btn-sm" type="submit">Moderate</button>
+                      </form>
+                      <form method="post" action="/admin/action/delete" class="d-inline">
+                        <input type="hidden" name="path" value="<%= pathKey %>">
+                        <input type="hidden" name="id" value="<%= item?.id %>">
+                        <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                      </form>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <small class="text-muted">Total: <%= data.total ?? 0 %> | Page <%= data.pageNumber ?? 1 %>/<%= data.totalPages ?? 1 %></small>
+        <div class="d-flex gap-2">
+          <% if ((data.pageNumber ?? 1) > 1) { %>
+            <a class="btn btn-outline-secondary btn-sm" href="?page=<%= (data.pageNumber ?? 1) - 1 %>&pageSize=<%= data.pageSize ?? 10 %>&q=<%= encodeURIComponent(data.query?.q ?? '') %>&status=<%= encodeURIComponent(data.query?.status ?? '') %>">Previous</a>
+          <% } %>
+          <% if ((data.pageNumber ?? 1) < (data.totalPages ?? 1)) { %>
+            <a class="btn btn-outline-secondary btn-sm" href="?page=<%= (data.pageNumber ?? 1) + 1 %>&pageSize=<%= data.pageSize ?? 10 %>&q=<%= encodeURIComponent(data.query?.q ?? '') %>&status=<%= encodeURIComponent(data.query?.status ?? '') %>">Next</a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<script>
+  (function () {
+    var createForm = document.querySelector('form[action="/admin/action/create"]');
+    if (createForm) {
+      createForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var formData = new FormData(createForm);
+        fetch('/admin/action/create', { method: 'POST', body: new URLSearchParams(formData) })
+          .then(function () { window.location.reload(); })
+          .catch(function () { alert('Creation failed'); });
+      });
+    }
+
+    document.querySelectorAll('form[action="/admin/action/status"]').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var formData = new FormData(form);
+        var status = String(formData.get('status') || '');
+        if (!window.confirm('Confirm update? New status: ' + status)) return;
+        fetch('/admin/action/status', { method: 'POST', body: new URLSearchParams(formData) })
+          .then(function () { window.location.reload(); })
+          .catch(function () { alert('Update failed'); });
+      });
+    });
+
+    document.querySelectorAll('form[action="/admin/action/delete"]').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (!window.confirm('Confirm delete?')) return;
+        var formData = new FormData(form);
+        fetch('/admin/action/delete', { method: 'POST', body: new URLSearchParams(formData) })
+          .then(function () { window.location.reload(); })
+          .catch(function () { alert('Delete failed'); });
+      });
+    });
+  })();
+</script>

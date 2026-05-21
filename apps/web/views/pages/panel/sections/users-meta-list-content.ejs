@@ -1,0 +1,114 @@
+<section class="rocket-page users-meta-page" data-meta-type="<%= data.type %>">
+  <div class="rocket-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="h2 fw-bold mb-0"><%= data.featureTitle %></h2>
+      <div class="d-flex gap-2">
+        <% if (data.type === 'roles') { %><a href="/admin/roles/export.csv" class="btn btn-outline-secondary rounded-pill px-4">Exporter</a><% } %>
+        <% if (data.type === 'groups') { %><a href="/admin/users/groups/export.csv" class="btn btn-outline-secondary rounded-pill px-4">Exporter</a><% } %>
+        <% if (data.type === 'badges') { %><a href="/admin/users/badges/export.csv" class="btn btn-outline-secondary rounded-pill px-4">Exporter</a><% } %>
+        <% if (data.type === 'roles') { %><a href="/admin/roles/create" class="btn btn-primary rounded-pill px-4">+ Nouveau role</a><% } %>
+        <% if (data.type === 'groups') { %><a href="/admin/users/groups/create" class="btn btn-primary rounded-pill px-4">+ Nouveau groupe</a><% } %>
+        <% if (data.type === 'badges') { %><a href="/admin/users/badges/create" class="btn btn-primary rounded-pill px-4">+ Nouveau badge</a><% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="rocket-card p-0 overflow-hidden">
+    <div class="p-4 border-bottom">
+      <h3 class="h5 fw-bold mb-1">Liste - <%= data.featureTitle %></h3>
+      <div class="text-muted">Gerez et consultez tous les elements de cette liste.</div>
+    </div>
+
+    <div class="p-4">
+    <% if ((data.listStatus ?? 200) !== 200) { %>
+      <div class="alert alert-warning d-flex align-items-center gap-2 mb-0">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>API indisponible (status <%= data.listStatus %>)</span>
+      </div>
+    <% } %>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+      <div class="small text-muted">Total: <%= (data.items ?? []).length %></div>
+      <div class="d-flex gap-2 align-items-center">
+        <select class="form-select form-select-sm users-meta-bulk-select" id="metaBulkAction">
+          <option value="">Actions groupees</option>
+          <option value="delete">Supprimer</option>
+        </select>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="metaBulkApplyBtn">Appliquer</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-borderless align-middle rocket-table">
+        <thead>
+          <tr>
+            <th style="width: 44px;"><input type="checkbox" id="metaCheckAll"></th>
+            <th>Title</th>
+            <% if (data.type === 'badges') { %><th>Icon</th><% } %>
+            <th>Description</th>
+            <% if (data.type === 'groups') { %><th>Utilisateurs</th><% } %>
+            <% if (data.type === 'badges') { %><th>Assignes</th><% } %>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if ((data.items ?? []).length === 0) { %>
+            <tr>
+              <td colspan="8" class="text-center py-5">
+                <div class="d-flex-center flex-column text-center">
+                  <div class="users-meta-empty-icon mb-3"><i class="fa-regular fa-folder-open"></i></div>
+                  <h3 class="font-16 font-weight-bold mt-1 mb-1">Aucun element trouve.</h3>
+                  <p class="mt-1 font-12 text-gray-500 mb-0">Creez un nouvel element pour commencer.</p>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+          <% (data.items ?? []).forEach((item) => { %>
+            <tr>
+              <td><input type="checkbox" class="meta-check-row" value="<%= item.id %>"></td>
+              <td><%= item.title ?? '-' %></td>
+              <% if (data.type === 'badges') { %>
+                <td>
+                  <% if (item.icon) { %>
+                    <img src="<%= item.icon %>" alt="badge" width="28" height="28" class="rounded border">
+                  <% } else { %>-<% } %>
+                </td>
+              <% } %>
+              <td><%= item.description ?? '-' %></td>
+              <% if (data.type === 'groups') { %><td><%= item.usersCount ?? 0 %></td><% } %>
+              <% if (data.type === 'badges') { %><td><%= item.assignedCount ?? 0 %></td><% } %>
+              <td><span class="badge text-bg-light"><%= item.status ?? '-' %></span></td>
+              <td><%= item.createdAt ? new Date(item.createdAt).toLocaleString() : '-' %></td>
+              <td>
+                <details class="position-relative d-inline-block users-meta-actions">
+                  <summary class="users-meta-action-btn">•••</summary>
+                  <div class="dropdown-menu show position-absolute p-2" style="min-width: 160px; right: 0; left: auto;">
+                    <% if (data.type === 'roles') { %><a href="/admin/roles/<%= item.id %>/edit" class="dropdown-item text-primary">Modifier</a><% } %>
+                    <% if (data.type === 'groups') { %><a href="/admin/users/groups/<%= item.id %>/edit" class="dropdown-item text-primary">Modifier</a><% } %>
+                    <% if (data.type === 'badges') { %><a href="/admin/users/badges/<%= item.id %>/edit" class="dropdown-item text-primary">Modifier</a><% } %>
+                    <% if (data.type === 'roles') { %>
+                      <form method="post" action="/admin/roles/<%= item.id %>/delete" class="js-meta-delete-form"><button type="submit" class="dropdown-item text-danger">Supprimer</button></form>
+                    <% } %>
+                    <% if (data.type === 'groups') { %>
+                      <form method="post" action="/admin/users/groups/<%= item.id %>/delete" class="js-meta-delete-form"><button type="submit" class="dropdown-item text-danger">Supprimer</button></form>
+                    <% } %>
+                    <% if (data.type === 'badges') { %>
+                      <form method="post" action="/admin/users/badges/<%= item.id %>/delete" class="js-meta-delete-form"><button type="submit" class="dropdown-item text-danger">Supprimer</button></form>
+                    <% } %>
+                  </div>
+                </details>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    </div>
+  </div>
+</section>
+
+<script src="/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+<link rel="stylesheet" href="/css/users-meta.css">
+<script src="/js/users-meta-list.js"></script>

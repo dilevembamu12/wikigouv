@@ -1,0 +1,30 @@
+<%
+  const safeFeatureTitle = typeof featureTitle !== 'undefined' ? featureTitle : 'Admin List';
+  const safeAllowed = typeof allowed !== 'undefined' ? allowed : true;
+  const safeComingSoon = typeof comingSoon !== 'undefined' ? comingSoon : false;
+  const safeItems = typeof items !== 'undefined' ? items : [];
+  const safeTableColumns = typeof tableColumns !== 'undefined' ? tableColumns : [];
+  const safeTotal = typeof total !== 'undefined' ? total : (Array.isArray(safeItems) ? safeItems.length : 0);
+  const safeTotalPages = typeof totalPages !== 'undefined' ? totalPages : 1;
+  const safePageNumber = typeof pageNumber !== 'undefined' ? pageNumber : 1;
+  const safePageSize = typeof pageSize !== 'undefined' ? pageSize : 10;
+  const safeListStatus = typeof listStatus !== 'undefined' ? listStatus : 200;
+  const safeQuery = typeof query !== 'undefined' ? query : {};
+%>
+<%- include('../../layouts/panel', {
+  page,
+  data: {
+    featureTitle: safeFeatureTitle,
+    allowed: safeAllowed,
+    comingSoon: safeComingSoon,
+    items: safeItems,
+    tableColumns: safeTableColumns,
+    total: safeTotal,
+    totalPages: safeTotalPages,
+    pageNumber: safePageNumber,
+    pageSize: safePageSize,
+    listStatus: safeListStatus,
+    query: safeQuery
+  },
+  contentTemplate: '../pages/panel/sections/admin-list-content'
+}) %>

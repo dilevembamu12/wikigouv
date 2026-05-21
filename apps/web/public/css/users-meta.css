@@ -1,0 +1,56 @@
+.users-meta-page .rocket-page-header {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px 26px;
+}
+
+.users-meta-page .rocket-table thead th {
+  background: #f4f6fb;
+  color: #98a3bf;
+  font-weight: 700;
+  border: 0;
+}
+
+.users-meta-page .rocket-table td,
+.users-meta-page .rocket-table th {
+  padding: 16px 14px;
+}
+
+.users-meta-bulk-select {
+  min-width: 170px;
+}
+
+.users-meta-actions summary {
+  list-style: none;
+}
+
+.users-meta-actions summary::-webkit-details-marker {
+  display: none;
+}
+
+.users-meta-action-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 0;
+  background: #eef2f8;
+  color: #8ea0be;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.users-meta-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: rgba(29, 110, 242, 0.1);
+  color: #1d6ef2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+

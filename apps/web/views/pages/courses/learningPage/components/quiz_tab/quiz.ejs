@@ -1,0 +1,14 @@
+<%
+  const title = String(quiz?.title ?? 'Quiz');
+  const status = String(quiz?.status ?? 'NOT_PARTICIPATED');
+  const questions = Number(quiz?.questionsCount ?? quiz?.questions_count ?? 0);
+  const passMark = Number(quiz?.passingScore ?? quiz?.pass_mark ?? 70);
+  const attempts = Number(quiz?.attempt ?? quiz?.attempts ?? 0);
+%>
+<div class="mini-row learning-quiz-row">
+  <div class="name"><%= title %></div>
+  <div class="meta"><%= status %></div>
+  <div class="meta"><%= questions %> questions</div>
+  <div class="meta">Pass: <%= passMark %>/100</div>
+  <div class="meta">Attempts: <%= attempts %></div>
+</div>

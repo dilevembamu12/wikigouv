@@ -1,0 +1,63 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: wikigouv_mysql_local
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wikigouv
+      MYSQL_USER: wikigouv
+      MYSQL_PASSWORD: wikigouv
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: wikigouv_keycloak_local
+    command: start-dev --import-realm
+    restart: unless-stopped
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: mysql
+      KC_DB_URL_HOST: mysql
+      KC_DB_URL_DATABASE: wikigouv
+      KC_DB_USERNAME: wikigouv
+      KC_DB_PASSWORD: wikigouv
+    ports:
+      - "18080:8080"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import
+    depends_on:
+      - mysql
+
+  minio:
+    image: minio/minio:latest
+    container_name: wikigouv_minio_local
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: wikigouv_qdrant_local
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  mysql_data:
+  minio_data:
+  qdrant_data:

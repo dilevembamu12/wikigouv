@@ -1,0 +1,2865 @@
+<section class="rocket-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 fw-bold mb-0">Edit Course #<%= webinarId %></h2>
+    <div class="d-flex gap-2">
+      <a href="/admin/webinars/<%= encodeURIComponent(String(webinarId)) %>/edit/course" class="btn btn-primary btn-sm">Edit Course</a>
+      <a href="/admin/webinars/<%= encodeURIComponent(String(webinarId)) %>/edit" class="btn btn-outline-primary btn-sm">Edit Sections</a>
+      <a href="/admin/webinars?ok=course_updated" class="btn btn-outline-secondary btn-sm">Back to list</a>
+    </div>
+  </div>
+
+  <div class="alert alert-success mb-4">
+    Cours cree. Continuez avec le curriculum complet: sections, fichiers, lecons, sessions, devoirs, FAQ, prerequisites, cours lies et quiz.
+  </div>
+
+  <div class="rocket-builder-card border rounded p-3 mb-4 rocket-builder-header">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h3 class="h6 fw-bold mb-0 d-flex align-items-center gap-2">
+        <span class="rocket-section-dot"></span>
+        Curriculum
+      </h3>
+      <button type="button" class="btn btn-primary btn-sm js-add-section-item" data-type="chapter" data-label="Section">
+        Add New Section
+      </button>
+    </div>
+  </div>
+
+  <div id="builderSections">
+  </div>
+</section>
+
+<style>
+  .rocket-swal-popup {
+    border-radius: 16px;
+    padding: 1.15rem 1.2rem 1rem;
+    border: 1px solid #e4ebf8;
+    box-shadow: 0 18px 42px rgba(16, 42, 88, 0.22);
+  }
+  .rocket-swal-popup .swal2-html-container {
+    margin: .35rem 0 0;
+  }
+  .rocket-swal-popup .swal2-input,
+  .rocket-swal-popup .swal2-select,
+  .rocket-swal-popup .swal2-textarea {
+    margin: .35rem 0 0;
+    min-height: 44px;
+    border: 1px solid #d6deee;
+    border-radius: 10px;
+    box-shadow: none;
+    font-size: .95rem;
+    background: #fbfdff;
+  }
+  .rocket-swal-popup .swal2-textarea {
+    min-height: 110px;
+  }
+  .rocket-swal-popup .swal2-label {
+    font-size: .84rem;
+    color: #5f7398;
+    margin: 0;
+    font-weight: 600;
+  }
+  .rocket-swal-popup .swal2-actions {
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: .9rem;
+  }
+  .rocket-swal-popup .btn.btn-primary,
+  .rocket-swal-popup .btn.btn-danger {
+    height: 40px;
+    min-width: 92px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .rocket-builder-card {
+    background: #fff;
+    border-color: #e8edf5 !important;
+  }
+  .rocket-builder-header {
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  }
+  .rocket-section-dot {
+    display: inline-block;
+    width: 30px;
+    height: 7px;
+    border-radius: 999px;
+    background: #1c73e8;
+  }
+  .rocket-empty-state {
+    border: 1px dashed #d9e1f0;
+    border-radius: 12px;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #8b98b8;
+    background: #f9fbff;
+    text-align: center;
+    padding: 1.2rem;
+  }
+  .rocket-empty-state .icon-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #eef4ff;
+    color: #5e7ec4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rocket-empty-state .title {
+    font-weight: 700;
+    color: #22304d;
+    margin-top: .35rem;
+  }
+  .rocket-empty-state .sub {
+    font-size: .9rem;
+  }
+  .rocket-item-row {
+    border: 1px solid #e8edf5;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-bottom: .6rem;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(12, 36, 80, 0.05);
+  }
+  .rocket-file-inline {
+    border: 1px solid #e8edf5;
+    border-radius: 10px;
+    background: #fff;
+    margin-bottom: 12px;
+  }
+  .rocket-file-inline-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #edf1f7;
+  }
+  .rocket-file-inline-head .left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rocket-file-inline-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f1f3f6;
+    color: #7a879f;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rocket-file-inline-body {
+    padding: 14px 12px 12px;
+  }
+  .rocket-file-inline .form-label {
+    font-size: .84rem;
+    color: #22304d;
+  }
+  .rocket-inline-item {
+    border: 1px solid #e8edf5;
+    border-radius: 10px;
+    background: #fff;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(12, 36, 80, 0.05);
+  }
+  .rocket-inline-item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #edf1f7;
+    background: linear-gradient(180deg, #fbfdff 0%, #f7faff 100%);
+  }
+  .rocket-inline-item-body { padding: 12px; }
+  .rocket-radio-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 38px;
+  }
+  .rocket-radio-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .95rem;
+    color: #495a7a;
+  }
+  .rocket-icon-input {
+    display: flex;
+    align-items: stretch;
+  }
+  .rocket-icon-input .icon {
+    width: 46px;
+    border: 1px solid #ced7ea;
+    border-right: 0;
+    background: #f7f9fe;
+    color: #6f7f9d;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .375rem 0 0 .375rem;
+  }
+  .rocket-icon-input .btn-browse {
+    border: 1px solid #ced7ea;
+    border-left: 0;
+    background: #f2f5fb;
+    color: #546a90;
+    padding: 0 .9rem;
+  }
+  .rocket-upload-chip {
+    font-size: .82rem;
+    color: #7a8fb3;
+  }
+  .rocket-icon-input input {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .rocket-icon-input .btn {
+    border-radius: 0;
+  }
+  .rocket-icon-input .btn:last-child {
+    border-top-right-radius: .375rem;
+    border-bottom-right-radius: .375rem;
+  }
+  .rocket-item-title {
+    font-weight: 700;
+    color: #15223d;
+  }
+  .rocket-item-meta {
+    font-size: .82rem;
+    color: #8b98b8;
+  }
+  .rocket-badge-status {
+    display: inline-block;
+    font-size: .73rem;
+    font-weight: 700;
+    padding: .2rem .45rem;
+    border-radius: 999px;
+    background: #eaf6ed;
+    color: #1f8b4c;
+    margin-left: .35rem;
+  }
+  .rocket-chapter-row {
+    border-top: 1px solid #edf1f7;
+    padding: 14px 0;
+  }
+  .rocket-chapter-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #0d6efd;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 16px;
+  }
+  .rocket-row-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: #8fa1c3;
+  }
+  .rocket-chapter-body.d-none {
+    display: none;
+  }
+  .rocket-icon-btn {
+    border: 0;
+    background: transparent;
+    color: #8fa1c3;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rocket-icon-btn.is-collapsed i {
+    transform: rotate(180deg);
+  }
+  .rocket-icon-btn:hover {
+    color: #1c73e8;
+  }
+  .rocket-icon-btn.plus {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #c8efd6;
+    color: #1c73e8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .rocket-quick-menu {
+    position: absolute;
+    z-index: 1051;
+    min-width: 196px;
+    background: #fff;
+    border: 1px solid #e8edf5;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(19, 38, 73, 0.18);
+    padding: .4rem 0;
+  }
+  .rocket-quick-menu button {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    padding: .56rem .95rem;
+    color: #6f7f9d;
+    font-size: .94rem;
+  }
+  .rocket-quick-menu button:hover {
+    background: #f6f9ff;
+    color: #1c73e8;
+  }
+  .rocket-swal-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-align: left;
+    color: #1d2d4f;
+    border-bottom: 1px solid #edf2fb;
+    padding-bottom: .6rem;
+  }
+  .rocket-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    text-align: left;
+  }
+  .rocket-modal-section-title {
+    grid-column: 1 / -1;
+    margin: 4px 0 0;
+    padding: 6px 2px 8px;
+    font-size: .9rem;
+    font-weight: 700;
+    color: #1d2b47;
+    border-bottom: 1px dashed #dfe8f7;
+  }
+  .rocket-modal-hint {
+    grid-column: 1 / -1;
+    margin-top: -4px;
+    padding: 8px 10px;
+    border: 1px solid #dbe8ff;
+    border-radius: 10px;
+    background: #f5f9ff;
+    color: #5876a7;
+    font-size: .82rem;
+    line-height: 1.35;
+  }
+  .rocket-field-hint {
+    margin-top: 6px;
+    font-size: .78rem;
+    color: #7f92b3;
+  }
+  .rocket-char-counter {
+    margin-top: 6px;
+    text-align: right;
+    font-size: .75rem;
+    color: #8ea1c1;
+  }
+  .rocket-attachments-picker {
+    border: 1px solid #d6deee;
+    border-radius: 10px;
+    background: #fff;
+    padding: 10px;
+  }
+  .rocket-attachments-search {
+    margin: 0 0 8px !important;
+    min-height: 38px !important;
+  }
+  .rocket-attachments-select {
+    width: 100%;
+    min-height: 130px;
+    border: 1px solid #d6deee;
+    border-radius: 8px;
+    padding: 6px;
+    background: #fbfdff;
+  }
+  .rocket-attachments-select option {
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 2px;
+  }
+  .rocket-attachments-selected {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .rocket-attachments-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: .78rem;
+    background: #eef4ff;
+    color: #2f4f82;
+    border: 1px solid #d6e3ff;
+  }
+  .rocket-swal-popup .swal2-checkbox {
+    margin: .45rem 0 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #f8fbff;
+    border: 1px solid #e2e9f6;
+  }
+  .rocket-rich {
+    border: 1px solid #d6deee;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .rocket-rich-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border-bottom: 1px solid #ebf0f8;
+    background: #f8fbff;
+  }
+  .rocket-rich-btn {
+    border: 1px solid #d9e3f3;
+    background: #fff;
+    color: #3a5179;
+    border-radius: 8px;
+    min-width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85rem;
+    cursor: pointer;
+  }
+  .rocket-rich-btn:hover {
+    background: #eef4ff;
+    border-color: #c7d6f3;
+    color: #1d5fd3;
+  }
+  .rocket-rich-editor {
+    min-height: 140px;
+    padding: 10px 12px;
+    line-height: 1.45;
+    color: #1f2f4d;
+    outline: none;
+  }
+  .rocket-rich-editor:empty:before {
+    content: attr(data-placeholder);
+    color: #9aabc8;
+  }
+  .rocket-modal-grid .rocket-modal-field {
+    min-width: 0;
+  }
+  .rocket-modal-grid .rocket-modal-field:has(textarea),
+  .rocket-modal-grid .rocket-modal-field[data-field-key="description"],
+  .rocket-modal-grid .rocket-modal-field[data-field-key="content"],
+  .rocket-modal-grid .rocket-modal-field[data-field-key="summary"],
+  .rocket-modal-grid .rocket-modal-field[data-field-key="attachments"] {
+    grid-column: 1 / -1;
+  }
+  .rocket-group-shell {
+    margin-top: 24px;
+  }
+  .rocket-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .rocket-group-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1d2b47;
+    position: relative;
+    padding-bottom: 8px;
+    margin: 0;
+  }
+  .rocket-group-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 34px;
+    height: 3px;
+    border-radius: 99px;
+    background: #2a6fde;
+  }
+  .rocket-group-body {
+    border: 1px solid #e8edf5;
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px;
+  }
+  .rocket-add-btn {
+    border-radius: 8px;
+    font-weight: 600;
+  }
+  .rocket-inline-item,
+  .rocket-file-inline {
+    border-radius: 12px;
+  }
+  .rocket-inline-item-head,
+  .rocket-file-inline-head {
+    min-height: 56px;
+  }
+  @media (max-width: 768px) {
+    .rocket-modal-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script src="/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+<script>
+  (function () {
+    var hasSwal = typeof window.Swal !== 'undefined';
+    var webinarId = "<%= webinarId %>";
+    var builderSections = document.getElementById('builderSections');
+    var modalUploadInProgressCount = 0;
+    var sectionItemsByType = {};
+    var sectionGroups = [
+      { key: 'file', label: 'Files', addLabel: 'New File' },
+      { key: 'interactive_file', label: 'SCORM / Interactive Files', addLabel: 'New SCORM' },
+      { key: 'text_lesson', label: 'Text Lessons', addLabel: 'New Text Lesson' },
+      { key: 'session', label: 'Live Sessions', addLabel: 'New Session' },
+      { key: 'assignment', label: 'Assignments', addLabel: 'New Assignment' },
+      { key: 'prerequisite', label: 'Prerequisites', addLabel: 'New Prerequisite' },
+      { key: 'related_course', label: 'Related Courses', addLabel: 'Add Related Courses' },
+      { key: 'faq', label: 'FAQ', addLabel: 'New FAQ' },
+      { key: 'learning_material', label: 'Learning Materials', addLabel: 'New Learning Material' },
+      { key: 'company_logo', label: 'Company Logos', addLabel: 'New Company Logo' },
+      { key: 'requirement', label: 'Requirements', addLabel: 'New Requirement' },
+      { key: 'quiz', label: 'Quiz & Certification', addLabel: 'New Quiz' }
+    ];
+    var typeSchemas = {
+      chapter: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'check_all_contents_pass', label: 'Require Completion of All Parts', type: 'checkbox' }
+        ]
+      },
+      file: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'chapter_id', label: 'Section', type: 'text', placeholder: 'No Section / chapter id' },
+          { key: 'storage', label: 'Source', type: 'select', options: ['upload', 'youtube', 'vimeo', 'external_link', 'google_drive', 'iframe', 's3', 'secure_host'], defaultValue: 'upload' },
+          { key: 'accessibility', label: 'Accessibility', type: 'select', options: ['free', 'paid'], defaultValue: 'free' },
+          { key: 'file_path', label: 'File Path', type: 'text', placeholder: 'Select a File' },
+          { key: 'description', label: 'Description', type: 'textarea' },
+          { key: 'online_viewer', label: 'Online Viewer', type: 'checkbox' },
+          { key: 'downloadable', label: 'Downloadable', type: 'checkbox', defaultValue: true },
+          { key: 'sequence_content', label: 'Drip Content', type: 'checkbox' },
+          { key: 'check_previous_parts', label: 'Require Completion of Previous Sections', type: 'checkbox', defaultValue: true },
+          { key: 'access_after_day', label: 'Access Delay (Days)', type: 'number', placeholder: 'e.g. 10' }
+        ]
+      },
+      interactive_file: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'chapter_id', label: 'Section', type: 'text' },
+          { key: 'interactive_type', label: 'SCORM Type', type: 'select', options: ['adobe_captivate', 'i_spring', 'custom'], defaultValue: 'adobe_captivate' },
+          { key: 'interactive_file_name', label: 'SCORM Index File Name', type: 'text', placeholder: 'scorm.html' },
+          { key: 'accessibility', label: 'Accessibility', type: 'select', options: ['free', 'paid'], defaultValue: 'free' },
+          { key: 'file_path', label: 'ZIP File Path', type: 'text' },
+          { key: 'description', label: 'Description', type: 'textarea' },
+          { key: 'sequence_content', label: 'Drip Content', type: 'checkbox' },
+          { key: 'check_previous_parts', label: 'Require Completion of Previous Sections', type: 'checkbox', defaultValue: true },
+          { key: 'access_after_day', label: 'Access Delay (Days)', type: 'number' }
+        ]
+      },
+      text_lesson: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'chapter_id', label: 'Section', type: 'text' },
+          { key: 'study_time', label: 'Study Duration (Min)', type: 'number' },
+          { key: 'image', label: 'Image Path', type: 'text' },
+          { key: 'accessibility', label: 'Accessibility', type: 'select', options: ['free', 'paid'], defaultValue: 'free' },
+          { key: 'attachments', label: 'Attachments (comma-separated IDs)', type: 'text' },
+          { key: 'summary', label: 'Summary', type: 'textarea' },
+          { key: 'content', label: 'Content', type: 'textarea' },
+          { key: 'sequence_content', label: 'Drip Content', type: 'checkbox' },
+          { key: 'check_previous_parts', label: 'Require Completion of Previous Sections', type: 'checkbox', defaultValue: true },
+          { key: 'access_after_day', label: 'Access Delay (Days)', type: 'number' }
+        ]
+      },
+      session: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'session_api', label: 'Live Class Provider', type: 'select', options: ['local', 'big_blue_button', 'zoom', 'google_meet', 'agora'], defaultValue: 'local' },
+          { key: 'chapter_id', label: 'Section', type: 'text' },
+          { key: 'api_secret', label: 'Password', type: 'text' },
+          { key: 'moderator_secret', label: 'Moderator Password', type: 'text' },
+          { key: 'date', label: 'Date', type: 'text', placeholder: 'YYYY-MM-DD HH:mm' },
+          { key: 'duration', label: 'Duration (Minutes)', type: 'number' },
+          { key: 'extra_time_to_join', label: 'Join Delay (Minutes)', type: 'number' },
+          { key: 'link', label: 'Link', type: 'text' },
+          { key: 'description', label: 'Description', type: 'textarea' },
+          { key: 'agora_chat', label: 'Chat (Agora)', type: 'checkbox' },
+          { key: 'sequence_content', label: 'Drip Content', type: 'checkbox' },
+          { key: 'check_previous_parts', label: 'Require Completion of Previous Sections', type: 'checkbox', defaultValue: true },
+          { key: 'access_after_day', label: 'Access Delay (Days)', type: 'number' }
+        ]
+      },
+      assignment: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'chapter_id', label: 'Section', type: 'text' },
+          { key: 'description', label: 'Description', type: 'textarea' },
+          { key: 'grade', label: 'Grade', type: 'number' },
+          { key: 'pass_grade', label: 'Passing Grade', type: 'number' },
+          { key: 'deadline', label: 'Deadline', type: 'text', placeholder: 'YYYY-MM-DD' },
+          { key: 'attempts', label: 'Attempts', type: 'number' },
+          { key: 'attachments', label: 'Attachments JSON', type: 'textarea', placeholder: '[{"title":"...","attach":"..."}]' },
+          { key: 'sequence_content', label: 'Drip Content', type: 'checkbox' },
+          { key: 'check_previous_parts', label: 'Require Completion of Previous Sections', type: 'checkbox', defaultValue: true },
+          { key: 'access_after_day', label: 'Access Delay (Days)', type: 'number' }
+        ]
+      },
+      prerequisite: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'prerequisite_id', label: 'Select Prerequisite Course ID', type: 'select', options: [] },
+          { key: 'required', label: 'Required', type: 'checkbox' }
+        ]
+      },
+      related_course: {
+        statusDefault: 'ACTIVE',
+        fields: [{ key: 'related_course_id', label: 'Related Course ID', type: 'select', options: [] }]
+      },
+      faq: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'answer', label: 'Answer', type: 'textarea' }
+        ]
+      },
+      learning_material: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'value', label: 'Material Item', type: 'text' }
+        ]
+      },
+      company_logo: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'logo_path', label: 'Logo Path', type: 'text' }
+        ]
+      },
+      requirement: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'value', label: 'Requirement', type: 'text' }
+        ]
+      },
+      quiz: {
+        statusDefault: 'DRAFT',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'time', label: 'Time (Minutes)', type: 'number' },
+          { key: 'attempt', label: 'Number of Attempts', type: 'number' },
+          { key: 'pass_mark', label: 'Pass Mark', type: 'number', defaultValue: 70 },
+          { key: 'expiry_days', label: 'Expiry Days', type: 'number' },
+          { key: 'description', label: 'Description', type: 'textarea' },
+          { key: 'display_questions_randomly', label: 'Display Questions Randomly', type: 'checkbox' },
+          { key: 'certificate', label: 'Certificate Included', type: 'checkbox' }
+        ]
+      },
+      pricing_plan: {
+        statusDefault: 'ACTIVE',
+        fields: [
+          { key: 'locale', label: 'Language', type: 'select', options: ['FR', 'EN', 'AR'], defaultValue: 'FR' },
+          { key: 'date', label: 'Date Range', type: 'text', placeholder: 'YYYY-MM-DD to YYYY-MM-DD' },
+          { key: 'discount', label: 'Discount (%)', type: 'number' },
+          { key: 'capacity', label: 'Capacity', type: 'number' }
+        ]
+      }
+    };
+
+    function safe(v) {
+      return String(v == null ? '' : v);
+    }
+
+    function toNullableNumber(value) {
+      var raw = safe(value).trim();
+      if (!raw) return null;
+      var parsed = Number(raw);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function escapeHtml(value) {
+      return safe(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function fieldHtml(type, field) {
+      var id = 'sw_' + type + '_' + field.key;
+      var wrapStart = '<div class="rocket-modal-field mb-2" data-field-key="' + escapeHtml(field.key) + '">';
+      var wrapEnd = '</div>';
+      var inferredType = field.type || 'text';
+      if (inferredType === 'text' && (field.key === 'date' || field.key === 'deadline')) {
+        inferredType = field.key === 'deadline' ? 'date' : 'datetime-local';
+      }
+      if (field.type === 'textarea') {
+        return wrapStart + '<label class="swal2-label">' + field.label + '</label><textarea id="' + id + '" class="swal2-textarea" placeholder="' + escapeHtml(field.placeholder || '') + '">' + escapeHtml(field.defaultValue || '') + '</textarea>' + wrapEnd;
+      }
+      if (field.type === 'select') {
+        var optionLabels = {
+          FR: 'Francais',
+          EN: 'English',
+          AR: 'Arabic',
+          upload: 'Upload',
+          youtube: 'YouTube',
+          vimeo: 'Vimeo',
+          external_link: 'External Link',
+          google_drive: 'Google Drive',
+          iframe: 'iFrame',
+          s3: 'Amazon S3',
+          secure_host: 'Secure Host (Bunny)',
+          local: 'Local',
+          big_blue_button: 'BigBlueButton',
+          google_meet: 'Google Meet',
+          agora: 'Agora',
+          adobe_captivate: 'Adobe Captivate',
+          i_spring: 'iSpring',
+          custom: 'Custom',
+          free: 'Free',
+          paid: 'Paid'
+        };
+        var options = (field.options || []).map(function (opt) {
+          var selected = String(opt) === String(field.defaultValue || '') ? ' selected' : '';
+          var label = optionLabels[opt] || String(opt).replace(/_/g, ' ');
+          return '<option value="' + escapeHtml(opt) + '"' + selected + '>' + escapeHtml(label) + '</option>';
+        }).join('');
+        return wrapStart + '<label class="swal2-label">' + field.label + '</label><select id="' + id + '" class="swal2-select">' + options + '</select>' + wrapEnd;
+      }
+      if (field.type === 'checkbox') {
+        var checked = field.defaultValue ? ' checked' : '';
+        return wrapStart + '<div class="swal2-checkbox" style="display:flex;justify-content:flex-start;"><input type="checkbox" id="' + id + '"' + checked + '><label for="' + id + '">' + escapeHtml(field.label) + '</label></div>' + wrapEnd;
+      }
+      return wrapStart + '<label class="swal2-label">' + field.label + '</label><input id="' + id + '" type="' + escapeHtml(inferredType) + '" class="swal2-input" placeholder="' + escapeHtml(field.placeholder || '') + '" value="' + escapeHtml(field.defaultValue || '') + '">' + wrapEnd;
+    }
+
+    function renderChapterOptions(selectedValue) {
+      var selected = safe(selectedValue);
+      var chapters = Array.isArray(sectionItemsByType.chapter) ? sectionItemsByType.chapter : [];
+      var options = '<option value=""' + (selected === '' ? ' selected' : '') + '>Contenu general / Intro</option>';
+      options += chapters.map(function (chapter) {
+        var chapterId = safe(chapter.id);
+        var chapterTitle = safe(chapter.title || 'Section');
+        return '<option value="' + escapeHtml(chapterId) + '"' + (chapterId === selected ? ' selected' : '') + '>' + escapeHtml(chapterTitle) + '</option>';
+      }).join('');
+      return options;
+    }
+
+    function enhanceSectionSelect(type, currentChapterId, lockToChapter) {
+      var typesWithSection = ['interactive_file', 'file', 'text_lesson', 'session', 'assignment'];
+      if (typesWithSection.indexOf(type) < 0) return;
+      var sectionWrap = fieldWrapper(type, 'chapter_id');
+      if (!sectionWrap) return;
+      var selectId = 'sw_' + type + '_chapter_id';
+      var selectEl = document.getElementById(selectId);
+      var selected = safe(currentChapterId || (selectEl ? selectEl.value : ''));
+      if (!selectEl || selectEl.tagName.toLowerCase() !== 'select') {
+        sectionWrap.innerHTML = '<label class="swal2-label">Section</label><select id="' + selectId + '" class="swal2-select">' + renderChapterOptions(selected) + '</select>';
+        selectEl = document.getElementById(selectId);
+      } else {
+        selectEl.innerHTML = renderChapterOptions(selected);
+      }
+      if (selectEl) {
+        selectEl.value = selected;
+        if (lockToChapter) {
+          selectEl.setAttribute('disabled', 'disabled');
+          var hintId = 'sw_' + type + '_chapter_hint';
+          if (!document.getElementById(hintId)) {
+            var hint = document.createElement('div');
+            hint.id = hintId;
+            hint.className = 'swal2-label';
+            hint.style.fontSize = '.78rem';
+            hint.style.marginTop = '.35rem';
+            hint.style.color = '#7d8fb0';
+            hint.textContent = 'Section fixee automatiquement selon le contexte d ouverture.';
+            sectionWrap.appendChild(hint);
+          }
+        } else {
+          selectEl.removeAttribute('disabled');
+        }
+      }
+    }
+
+    var courseOptionsCache = null;
+    var courseFileOptionsCache = null;
+    function loadCourseOptions() {
+      if (Array.isArray(courseOptionsCache)) return Promise.resolve(courseOptionsCache);
+      return fetch('/api/admin/education/courses?page=1&pageSize=300', { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          var items = data && Array.isArray(data.items) ? data.items : [];
+          courseOptionsCache = items.map(function (it) {
+            var id = safe(it.id);
+            var title = safe(it.title || 'Untitled');
+            return { id: id, title: title };
+          }).filter(function (x) { return !!x.id; });
+          return courseOptionsCache;
+        })
+        .catch(function () {
+          courseOptionsCache = [];
+          return courseOptionsCache;
+        });
+    }
+
+    function enhanceCourseSearchSelect(type, key, currentValue) {
+      var fieldId = 'sw_' + type + '_' + key;
+      var selectEl = document.getElementById(fieldId);
+      if (!selectEl) return Promise.resolve();
+      var selected = safe(currentValue || selectEl.value || '');
+      return loadCourseOptions().then(function (options) {
+        var opts = '<option value="">Select a course</option>' + options.map(function (opt) {
+          return '<option value="' + escapeHtml(opt.id) + '" title="' + escapeHtml(opt.id) + '"' + (safe(opt.id) === selected ? ' selected' : '') + '>' + escapeHtml(opt.title) + '</option>';
+        }).join('');
+        selectEl.innerHTML = opts;
+        selectEl.value = selected;
+        var wrapper = selectEl.closest('.rocket-modal-field');
+        if (!wrapper) return;
+        var filterId = 'swf_' + type + '_' + key;
+        var filter = document.getElementById(filterId);
+        if (!filter) {
+          filter = document.createElement('input');
+          filter.id = filterId;
+          filter.type = 'text';
+          filter.className = 'swal2-input';
+          filter.placeholder = 'Search course by ID or title...';
+          filter.style.marginTop = '0';
+          wrapper.insertBefore(filter, selectEl);
+        }
+        var metaId = 'swmeta_' + type + '_' + key;
+        var meta = document.getElementById(metaId);
+        if (!meta) {
+          meta = document.createElement('div');
+          meta.id = metaId;
+          meta.className = 'swal2-label';
+          meta.style.fontSize = '.78rem';
+          meta.style.marginTop = '.35rem';
+          meta.style.color = '#7d8fb0';
+          wrapper.appendChild(meta);
+        }
+        function syncMeta() {
+          var selectedId = safe(selectEl.value || '');
+          meta.textContent = selectedId ? ('Course ID: ' + selectedId) : 'Course ID: none';
+        }
+        syncMeta();
+        selectEl.addEventListener('change', syncMeta);
+        filter.addEventListener('input', function () {
+          var q = safe(filter.value).toLowerCase();
+          Array.prototype.forEach.call(selectEl.options, function (opt) {
+            var keep = !q || safe(opt.textContent).toLowerCase().indexOf(q) !== -1;
+            opt.hidden = !keep;
+          });
+        });
+      });
+    }
+
+    function loadCourseFileOptions() {
+      if (Array.isArray(courseFileOptionsCache)) return Promise.resolve(courseFileOptionsCache);
+      return fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections?type=file', { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          var items = data && Array.isArray(data.items) ? data.items : [];
+          courseFileOptionsCache = items.map(function (it) {
+            var id = safe(it.id);
+            var title = safe(it.title || 'Untitled file');
+            return { id: id, title: title };
+          }).filter(function (x) { return !!x.id; });
+          return courseFileOptionsCache;
+        })
+        .catch(function () {
+          courseFileOptionsCache = [];
+          return courseFileOptionsCache;
+        });
+    }
+
+    function normalizeAttachmentIds(raw) {
+      var txt = safe(raw).trim();
+      if (!txt) return [];
+      try {
+        var parsed = JSON.parse(txt);
+        if (Array.isArray(parsed)) return parsed.map(function (v) { return safe(v).trim(); }).filter(Boolean);
+      } catch (_) {}
+      return txt.split(',').map(function (v) { return safe(v).trim(); }).filter(Boolean);
+    }
+
+    function enhanceTextLessonAttachmentsPicker() {
+      var input = document.getElementById('sw_text_lesson_attachments');
+      if (!input || input.dataset.attachmentsEnhanced === '1') return;
+      input.dataset.attachmentsEnhanced = '1';
+      input.style.display = 'none';
+
+      var wrap = input.closest('.rocket-modal-field');
+      if (!wrap) return;
+
+      var root = document.createElement('div');
+      root.className = 'rocket-attachments-picker';
+      root.innerHTML = '' +
+        '<input type="text" class="swal2-input rocket-attachments-search" placeholder="Rechercher un fichier...">' +
+        '<select multiple class="rocket-attachments-select"></select>' +
+        '<div class="rocket-attachments-selected"></div>' +
+        '<div class="rocket-field-hint">Selection multiple possible. Les IDs sont geres automatiquement.</div>';
+      wrap.appendChild(root);
+
+      var searchEl = root.querySelector('.rocket-attachments-search');
+      var selectEl = root.querySelector('.rocket-attachments-select');
+      var selectedEl = root.querySelector('.rocket-attachments-selected');
+      var initialIds = normalizeAttachmentIds(input.value);
+
+      function renderSelectedChips() {
+        var selected = Array.prototype.slice.call(selectEl.selectedOptions).map(function (opt) {
+          return { id: safe(opt.value), title: safe(opt.textContent) };
+        });
+        selectedEl.innerHTML = selected.map(function (s) {
+          return '<span class="rocket-attachments-chip" title="' + escapeHtml(s.id) + '">' + escapeHtml(s.title) + '</span>';
+        }).join('');
+        input.value = JSON.stringify(selected.map(function (s) { return s.id; }));
+      }
+
+      loadCourseFileOptions().then(function (options) {
+        selectEl.innerHTML = options.map(function (opt) {
+          var selected = initialIds.indexOf(opt.id) >= 0 ? ' selected' : '';
+          return '<option value="' + escapeHtml(opt.id) + '"' + selected + ' title="' + escapeHtml(opt.id) + '">' + escapeHtml(opt.title) + '</option>';
+        }).join('');
+        renderSelectedChips();
+      });
+
+      selectEl.addEventListener('change', renderSelectedChips);
+      if (searchEl) {
+        searchEl.addEventListener('input', function () {
+          var q = safe(searchEl.value).toLowerCase();
+          Array.prototype.forEach.call(selectEl.options, function (opt) {
+            var keep = !q || safe(opt.textContent).toLowerCase().indexOf(q) >= 0 || safe(opt.value).toLowerCase().indexOf(q) >= 0;
+            opt.hidden = !keep;
+          });
+        });
+      }
+    }
+
+    function validateRequiredModalFields(type, title, payload) {
+      var trimmedTitle = safe(title).trim();
+      if (!trimmedTitle) {
+        return 'Le titre est obligatoire.';
+      }
+      if (type === 'interactive_file') {
+        var locale = safe(payload.locale).trim();
+        var scormType = safe(payload.interactive_type).trim();
+        var accessibility = safe(payload.accessibility).trim();
+        var zipPath = safe(payload.file_path).trim();
+        if (!locale) return 'La langue est obligatoire.';
+        if (!scormType) return 'Le type SCORM est obligatoire.';
+        if (!accessibility) return 'Le niveau d accessibilite est obligatoire.';
+        if (!zipPath) return 'Le champ ZIP File Path est obligatoire.';
+      }
+      return '';
+    }
+
+    function fieldWrapper(type, key) {
+      return document.querySelector('[data-field-key="' + key + '"]');
+    }
+
+    function setFieldVisible(type, key, visible) {
+      var wrap = fieldWrapper(type, key);
+      if (!wrap) return;
+      wrap.style.display = visible ? '' : 'none';
+    }
+
+    function setFieldLabel(type, key, label) {
+      var wrap = fieldWrapper(type, key);
+      if (!wrap) return;
+      var lbl = wrap.querySelector('.swal2-label');
+      if (lbl) lbl.textContent = label;
+    }
+
+    function setFieldPlaceholder(type, key, placeholder) {
+      var el = document.getElementById('sw_' + type + '_' + key);
+      if (el && 'placeholder' in el) el.placeholder = placeholder;
+    }
+
+    function applyDynamicRules(type) {
+      if (type === 'file') {
+        var storageEl = document.getElementById('sw_file_storage');
+        var storage = storageEl ? storageEl.value : 'upload';
+        var isUpload = storage === 'upload' || storage === 's3' || storage === 'secure_host';
+        var isEmbed = storage === 'iframe' || storage === 'google_drive';
+        setFieldVisible(type, 'online_viewer', storage !== 'youtube' && storage !== 'vimeo');
+        setFieldVisible(type, 'downloadable', true);
+        setFieldVisible(type, 'file_path', true);
+        setFieldLabel(type, 'file_path', isUpload ? 'Upload files from your device' : (storage === 'youtube' ? 'Paste YouTube link' : storage === 'vimeo' ? 'Paste Vimeo link' : isEmbed ? 'Embed link' : 'Paste external link'));
+        setFieldPlaceholder(type, 'file_path', isUpload
+          ? 'Select a File or object key'
+          : storage === 'youtube'
+            ? 'Paste YouTube link'
+            : storage === 'vimeo'
+              ? 'Paste Vimeo link'
+              : storage === 'iframe'
+                ? 'Paste full iframe embed code'
+                : storage === 'google_drive'
+                  ? 'Embed link starting with iframe tag'
+                  : 'Paste external link');
+      }
+
+      if (type === 'session') {
+        var providerEl = document.getElementById('sw_session_session_api');
+        var provider = providerEl ? providerEl.value : 'local';
+        setFieldVisible(type, 'link', provider === 'local' || provider === 'zoom' || provider === 'google_meet');
+        setFieldVisible(type, 'api_secret', provider !== 'agora');
+        setFieldVisible(type, 'moderator_secret', provider === 'big_blue_button');
+        setFieldVisible(type, 'agora_chat', provider === 'agora');
+        setFieldLabel(type, 'api_secret', (provider === 'zoom' || provider === 'google_meet') ? 'Meeting Password' : 'Password');
+      }
+
+      if (type === 'interactive_file') {
+        var scormEl = document.getElementById('sw_interactive_file_interactive_type');
+        var scorm = scormEl ? scormEl.value : 'adobe_captivate';
+        setFieldVisible(type, 'interactive_file_name', scorm === 'custom');
+      }
+
+      if (type === 'text_lesson' || type === 'assignment' || type === 'file' || type === 'interactive_file' || type === 'session') {
+        var dripEl = document.getElementById('sw_' + type + '_sequence_content');
+        var drip = dripEl ? !!dripEl.checked : false;
+        setFieldVisible(type, 'check_previous_parts', drip);
+        setFieldVisible(type, 'access_after_day', drip);
+      }
+    }
+
+    function bindDynamicRules(type) {
+      var watchMap = {
+        file: ['storage', 'sequence_content'],
+        session: ['session_api', 'sequence_content'],
+        interactive_file: ['interactive_type', 'sequence_content'],
+        text_lesson: ['sequence_content'],
+        assignment: ['sequence_content']
+      };
+      (watchMap[type] || []).forEach(function (key) {
+        var el = document.getElementById('sw_' + type + '_' + key);
+        if (!el) return;
+        el.addEventListener('change', function () { applyDynamicRules(type); });
+      });
+      applyDynamicRules(type);
+    }
+
+    function enhanceModalSelectFilter(type) {
+      var schema = typeSchemas[type] || { fields: [] };
+      (schema.fields || []).forEach(function (field) {
+        if (field.type !== 'select') return;
+        var selectEl = document.getElementById('sw_' + type + '_' + field.key);
+        if (!selectEl) return;
+        if (selectEl.options.length < 9) return;
+        var wrapper = selectEl.closest('.rocket-modal-field');
+        if (!wrapper) return;
+        var filterId = 'swf_' + type + '_' + field.key;
+        if (document.getElementById(filterId)) return;
+        var input = document.createElement('input');
+        input.id = filterId;
+        input.type = 'text';
+        input.className = 'swal2-input';
+        input.placeholder = 'Search...';
+        input.style.marginTop = '0';
+        wrapper.insertBefore(input, selectEl);
+        input.addEventListener('input', function () {
+          var q = String(input.value || '').toLowerCase();
+          Array.prototype.forEach.call(selectEl.options, function (opt) {
+            var keep = !q || String(opt.textContent || '').toLowerCase().indexOf(q) !== -1;
+            opt.hidden = !keep;
+          });
+        });
+      });
+    }
+
+    function enhanceModalRichText(type) {
+      var schema = typeSchemas[type] || { fields: [] };
+      var richKeys = { content: true, description: true, summary: true, answer: true };
+      (schema.fields || []).forEach(function (field) {
+        if (field.type !== 'textarea') return;
+        if (!richKeys[field.key]) return;
+        var textarea = document.getElementById('sw_' + type + '_' + field.key);
+        if (!textarea || textarea.dataset.richified === '1') return;
+        textarea.dataset.richified = '1';
+        textarea.style.display = 'none';
+        var box = document.createElement('div');
+        box.className = 'rocket-rich';
+        var toolbar = document.createElement('div');
+        toolbar.className = 'rocket-rich-toolbar';
+        toolbar.innerHTML =
+          '<button type="button" class="rocket-rich-btn" data-cmd="bold"><b>B</b></button>' +
+          '<button type="button" class="rocket-rich-btn" data-cmd="italic"><i>I</i></button>' +
+          '<button type="button" class="rocket-rich-btn" data-cmd="insertUnorderedList"><i class="fa-solid fa-list-ul"></i></button>' +
+          '<button type="button" class="rocket-rich-btn" data-cmd="insertOrderedList"><i class="fa-solid fa-list-ol"></i></button>' +
+          '<button type="button" class="rocket-rich-btn" data-cmd="createLink"><i class="fa-solid fa-link"></i></button>';
+        var editor = document.createElement('div');
+        editor.className = 'rocket-rich-editor';
+        editor.contentEditable = 'true';
+        editor.dataset.placeholder = field.placeholder || 'Write content...';
+        editor.innerHTML = textarea.value || '';
+        box.appendChild(toolbar);
+        box.appendChild(editor);
+        textarea.parentNode.insertBefore(box, textarea.nextSibling);
+        toolbar.addEventListener('click', function (ev) {
+          var btn = ev.target.closest('.rocket-rich-btn');
+          if (!btn) return;
+          var cmd = btn.getAttribute('data-cmd');
+          if (!cmd) return;
+          editor.focus();
+          if (cmd === 'createLink') {
+            var url = window.prompt('Enter URL');
+            if (!url) return;
+            document.execCommand(cmd, false, url);
+          } else {
+            document.execCommand(cmd, false, null);
+          }
+          textarea.value = editor.innerHTML;
+        });
+        editor.addEventListener('input', function () {
+          textarea.value = editor.innerHTML;
+        });
+      });
+    }
+
+    function addFieldHint(type, key, text) {
+      var wrap = fieldWrapper(type, key);
+      if (!wrap || !text) return;
+      var hintId = 'sw_' + type + '_' + key + '_hint';
+      if (document.getElementById(hintId)) return;
+      var hint = document.createElement('div');
+      hint.id = hintId;
+      hint.className = 'rocket-field-hint';
+      hint.textContent = text;
+      wrap.appendChild(hint);
+    }
+
+    function addCharCounter(type, key, max) {
+      var el = document.getElementById('sw_' + type + '_' + key);
+      if (!el) return;
+      var wrap = fieldWrapper(type, key);
+      if (!wrap) return;
+      var id = 'sw_' + type + '_' + key + '_counter';
+      var counter = document.getElementById(id);
+      if (!counter) {
+        counter = document.createElement('div');
+        counter.id = id;
+        counter.className = 'rocket-char-counter';
+        wrap.appendChild(counter);
+      }
+      var refresh = function () {
+        var len = safe(el.value || '').length;
+        counter.textContent = max ? (len + ' / ' + max + ' caracteres') : (len + ' caracteres');
+      };
+      refresh();
+      el.addEventListener('input', refresh);
+    }
+
+    function enhanceTextLessonModalUX() {
+      var grid = document.querySelector('.rocket-modal-grid');
+      if (!grid) return;
+      if (grid.getAttribute('data-lesson-ux') === '1') return;
+      grid.setAttribute('data-lesson-ux', '1');
+
+      var statusWrap = document.getElementById('sw-status');
+      if (statusWrap) {
+        var statusField = statusWrap.closest('.rocket-modal-field');
+        if (statusField) statusField.classList.add('rocket-status-field');
+      }
+
+      var langWrap = fieldWrapper('text_lesson', 'locale');
+      if (langWrap) {
+        var basicTitle = document.createElement('div');
+        basicTitle.className = 'rocket-modal-section-title';
+        basicTitle.textContent = 'Essentiel';
+        grid.insertBefore(basicTitle, langWrap);
+      }
+
+      var summaryWrap = fieldWrapper('text_lesson', 'summary');
+      if (summaryWrap) {
+        var contentTitle = document.createElement('div');
+        contentTitle.className = 'rocket-modal-section-title';
+        contentTitle.textContent = 'Contenu pedagogique';
+        grid.insertBefore(contentTitle, summaryWrap);
+      }
+
+      var dripWrap = fieldWrapper('text_lesson', 'sequence_content');
+      if (dripWrap) {
+        var optionsTitle = document.createElement('div');
+        optionsTitle.className = 'rocket-modal-section-title';
+        optionsTitle.textContent = 'Options de progression';
+        grid.insertBefore(optionsTitle, dripWrap);
+      }
+
+      var chapterWrap = fieldWrapper('text_lesson', 'chapter_id');
+      if (chapterWrap && !document.getElementById('sw_text_lesson_chapter_context_hint')) {
+        var h = document.createElement('div');
+        h.id = 'sw_text_lesson_chapter_context_hint';
+        h.className = 'rocket-modal-hint';
+        h.textContent = 'Astuce: la section peut etre preselectionnee automatiquement selon le contexte d ouverture.';
+        chapterWrap.insertAdjacentElement('afterend', h);
+      }
+
+      addFieldHint('text_lesson', 'study_time', 'Duree estimee de lecture en minutes.');
+      addFieldHint('text_lesson', 'attachments', 'Vous pouvez saisir un ou plusieurs IDs separes par des virgules.');
+      addFieldHint('text_lesson', 'content', 'Le contenu principal sera affiche dans le lecteur de cours.');
+      addCharCounter('text_lesson', 'summary', 500);
+      addCharCounter('text_lesson', 'content', 5000);
+    }
+
+    function attachInlineRichEditor(textarea) {
+      if (!textarea || textarea.dataset.richifiedInline === '1') return;
+      textarea.dataset.richifiedInline = '1';
+      textarea.style.display = 'none';
+
+      var box = document.createElement('div');
+      box.className = 'rocket-rich mt-1';
+      var toolbar = document.createElement('div');
+      toolbar.className = 'rocket-rich-toolbar';
+      toolbar.innerHTML =
+        '<button type="button" class="rocket-rich-btn" data-cmd="bold"><b>B</b></button>' +
+        '<button type="button" class="rocket-rich-btn" data-cmd="italic"><i>I</i></button>' +
+        '<button type="button" class="rocket-rich-btn" data-cmd="insertUnorderedList"><i class="fa-solid fa-list-ul"></i></button>' +
+        '<button type="button" class="rocket-rich-btn" data-cmd="insertOrderedList"><i class="fa-solid fa-list-ol"></i></button>' +
+        '<button type="button" class="rocket-rich-btn" data-cmd="createLink"><i class="fa-solid fa-link"></i></button>';
+      var editor = document.createElement('div');
+      editor.className = 'rocket-rich-editor';
+      editor.contentEditable = 'true';
+      editor.dataset.placeholder = textarea.getAttribute('placeholder') || 'Write content...';
+      editor.innerHTML = textarea.value || '';
+      box.appendChild(toolbar);
+      box.appendChild(editor);
+      textarea.parentNode.insertBefore(box, textarea.nextSibling);
+
+      toolbar.addEventListener('click', function (ev) {
+        var btn = ev.target.closest('.rocket-rich-btn');
+        if (!btn) return;
+        var cmd = btn.getAttribute('data-cmd');
+        if (!cmd) return;
+        editor.focus();
+        if (cmd === 'createLink') {
+          var url = window.prompt('Enter URL');
+          if (!url) return;
+          document.execCommand(cmd, false, url);
+        } else {
+          document.execCommand(cmd, false, null);
+        }
+        textarea.value = editor.innerHTML;
+      });
+
+      editor.addEventListener('input', function () {
+        textarea.value = editor.innerHTML;
+      });
+    }
+
+    function enhanceInlineRichEditors() {
+      var selectors = [
+        '.js-file-inline-description',
+        '.js-if-inline-description',
+        '.js-tl-inline-summary',
+        '.js-tl-inline-content',
+        '.js-ss-inline-description',
+        '.js-as-inline-description',
+        '.js-qz-inline-description'
+      ];
+      selectors.forEach(function (selector) {
+        document.querySelectorAll(selector).forEach(function (textarea) {
+          attachInlineRichEditor(textarea);
+        });
+      });
+    }
+
+    function buildCreateModal(type, label, chapterContextId) {
+      if (!hasSwal) {
+        window.alert('Le composant modal SweetAlert est indisponible. Rechargez la page.');
+        return Promise.resolve({ isConfirmed: false });
+      }
+      var schema = typeSchemas[type] || { statusDefault: 'ACTIVE', fields: [] };
+      var statusOptions = ['ACTIVE', 'INACTIVE', 'DRAFT', 'PUBLISHED', 'ARCHIVED'];
+      var statusDefault = schema.statusDefault || 'ACTIVE';
+      var html = '<div class="rocket-modal-grid">' +
+        '<div class="rocket-modal-field mb-2"><label class="swal2-label">Title</label><input id="sw-title" class="swal2-input" placeholder="Title"></div>' +
+        '<div class="rocket-modal-field mb-2"><label class="swal2-label">Status</label><select id="sw-status" class="swal2-select">' +
+          statusOptions.map(function (status) {
+            return '<option value="' + status + '"' + (status === statusDefault ? ' selected' : '') + '>' + status + '</option>';
+          }).join('') +
+        '</select></div>';
+      html += (schema.fields || []).map(function (field) { return fieldHtml(type, field); }).join('');
+      html += '</div>';
+      return Swal.fire({
+        title: 'Add ' + label,
+        html: html,
+        width: 760,
+        customClass: {
+          popup: 'rocket-swal-popup',
+          title: 'rocket-swal-title',
+          confirmButton: 'btn btn-primary',
+          cancelButton: 'btn btn-danger ms-2'
+        },
+        buttonsStyling: false,
+        allowEnterKey: false,
+        allowEscapeKey: function () { return modalUploadInProgressCount === 0; },
+        allowOutsideClick: function () { return modalUploadInProgressCount === 0; },
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Save',
+        cancelButtonText: 'Close',
+        didOpen: function () {
+          enhanceSectionSelect(type, safe(chapterContextId || ''), safe(chapterContextId || '') !== '');
+          if (type === 'text_lesson') enhanceTextLessonModalUX();
+          if (type === 'text_lesson') enhanceTextLessonAttachmentsPicker();
+          if (type === 'prerequisite') enhanceCourseSearchSelect(type, 'prerequisite_id', '');
+          if (type === 'related_course') enhanceCourseSearchSelect(type, 'related_course_id', '');
+          bindDynamicRules(type);
+          bindModalFileControls(type);
+          enhanceModalSelectFilter(type);
+          enhanceModalRichText(type);
+        },
+        preConfirm: function () {
+          if (!guardModalConfirmWhileUploading()) return false;
+          var payload = {};
+          (schema.fields || []).forEach(function (field) {
+            var el = document.getElementById('sw_' + type + '_' + field.key);
+            if (!el) return;
+            if (field.type === 'checkbox') {
+              payload[field.key] = !!el.checked;
+            } else if (field.type === 'number') {
+              payload[field.key] = el.value === '' ? null : Number(el.value);
+            } else if (field.key === 'attachments') {
+              var raw = String(el.value || '').trim();
+              if (!raw) payload[field.key] = [];
+              else {
+                try { payload[field.key] = JSON.parse(raw); } catch (_) { payload[field.key] = raw; }
+              }
+            } else {
+              payload[field.key] = el.value;
+            }
+          });
+          if (safe(chapterContextId || '') !== '') {
+            var hasChapterField = (schema.fields || []).some(function (field) {
+              return field && field.key === 'chapter_id';
+            });
+            if (hasChapterField) {
+              payload.chapter_id = safe(chapterContextId || '');
+            }
+          }
+          var modalTitle = document.getElementById('sw-title').value;
+          var requiredMessage = validateRequiredModalFields(type, modalTitle, payload);
+          if (requiredMessage) {
+            Swal.showValidationMessage(requiredMessage);
+            return false;
+          }
+          return {
+            title: modalTitle,
+            status: document.getElementById('sw-status').value || statusDefault,
+            payload: payload
+          };
+        }
+      });
+    }
+
+    function buildEditModal(type, item) {
+      if (!hasSwal) {
+        window.alert('Le composant modal SweetAlert est indisponible. Rechargez la page.');
+        return Promise.resolve({ isConfirmed: false });
+      }
+      var schema = typeSchemas[type] || { statusDefault: 'ACTIVE', fields: [] };
+      var statusOptions = ['ACTIVE', 'INACTIVE', 'DRAFT', 'PUBLISHED', 'ARCHIVED'];
+      var statusValue = item && item.status ? item.status : (schema.statusDefault || 'ACTIVE');
+      var payload = item && typeof item.payload === 'object' && item.payload ? item.payload : {};
+      var html = '<div class="rocket-modal-grid">' +
+        '<div class="rocket-modal-field mb-2"><label class="swal2-label">Title</label><input id="sw-title" class="swal2-input" value="' + escapeHtml(item && item.title ? item.title : '') + '"></div>' +
+        '<div class="rocket-modal-field mb-2"><label class="swal2-label">Status</label><select id="sw-status" class="swal2-select">' +
+          statusOptions.map(function (status) {
+            return '<option value="' + status + '"' + (status === statusValue ? ' selected' : '') + '>' + status + '</option>';
+          }).join('') +
+        '</select></div>';
+
+      html += (schema.fields || []).map(function (field) {
+        var localField = Object.assign({}, field);
+        localField.defaultValue = type === 'quiz' && field.key === 'pass_mark'
+          ? (item && item.passingScore != null ? item.passingScore : (payload.pass_mark || 70))
+          : payload[field.key];
+        return fieldHtml(type, localField);
+      }).join('');
+      html += '</div>';
+
+      return Swal.fire({
+        title: 'Edit item',
+        html: html,
+        width: 760,
+        customClass: {
+          popup: 'rocket-swal-popup',
+          title: 'rocket-swal-title',
+          confirmButton: 'btn btn-primary',
+          cancelButton: 'btn btn-danger ms-2'
+        },
+        buttonsStyling: false,
+        allowEnterKey: false,
+        allowEscapeKey: function () { return modalUploadInProgressCount === 0; },
+        allowOutsideClick: function () { return modalUploadInProgressCount === 0; },
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        cancelButtonText: 'Cancel',
+        didOpen: function () {
+          enhanceSectionSelect(type, payload.chapter_id);
+          if (type === 'text_lesson') enhanceTextLessonModalUX();
+          if (type === 'text_lesson') enhanceTextLessonAttachmentsPicker();
+          if (type === 'prerequisite') enhanceCourseSearchSelect(type, 'prerequisite_id', payload.prerequisite_id);
+          if (type === 'related_course') enhanceCourseSearchSelect(type, 'related_course_id', payload.related_course_id);
+          bindDynamicRules(type);
+          bindModalFileControls(type);
+          enhanceModalSelectFilter(type);
+          enhanceModalRichText(type);
+        },
+        preConfirm: function () {
+          if (!guardModalConfirmWhileUploading()) return false;
+          var outPayload = {};
+          (schema.fields || []).forEach(function (field) {
+            var el = document.getElementById('sw_' + type + '_' + field.key);
+            if (!el) return;
+            if (field.type === 'checkbox') outPayload[field.key] = !!el.checked;
+            else if (field.type === 'number') outPayload[field.key] = el.value === '' ? null : Number(el.value);
+            else if (field.key === 'attachments') {
+              var raw = String(el.value || '').trim();
+              if (!raw) outPayload[field.key] = [];
+              else {
+                try { outPayload[field.key] = JSON.parse(raw); } catch (_) { outPayload[field.key] = raw; }
+              }
+            } else outPayload[field.key] = el.value;
+          });
+          var modalTitle = document.getElementById('sw-title').value;
+          var requiredMessage = validateRequiredModalFields(type, modalTitle, outPayload);
+          if (requiredMessage) {
+            Swal.showValidationMessage(requiredMessage);
+            return false;
+          }
+          return {
+            type: type,
+            title: modalTitle,
+            status: document.getElementById('sw-status').value || statusValue,
+            payload: outPayload
+          };
+        }
+      });
+    }
+
+    function statusBadge(status) {
+      var s = safe(status || 'ACTIVE').toUpperCase();
+      return '<span class="rocket-badge-status">' + s + '</span>';
+    }
+
+    function renderEmptyState(type) {
+      var emptyMap = {
+        chapter: 'No Sections!',
+        file: 'No Files!',
+        interactive_file: 'No SCORM Files!',
+        text_lesson: 'No Text Lessons!',
+        session: 'No Live Sessions!',
+        assignment: 'No Assignments!',
+        prerequisite: 'No Prerequisites defined!',
+        related_course: 'No Related Courses Selected!',
+        faq: 'No FAQs Available!',
+        learning_material: 'No Learning Materials!',
+        company_logo: 'No Company Logos!',
+        requirement: 'No Requirements!',
+        quiz: 'No Quiz Created for This Course!',
+        pricing_plan: 'No Pricing Plans Found!'
+      };
+      return '<div class="rocket-empty-state">' +
+        '<span class="icon-wrap"><i class="fa-regular fa-folder-open fs-4"></i></span>' +
+        '<div class="title">' + (emptyMap[type] || 'No items yet.') + '</div>' +
+        '<div class="sub">You can add content to your course for students.</div>' +
+      '</div>';
+    }
+
+    function itemBelongsToChapter(item, chapterId) {
+      if (!item || typeof item !== 'object') return false;
+      var payload = item.payload && typeof item.payload === 'object' ? item.payload : {};
+      var pChapterId = payload.chapter_id || payload.chapterId || item.chapter_id || item.chapterId || '';
+      return safe(pChapterId) === safe(chapterId);
+    }
+
+    function renderSectionBlock(chapterId, group) {
+      var items = (sectionItemsByType[group.key] || []).filter(function (item) {
+        return itemBelongsToChapter(item, chapterId);
+      });
+      return (
+        '<section class="rocket-group-shell">' +
+          '<div class="rocket-group-header">' +
+            '<h4 class="rocket-group-title">' + group.label + '</h4>' +
+            '<button type="button" class="btn btn-primary btn-sm rocket-add-btn js-add-in-chapter" data-type="' + group.key + '" data-label="' + group.label + '" data-chapter-id="' + safe(chapterId) + '">' + escapeHtml(group.addLabel || 'Add') + '</button>' +
+          '</div>' +
+          '<div class="rocket-group-body">' +
+            (items.length ? items.map(function (item) { return renderItem(item, group.key); }).join('') : renderEmptyState(group.key)) +
+          '</div>' +
+        '</section>'
+      );
+    }
+
+    function renderChapterBoard() {
+      var chapters = sectionItemsByType.chapter || [];
+      var hasGeneralItems = sectionGroups.some(function (group) {
+        var items = sectionItemsByType[group.key] || [];
+        return items.some(function (item) { return itemBelongsToChapter(item, ''); });
+      });
+      if (!chapters.length && !hasGeneralItems) {
+        builderSections.innerHTML = renderEmptyState('chapter');
+        return;
+      }
+      var generalBoardHtml = '';
+      if (hasGeneralItems) {
+        var generalTopicCount = sectionGroups.reduce(function (acc, group) {
+          var items = (sectionItemsByType[group.key] || []).filter(function (item) {
+            return itemBelongsToChapter(item, '');
+          });
+          return acc + items.length;
+        }, 0);
+        generalBoardHtml =
+          '<div class="rocket-builder-card border rounded p-3 mb-4" data-chapter-id="">' +
+            '<div class="rocket-chapter-row d-flex justify-content-between align-items-center">' +
+              '<div class="d-flex align-items-center">' +
+                '<span class="rocket-chapter-icon"><i class="fa-solid fa-layer-group"></i></span>' +
+                '<div>' +
+                  '<div class="rocket-item-title">Contenu general / Intro</div>' +
+                  '<div class="rocket-item-meta">' + generalTopicCount + ' Topic | 0 Hr</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="rocket-row-actions">' +
+                '<button type="button" class="rocket-icon-btn plus js-chapter-add" data-id="" title="Add content">+</button>' +
+                '<button type="button" class="rocket-icon-btn js-chapter-toggle" data-id="general-intro" title="Collapse"><i class="fa-solid fa-angle-up"></i></button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="rocket-chapter-body" data-chapter-body="general-intro">' +
+              sectionGroups.map(function (group) { return renderSectionBlock('', group); }).join('') +
+            '</div>' +
+          '</div>';
+      }
+
+      var chapterBoardsHtml = chapters.map(function (chapter, index) {
+        var topicCount = sectionGroups.reduce(function (acc, group) {
+          var items = (sectionItemsByType[group.key] || []).filter(function (item) {
+            return itemBelongsToChapter(item, chapter.id);
+          });
+          return acc + items.length;
+        }, 0);
+        return (
+          '<div class="rocket-builder-card border rounded p-3 mb-4" data-chapter-id="' + safe(chapter.id) + '">' +
+            '<div class="rocket-chapter-row d-flex justify-content-between align-items-center">' +
+              '<div class="d-flex align-items-center">' +
+                '<span class="rocket-chapter-icon"><i class="fa-solid fa-grip"></i></span>' +
+                '<div>' +
+                  '<div class="rocket-item-title">' + safe(chapter.title || ('Section ' + (index + 1))) + '</div>' +
+                  '<div class="rocket-item-meta">' + topicCount + ' Topic | 0 Hr</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="rocket-row-actions">' +
+                '<button type="button" class="rocket-icon-btn plus js-chapter-add" data-id="' + safe(chapter.id) + '" title="Add content">+</button>' +
+                '<button type="button" class="rocket-icon-btn js-edit-item" data-type="chapter" data-id="' + safe(chapter.id) + '" data-title="' + safe(chapter.title || '').replace(/"/g, '&quot;') + '" data-status="' + safe(chapter.status || 'ACTIVE') + '" title="Edit"><i class="fa-solid fa-pen"></i></button>' +
+                '<button type="button" class="rocket-icon-btn js-delete-item" data-type="chapter" data-id="' + safe(chapter.id) + '" title="Delete"><i class="fa-regular fa-trash-can"></i></button>' +
+                '<button type="button" class="rocket-icon-btn" title="Sort"><i class="fa-solid fa-up-down-left-right"></i></button>' +
+                '<button type="button" class="rocket-icon-btn js-chapter-toggle" data-id="' + safe(chapter.id) + '" title="Collapse"><i class="fa-solid fa-angle-up"></i></button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="rocket-chapter-body" data-chapter-body="' + safe(chapter.id) + '">' +
+              sectionGroups.map(function (group) { return renderSectionBlock(chapter.id, group); }).join('') +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+
+      builderSections.innerHTML = generalBoardHtml + chapterBoardsHtml;
+    }
+
+    function renderItem(item, type) {
+      var id = safe(item.id);
+      var title = safe(item.title || item.subject || 'Untitled');
+      var status = safe(item.status || 'ACTIVE');
+      var payload = item.payload || {};
+      if (type === 'file') {
+        return renderFileInlineItem(item, id, title, status, payload);
+      }
+      if (type === 'interactive_file') {
+        return renderInteractiveInlineItem(item, id, title, status, payload);
+      }
+      if (type === 'text_lesson') {
+        return renderTextLessonInlineItem(item, id, title, status, payload);
+      }
+      if (type === 'session') {
+        return renderSessionInlineItem(item, id, title, status, payload);
+      }
+      if (type === 'assignment') {
+        return renderAssignmentInlineItem(item, id, title, status, payload);
+      }
+      if (type === 'quiz') {
+        return renderQuizInlineItem(item, id, title, status, payload);
+      }
+      var details = [];
+      Object.keys(payload).slice(0, 3).forEach(function (k) {
+        details.push(k + ': ' + safe(payload[k]));
+      });
+
+      return (
+        '<div class="rocket-item-row d-flex justify-content-between align-items-start" data-id="' + id + '">' +
+          '<div>' +
+            '<div class="rocket-item-title">' + title + statusBadge(status) + '</div>' +
+            '<div class="rocket-item-meta">' + (details.length ? details.join(' | ') : 'Ready to configure') + '</div>' +
+          '</div>' +
+          '<div class="d-flex gap-2">' +
+            '<button class="btn btn-outline-secondary btn-sm js-edit-item" data-type="' + type + '" data-id="' + id + '" data-title="' + title.replace(/"/g, '&quot;') + '" data-status="' + status + '">Edit</button>' +
+            (type !== 'quiz'
+              ? '<button class="btn btn-outline-danger btn-sm js-delete-item" data-type="' + type + '" data-id="' + id + '">Delete</button>'
+              : '') +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function renderFileInlineItem(item, id, title, status, payload) {
+      var chapters = sectionItemsByType.chapter || [];
+      var chapterId = safe(payload.chapter_id || payload.chapterId || '');
+      var chapterOptions = chapters.map(function (ch) {
+        var chId = safe(ch.id);
+        return '<option value="' + chId + '"' + (chId === chapterId ? ' selected' : '') + '>' + escapeHtml(safe(ch.title || 'Section')) + '</option>';
+      }).join('');
+      var source = safe(payload.storage || 'upload');
+      var accessibility = safe(payload.accessibility || 'free');
+      var filePath = safe(payload.file_path || '');
+      var description = safe(payload.description || '');
+      var fileType = safe(payload.file_type || '');
+      var fileVolume = safe(payload.volume || '');
+      var onlineViewerChecked = payload.online_viewer ? ' checked' : '';
+      var downloadableChecked = payload.downloadable ? ' checked' : '';
+      var dripChecked = payload.sequence_content ? ' checked' : '';
+      var checkPrevChecked = payload.check_previous_parts ? ' checked' : '';
+      var accessAfterDay = safe(payload.access_after_day || '');
+      var activeChecked = status === 'ACTIVE' ? ' checked' : '';
+      var pathInputId = 'file_inline_path_' + safe(id).replace(/[^a-zA-Z0-9_-]/g, '_');
+      var sourceLabel = {
+        upload: 'Upload',
+        youtube: 'YouTube',
+        vimeo: 'Vimeo',
+        external_link: 'External Link',
+        google_drive: 'Google Drive',
+        iframe: 'iFrame',
+        s3: 'Amazon S3',
+        secure_host: 'Secure Host (Bunny)'
+      };
+
+      return (
+        '<div class="rocket-file-inline" data-id="' + id + '">' +
+          '<div class="rocket-file-inline-head">' +
+            '<div class="left">' +
+              '<span class="rocket-file-inline-icon"><i class="fa-regular fa-file-lines"></i></span>' +
+              '<div class="rocket-item-title">' + title + ' (' + escapeHtml(source) + ') ' + statusBadge(status) + '</div>' +
+            '</div>' +
+            '<div class="rocket-row-actions">' +
+              '<button type="button" class="rocket-icon-btn"><i class="fa-solid fa-up-down-left-right"></i></button>' +
+              '<button type="button" class="rocket-icon-btn js-delete-item" data-type="file" data-id="' + id + '"><i class="fa-regular fa-trash-can"></i></button>' +
+              '<button type="button" class="rocket-icon-btn js-inline-toggle" title="Collapse"><i class="fa-solid fa-angle-up"></i></button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="rocket-file-inline-body">' +
+            '<div class="row g-3">' +
+              '<div class="col-md-6"><label class="form-label">Section</label><select class="form-select js-file-inline-chapter">' + chapterOptions + '</select></div>' +
+              '<div class="col-md-6"><label class="form-label">Title</label><input class="form-control js-file-inline-title" value="' + escapeHtml(title) + '"></div>' +
+              '<div class="col-md-6"><label class="form-label">Source</label><select class="form-select js-file-inline-source">' +
+                ['upload','youtube','vimeo','external_link','google_drive','iframe','s3','secure_host'].map(function (opt) {
+                  return '<option value="' + opt + '"' + (opt === source ? ' selected' : '') + '>' + (sourceLabel[opt] || opt) + '</option>';
+                }).join('') +
+              '</select></div>' +
+              '<div class="col-md-6"><label class="form-label">Accessibility</label>' +
+                '<div class="rocket-radio-row js-file-inline-accessibility">' +
+                  '<label class="rocket-radio-inline"><input type="radio" name="file_access_' + id + '" value="free"' + (accessibility === 'free' ? ' checked' : '') + '> Free</label>' +
+                  '<label class="rocket-radio-inline"><input type="radio" name="file_access_' + id + '" value="paid"' + (accessibility === 'paid' ? ' checked' : '') + '> Paid</label>' +
+                '</div>' +
+              '</div>' +
+              '<div class="col-12"><label class="form-label js-file-inline-path-label">File Path</label><div class="rocket-icon-input"><span class="icon js-file-inline-path-icon"><i class="fa-solid fa-link"></i></span><input id="' + escapeHtml(pathInputId) + '" class="form-control js-file-inline-path" value="' + escapeHtml(filePath) + '" placeholder="https://... ou chemin MinIO"><button type="button" class="btn btn-outline-secondary js-open-library-picker" data-target-input="' + escapeHtml(pathInputId) + '">Library</button><button type="button" class="btn btn-outline-primary js-preview-library-file" data-target-input="' + escapeHtml(pathInputId) + '"><i class="fa-regular fa-eye"></i></button><button type="button" class="btn btn-browse d-none js-file-inline-browse">Browse</button><input class="d-none js-file-inline-device-file" type="file"></div><div class="form-text js-file-inline-path-help">Choisir depuis la Library (upload direct possible) ou coller un lien.</div></div>' +
+              '<div class="col-md-6 js-file-inline-type-wrap"><label class="form-label">File Type</label><select class="form-select js-file-inline-file-type">' +
+                ['','pdf','powerpoint','sound','video','image','archive','document','project'].map(function (opt) {
+                  var labelMap = {'':'Select File Type',pdf:'PDF',powerpoint:'PowerPoint',sound:'Audio',video:'Video',image:'Image',archive:'Archive',document:'Document',project:'Project'};
+                  return '<option value="' + opt + '"' + (opt === fileType ? ' selected' : '') + '>' + labelMap[opt] + '</option>';
+                }).join('') +
+              '</select></div>' +
+              '<div class="col-md-6 js-file-inline-volume-wrap"><label class="form-label">File Size (MB)</label><input class="form-control js-file-inline-volume" value="' + escapeHtml(fileVolume) + '" placeholder="Enter File Size (MB)"></div>' +
+              '<div class="col-12"><label class="form-label">Description</label><textarea class="form-control js-file-inline-description" rows="4">' + escapeHtml(description) + '</textarea></div>' +
+              '<div class="col-md-6"><div class="form-check mb-2"><input class="form-check-input js-file-inline-online-viewer" type="checkbox"' + onlineViewerChecked + '><label class="form-check-label">Online Viewer</label></div><div class="form-check mb-2"><input class="form-check-input js-file-inline-downloadable" type="checkbox"' + downloadableChecked + '><label class="form-check-label">Downloadable</label></div><div class="form-check"><input class="form-check-input js-file-inline-drip" type="checkbox"' + dripChecked + '><label class="form-check-label">Drip Content</label></div></div>' +
+              '<div class="col-md-6 js-file-inline-drip-wrap"><div class="form-check mb-2"><input class="form-check-input js-file-inline-check-prev" type="checkbox"' + checkPrevChecked + '><label class="form-check-label">Require Completion of Previous Sections</label></div><label class="form-label">Access Delay (Days)</label><input class="form-control js-file-inline-access-after-day" value="' + escapeHtml(accessAfterDay) + '" placeholder="e.g. 10"></div>' +
+              '<div class="col-md-6 d-flex align-items-center"><div class="form-check form-switch"><input class="form-check-input js-file-inline-active" type="checkbox"' + activeChecked + '><label class="form-check-label">Active</label></div></div>' +
+              '<div class="col-md-6 text-end"><button type="button" class="btn btn-primary js-save-file-inline" data-id="' + id + '">Save</button></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function renderInteractiveInlineItem(item, id, title, status, payload) {
+      var chapters = sectionItemsByType.chapter || [];
+      var chapterId = safe(payload.chapter_id || payload.chapterId || '');
+      var chapterOptions = chapters.map(function (ch) {
+        var chId = safe(ch.id);
+        return '<option value="' + chId + '"' + (chId === chapterId ? ' selected' : '') + '>' + escapeHtml(safe(ch.title || 'Section')) + '</option>';
+      }).join('');
+      var scormType = safe(payload.interactive_type || 'adobe_captivate');
+      var zipPath = safe(payload.file_path || '');
+      var idxFile = safe(payload.interactive_file_name || '');
+      var desc = safe(payload.description || '');
+      var activeChecked = status === 'ACTIVE' ? ' checked' : '';
+      return (
+        '<div class="rocket-inline-item" data-id="' + id + '">' +
+          '<div class="rocket-inline-item-head"><div class="left"><span class="rocket-file-inline-icon"><i class="fa-regular fa-file-zipper"></i></span><div class="rocket-item-title">' + title + ' (SCORM) ' + statusBadge(status) + '</div></div><div class="rocket-row-actions"><button type="button" class="rocket-icon-btn"><i class="fa-solid fa-up-down-left-right"></i></button><button type="button" class="rocket-icon-btn js-delete-item" data-type="interactive_file" data-id="' + id + '"><i class="fa-regular fa-trash-can"></i></button><button type="button" class="rocket-icon-btn js-inline-toggle" title="Collapse"><i class="fa-solid fa-angle-up"></i></button></div></div>' +
+          '<div class="rocket-inline-item-body"><div class="row g-3">' +
+            '<div class="col-md-6"><label class="form-label">Section</label><select class="form-select js-if-inline-chapter">' + chapterOptions + '</select></div>' +
+            '<div class="col-md-6"><label class="form-label">Title</label><input class="form-control js-if-inline-title" value="' + escapeHtml(title) + '"></div>' +
+            '<div class="col-md-6"><label class="form-label">SCORM Type</label><select class="form-select js-if-inline-type">' +
+              ['adobe_captivate','i_spring','custom'].map(function (opt) { return '<option value="' + opt + '"' + (opt === scormType ? ' selected' : '') + '>' + opt + '</option>'; }).join('') +
+            '</select></div>' +
+            '<div class="col-md-6 js-if-inline-index-wrap"><label class="form-label">SCORM Index File Name</label><input class="form-control js-if-inline-index" value="' + escapeHtml(idxFile) + '" placeholder="scorm.html"></div>' +
+            '<div class="col-12"><label class="form-label">ZIP File Path</label><div class="rocket-icon-input"><span class="icon"><i class="fa-solid fa-upload"></i></span><input id="if_inline_path_' + safe(id).replace(/[^a-zA-Z0-9_-]/g, '_') + '" class="form-control js-if-inline-path" value="' + escapeHtml(zipPath) + '" placeholder="Choose ZIP File"><button type="button" class="btn btn-outline-secondary js-open-library-picker" data-target-input="if_inline_path_' + safe(id).replace(/[^a-zA-Z0-9_-]/g, '_') + '">Library</button><button type="button" class="btn btn-outline-primary js-preview-library-file" data-target-input="if_inline_path_' + safe(id).replace(/[^a-zA-Z0-9_-]/g, '_') + '"><i class="fa-regular fa-eye"></i></button><button type="button" class="btn btn-browse js-if-inline-browse">Browse</button><input class="d-none js-if-inline-device-file" type="file" accept=\".zip,application/zip,application/x-zip-compressed\"></div></div>' +
+            '<div class="col-12"><label class="form-label">Description</label><textarea class="form-control js-if-inline-description" rows="4">' + escapeHtml(desc) + '</textarea></div>' +
+            '<div class="col-md-6 d-flex align-items-center"><div class="form-check form-switch"><input class="form-check-input js-if-inline-active" type="checkbox"' + activeChecked + '><label class="form-check-label">Active</label></div></div>' +
+            '<div class="col-md-6 text-end d-flex align-items-center justify-content-end gap-2"><button type="button" class="btn btn-outline-primary js-test-if-inline" data-id="' + id + '"><i class="fa-solid fa-flask-vial me-1"></i>Tester</button><button type="button" class="btn btn-primary js-save-if-inline" data-id="' + id + '">Save</button></div>' +
+          '</div></div>' +
+        '</div>'
+      );
+    }
+
+    function openInteractiveTest(itemId) {
+      var id = safe(itemId || '').trim();
+      if (!id) return;
+      var url = '/learning/courses/' + encodeURIComponent(webinarId)
+        + '?tab=content&type=' + encodeURIComponent('interactive_file')
+        + '&item=' + encodeURIComponent(id);
+      window.open(url, '_blank', 'noopener');
+    }
+
+    function renderTextLessonInlineItem(item, id, title, status, payload) {
+      var chapters = sectionItemsByType.chapter || [];
+      var chapterId = safe(payload.chapter_id || payload.chapterId || '');
+      var chapterOptions = chapters.map(function (ch) {
+        var chId = safe(ch.id);
+        return '<option value="' + chId + '"' + (chId === chapterId ? ' selected' : '') + '>' + escapeHtml(safe(ch.title || 'Section')) + '</option>';
+      }).join('');
+      var summary = safe(payload.summary || '');
+      var content = safe(payload.content || '');
+      var study = safe(payload.study_time || '');
+      var activeChecked = status === 'ACTIVE' ? ' checked' : '';
+      return (
+        '<div class="rocket-inline-item" data-id="' + id + '">' +
+          '<div class="rocket-inline-item-head"><div class="left"><span class="rocket-file-inline-icon"><i class="fa-regular fa-file-lines"></i></span><div class="rocket-item-title">' + title + ' (Text Lesson) ' + statusBadge(status) + '</div></div><div class="rocket-row-actions"><button type="button" class="rocket-icon-btn"><i class="fa-solid fa-up-down-left-right"></i></button><button type="button" class="rocket-icon-btn js-delete-item" data-type="text_lesson" data-id="' + id + '"><i class="fa-regular fa-trash-can"></i></button><button type="button" class="rocket-icon-btn js-inline-toggle" title="Collapse"><i class="fa-solid fa-angle-up"></i></button></div></div>' +
+          '<div class="rocket-inline-item-body"><div class="row g-3">' +
+            '<div class="col-md-6"><label class="form-label">Section</label><select class="form-select js-tl-inline-chapter">' + chapterOptions + '</select></div>' +
+            '<div class="col-md-6"><label class="form-label">Title</label><input class="form-control js-tl-inline-title" value="' + escapeHtml(title) + '"></div>' +
+            '<div class="col-md-6"><label class="form-label">Study Duration</label><input class="form-control js-tl-inline-study" value="' + escapeHtml(study) + '"></div>' +
+            '<div class="col-12"><label class="form-label">Summary</label><textarea class="form-control js-tl-inline-summary" rows="3">' + escapeHtml(summary) + '</textarea></div>' +
+            '<div class="col-12"><label class="form-label">Content</label><textarea class="form-control js-tl-inline-content" rows="5">' + escapeHtml(content) + '</textarea></div>' +
+            '<div class="col-md-6 d-flex align-items-center"><div class="form-check form-switch"><input class="form-check-input js-tl-inline-active" type="checkbox"' + activeChecked + '><label class="form-check-label">Active</label></div></div>' +
+            '<div class="col-md-6 text-end"><button type="button" class="btn btn-primary js-save-tl-inline" data-id="' + id + '">Save</button></div>' +
+          '</div></div>' +
+        '</div>'
+      );
+    }
+
+    function renderSessionInlineItem(item, id, title, status, payload) {
+      var chapters = sectionItemsByType.chapter || [];
+      var chapterId = safe(payload.chapter_id || payload.chapterId || '');
+      var chapterOptions = chapters.map(function (ch) {
+        var chId = safe(ch.id);
+        return '<option value="' + chId + '"' + (chId === chapterId ? ' selected' : '') + '>' + escapeHtml(safe(ch.title || 'Section')) + '</option>';
+      }).join('');
+      var provider = safe(payload.session_api || 'local');
+      var date = safe(payload.date || '');
+      var duration = safe(payload.duration || '');
+      var extraTimeToJoin = safe(payload.extra_time_to_join || '');
+      var apiSecret = safe(payload.api_secret || '');
+      var moderatorSecret = safe(payload.moderator_secret || '');
+      var link = safe(payload.link || '');
+      var desc = safe(payload.description || '');
+      var agoraChatChecked = payload.agora_chat ? ' checked' : '';
+      var activeChecked = status === 'ACTIVE' ? ' checked' : '';
+      return (
+        '<div class="rocket-inline-item" data-id="' + id + '">' +
+          '<div class="rocket-inline-item-head"><div class="left"><span class="rocket-file-inline-icon"><i class="fa-regular fa-calendar"></i></span><div class="rocket-item-title">' + title + ' (Session) ' + statusBadge(status) + '</div></div><div class="rocket-row-actions"><button type="button" class="rocket-icon-btn js-delete-item" data-type="session" data-id="' + id + '"><i class="fa-regular fa-trash-can"></i></button></div></div>' +
+          '<div class="rocket-inline-item-body"><div class="row g-3">' +
+            '<div class="col-md-6"><label class="form-label">Section</label><select class="form-select js-ss-inline-chapter">' + chapterOptions + '</select></div>' +
+            '<div class="col-md-6"><label class="form-label">Title</label><input class="form-control js-ss-inline-title" value="' + escapeHtml(title) + '"></div>' +
+            '<div class="col-md-6"><label class="form-label">Provider</label><select class="form-select js-ss-inline-provider">' + ['local','big_blue_button','zoom','google_meet','agora'].map(function (opt) { return '<option value="' + opt + '"' + (opt === provider ? ' selected' : '') + '>' + opt + '</option>'; }).join('') + '</select></div>' +
+            '<div class="col-md-6"><label class="form-label">Date</label><input type="datetime-local" class="form-control js-ss-inline-date" value="' + escapeHtml(date) + '" placeholder="YYYY-MM-DD HH:mm"></div>' +
+            '<div class="col-md-6"><label class="form-label">Duration (Minutes)</label><input class="form-control js-ss-inline-duration" value="' + escapeHtml(duration) + '"></div>' +
+            '<div class="col-md-6"><label class="form-label">Live Class Join Delay Period (Minutes)</label><input class="form-control js-ss-inline-extra-time-to-join" value="' + escapeHtml(extraTimeToJoin) + '"></div>' +
+            '<div class="col-md-6 js-ss-inline-api-secret-wrap"><label class="form-label js-ss-inline-api-secret-label">Password</label><input class="form-control js-ss-inline-api-secret" value="' + escapeHtml(apiSecret) + '"></div>' +
+            '<div class="col-md-6 js-ss-inline-moderator-secret-wrap"><label class="form-label">Moderator Password</label><input class="form-control js-ss-inline-moderator-secret" value="' + escapeHtml(moderatorSecret) + '"></div>' +
+            '<div class="col-md-6 js-ss-inline-link-wrap"><label class="form-label">Link</label><input class="form-control js-ss-inline-link" value="' + escapeHtml(link) + '"></div>' +
+            '<div class="col-12"><label class="form-label">Description</label><textarea class="form-control js-ss-inline-description" rows="3">' + escapeHtml(desc) + '</textarea></div>' +
+            '<div class="col-md-6 js-ss-inline-agora-chat-wrap"><div class="form-check mb-2"><input class="form-check-input js-ss-inline-agora-chat" type="checkbox"' + agoraChatChecked + '><label class="form-check-label">Chat (Agora)</label></div></div>' +
+            '<div class="col-md-6 d-flex align-items-center"><div class="form-check form-switch"><input class="form-check-input js-ss-inline-active" type="checkbox"' + activeChecked + '><label class="form-check-label">Active</label></div></div>' +
+            '<div class="col-md-6 text-end"><button type="button" class="btn btn-primary js-save-ss-inline" data-id="' + id + '">Save</button></div>' +
+          '</div></div>' +
+        '</div>'
+      );
+    }
+
+    function renderAssignmentInlineItem(item, id, title, status, payload) {
+      var chapters = sectionItemsByType.chapter || [];
+      var chapterId = safe(payload.chapter_id || payload.chapterId || '');
+      var chapterOptions = chapters.map(function (ch) {
+        var chId = safe(ch.id);
+        return '<option value="' + chId + '"' + (chId === chapterId ? ' selected' : '') + '>' + escapeHtml(safe(ch.title || 'Section')) + '</option>';
+      }).join('');
+      var grade = safe(payload.grade || '');
+      var passGrade = safe(payload.pass_grade || '');
+      var deadline = safe(payload.deadline || '');
+      var attempts = safe(payload.attempts || '');
+      var desc = safe(payload.description || '');
+      var activeChecked = status === 'ACTIVE' ? ' checked' : '';
+      return (
+        '<div class="rocket-inline-item" data-id="' + id + '">' +
+          '<div class="rocket-inline-item-head"><div class="left"><span class="rocket-file-inline-icon"><i class="fa-regular fa-clipboard"></i></span><div class="rocket-item-title">' + title + ' (Assignment) ' + statusBadge(status) + '</div></div><div class="rocket-row-actions"><button type="button" class="rocket-icon-btn js-delete-item" data-type="assignment" data-id="' + id + '"><i class="fa-regular fa-trash-can"></i></button></div></div>' +
+          '<div class="rocket-inline-item-body"><div class="row g-3">' +
+            '<div class="col-md-6"><label class="form-label">Section</label><select class="form-select js-as-inline-chapter">' + chapterOptions + '</select></div>' +
+            '<div class="col-md-6"><label class="form-label">Title</label><input class="form-control js-as-inline-title" value="' + escapeHtml(title) + '"></div>' +
+            '<div class="col-md-3"><label class="form-label">Grade</label><input class="form-control js-as-inline-grade" value="' + escapeHtml(grade) + '"></div>' +
+            '<div class="col-md-3"><label class="form-label">Passing Grade</label><input class="form-control js-as-inline-pass-grade" value="' + escapeHtml(passGrade) + '"></div>' +
+            '<div class="col-md-3"><label class="form-label">Deadline</label><input type="date" class="form-control js-as-inline-deadline" value="' + escapeHtml(deadline) + '"></div>' +
+            '<div class="col-md-3"><label class="form-label">Attempts</label><input class="form-control js-as-inline-attempts" value="' + escapeHtml(attempts) + '"></div>' +
+            '<div class="col-12"><label class="form-label">Description</label><textarea class="form-control js-as-inline-description" rows="4">' + escapeHtml(desc) + '</textarea></div>' +
+            '<div class="col-md-6 d-flex align-items-center"><div class="form-check form-switch"><input class="form-check-input js-as-inline-active" type="checkbox"' + activeChecked + '><label class="form-check-label">Active</label></div></div>' +
+            '<div class="col-md-6 text-end"><button type="button" class="btn btn-primary js-save-as-inline" data-id="' + id + '">Save</button></div>' +
+          '</div></div>' +
+        '</div>'
+      );
+    }
+
+    function renderQuizInlineItem(item, id, title, status, payload) {
+      var chapters = sectionItemsByType.chapter || [];
+      var chapterId = safe(payload.chapter_id || payload.chapterId || '');
+      var chapterOptions = chapters.map(function (ch) {
+        var chId = safe(ch.id);
+        return '<option value="' + chId + '"' + (chId === chapterId ? ' selected' : '') + '>' + escapeHtml(safe(ch.title || 'Section')) + '</option>';
+      }).join('');
+      var time = safe(payload.time || '');
+      var attempt = safe(payload.attempt || '');
+      var passMark = safe(payload.pass_mark || item.passingScore || 70);
+      var expiryDays = safe(payload.expiry_days || '');
+      var description = safe(payload.description || '');
+      var randomChecked = payload.display_questions_randomly ? ' checked' : '';
+      var certificateChecked = payload.certificate ? ' checked' : '';
+      var activeChecked = status === 'ACTIVE' || status === 'PUBLISHED' ? ' checked' : '';
+      return (
+        '<div class="rocket-inline-item" data-id="' + id + '">' +
+          '<div class="rocket-inline-item-head"><div class="left"><span class="rocket-file-inline-icon"><i class="fa-regular fa-circle-question"></i></span><div class="rocket-item-title">' + title + ' (Quiz) ' + statusBadge(status) + '</div></div><div class="rocket-row-actions"><button type="button" class="rocket-icon-btn"><i class="fa-solid fa-up-down-left-right"></i></button><button type="button" class="rocket-icon-btn js-delete-item" data-type="quiz" data-id="' + id + '"><i class="fa-regular fa-trash-can"></i></button><button type="button" class="rocket-icon-btn js-inline-toggle" title="Collapse"><i class="fa-solid fa-angle-up"></i></button></div></div>' +
+          '<div class="rocket-inline-item-body"><div class="row g-3">' +
+            '<div class="col-md-6"><label class="form-label">Section</label><select class="form-select js-qz-inline-chapter">' + chapterOptions + '</select></div>' +
+            '<div class="col-md-6"><label class="form-label">Title</label><input class="form-control js-qz-inline-title" value="' + escapeHtml(title) + '"></div>' +
+            '<div class="col-md-3"><label class="form-label">Time (Minutes)</label><input class="form-control js-qz-inline-time" value="' + escapeHtml(time) + '"></div>' +
+            '<div class="col-md-3"><label class="form-label">Attempts</label><input class="form-control js-qz-inline-attempt" value="' + escapeHtml(attempt) + '"></div>' +
+            '<div class="col-md-3"><label class="form-label">Pass Mark</label><input class="form-control js-qz-inline-pass-mark" value="' + escapeHtml(passMark) + '"></div>' +
+            '<div class="col-md-3"><label class="form-label">Expiry Days</label><input class="form-control js-qz-inline-expiry-days" value="' + escapeHtml(expiryDays) + '"></div>' +
+            '<div class="col-12"><label class="form-label">Description</label><textarea class="form-control js-qz-inline-description" rows="4">' + escapeHtml(description) + '</textarea></div>' +
+            '<div class="col-md-6"><div class="form-check mb-2"><input class="form-check-input js-qz-inline-random" type="checkbox"' + randomChecked + '><label class="form-check-label">Display Questions Randomly</label></div><div class="form-check"><input class="form-check-input js-qz-inline-certificate" type="checkbox"' + certificateChecked + '><label class="form-check-label">Certificate Included</label></div></div>' +
+            '<div class="col-md-6 d-flex align-items-start justify-content-between"><div class="form-check form-switch mt-1"><input class="form-check-input js-qz-inline-active" type="checkbox"' + activeChecked + '><label class="form-check-label">Active</label></div><button type="button" class="btn btn-primary js-save-qz-inline" data-id="' + id + '">Save</button></div>' +
+          '</div></div>' +
+        '</div>'
+      );
+    }
+
+    function loadType(type) {
+      return fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections?type=' + encodeURIComponent(type))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          sectionItemsByType[type] = Array.isArray(data.items) ? data.items : [];
+        })
+        .catch(function () {
+          sectionItemsByType[type] = [];
+        });
+    }
+
+    function refreshBuilder() {
+      builderSections.innerHTML = '<div class="text-muted small py-2">Loading...</div>';
+      var typesToLoad = ['chapter'].concat(sectionGroups.map(function (g) { return g.key; }));
+      Promise.all(typesToLoad.map(function (type) { return loadType(type); })).then(function () {
+        renderChapterBoard();
+        document.querySelectorAll('.rocket-file-inline').forEach(function (row) {
+          applyInlineFileSourceBehavior(row);
+          applyInlineFileDripBehavior(row);
+        });
+        document.querySelectorAll('.rocket-inline-item').forEach(function (row) {
+          if (row.querySelector('.js-ss-inline-provider')) applyInlineSessionProviderBehavior(row);
+          if (row.querySelector('.js-if-inline-type')) applyInlineInteractiveTypeBehavior(row);
+        });
+        enhanceInlineRichEditors();
+        processDeepLinkActions();
+      });
+    }
+
+    function applyInlineFileSourceBehavior(root) {
+      if (!root) return;
+      var sourceEl = root.querySelector('.js-file-inline-source');
+      var pathInput = root.querySelector('.js-file-inline-path');
+      var pathLabel = root.querySelector('.js-file-inline-path-label');
+      var pathIcon = root.querySelector('.js-file-inline-path-icon i');
+      var pathHelp = root.querySelector('.js-file-inline-path-help');
+      var browseBtn = root.querySelector('.js-file-inline-browse');
+      var typeWrap = root.querySelector('.js-file-inline-type-wrap');
+      var volumeWrap = root.querySelector('.js-file-inline-volume-wrap');
+      var onlineViewerWrap = root.querySelector('.js-file-inline-online-viewer') ? root.querySelector('.js-file-inline-online-viewer').closest('.form-check') : null;
+      var downloadableWrap = root.querySelector('.js-file-inline-downloadable') ? root.querySelector('.js-file-inline-downloadable').closest('.form-check') : null;
+      if (!sourceEl || !pathInput) return;
+      var src = safe(sourceEl.value).toLowerCase();
+      var isUpload = src === 'upload' || src === 's3' || src === 'secure_host';
+      var isEmbed = src === 'iframe' || src === 'google_drive';
+      if (pathLabel) pathLabel.textContent = isUpload ? 'Upload files from your device' : (src === 'youtube' ? 'Paste YouTube link' : src === 'vimeo' ? 'Paste Vimeo link' : isEmbed ? 'Embed link' : 'Paste external link');
+      pathInput.placeholder = src === 'youtube'
+        ? 'Paste YouTube link'
+        : src === 'vimeo'
+          ? 'Paste Vimeo link'
+          : src === 'iframe'
+            ? 'Paste full iframe embed code'
+            : src === 'google_drive'
+              ? 'Embed link starting with iframe tag'
+              : isUpload
+                ? 'Upload files from your device'
+                : 'Paste external link';
+      if (pathHelp) {
+        pathHelp.textContent = isUpload
+          ? 'Choisir depuis la Library, uploader en direct, ou saisir une cle objet.'
+          : 'Collez le lien correspondant a la source selectionnee.';
+      }
+      if (pathIcon) {
+        pathIcon.className = src === 'youtube' || src === 'vimeo' || src === 'external_link' || src === 'iframe'
+          ? 'fa-solid fa-link'
+          : src === 'google_drive'
+            ? 'fa-solid fa-cube'
+            : 'fa-solid fa-upload';
+      }
+      if (browseBtn) browseBtn.classList.toggle('d-none', !(src === 's3' || src === 'upload' || src === 'secure_host'));
+      if (typeWrap) typeWrap.style.display = (src === 'youtube' || src === 'vimeo' || src === 'iframe') ? 'none' : '';
+      if (volumeWrap) volumeWrap.style.display = (src === 'youtube' || src === 'vimeo' || src === 'iframe') ? 'none' : '';
+      if (onlineViewerWrap) onlineViewerWrap.style.display = (src === 'youtube' || src === 'vimeo') ? 'none' : '';
+      if (downloadableWrap) downloadableWrap.style.display = (src === 'iframe') ? 'none' : '';
+    }
+
+    function applyInlineFileDripBehavior(root) {
+      if (!root) return;
+      var dripEl = root.querySelector('.js-file-inline-drip');
+      var dripWrap = root.querySelector('.js-file-inline-drip-wrap');
+      if (!dripEl || !dripWrap) return;
+      dripWrap.style.display = dripEl.checked ? '' : 'none';
+    }
+
+    function applyInlineSessionProviderBehavior(root) {
+      if (!root) return;
+      var providerEl = root.querySelector('.js-ss-inline-provider');
+      if (!providerEl) return;
+      var provider = safe(providerEl.value).toLowerCase();
+      var linkWrap = root.querySelector('.js-ss-inline-link-wrap');
+      var apiSecretWrap = root.querySelector('.js-ss-inline-api-secret-wrap');
+      var apiSecretLabel = root.querySelector('.js-ss-inline-api-secret-label');
+      var moderatorSecretWrap = root.querySelector('.js-ss-inline-moderator-secret-wrap');
+      var agoraChatWrap = root.querySelector('.js-ss-inline-agora-chat-wrap');
+
+      if (linkWrap) linkWrap.style.display = (provider === 'local' || provider === 'zoom' || provider === 'google_meet') ? '' : 'none';
+      if (apiSecretWrap) apiSecretWrap.style.display = provider === 'agora' ? 'none' : '';
+      if (moderatorSecretWrap) moderatorSecretWrap.style.display = provider === 'big_blue_button' ? '' : 'none';
+      if (agoraChatWrap) agoraChatWrap.style.display = provider === 'agora' ? '' : 'none';
+      if (apiSecretLabel) apiSecretLabel.textContent = (provider === 'zoom' || provider === 'google_meet') ? 'Meeting Password' : 'Password';
+    }
+
+    function applyInlineInteractiveTypeBehavior(root) {
+      if (!root) return;
+      var typeEl = root.querySelector('.js-if-inline-type');
+      var indexWrap = root.querySelector('.js-if-inline-index-wrap');
+      if (!typeEl || !indexWrap) return;
+      var scormType = safe(typeEl.value).toLowerCase();
+      indexWrap.style.display = scormType === 'custom' ? '' : 'none';
+    }
+
+    function openLibraryPicker(targetInputId) {
+      if (!targetInputId) return;
+      var pickerUrl = '/admin/library?picker=1&target=' + encodeURIComponent(targetInputId) + '&folder=Library';
+      window.open(pickerUrl, 'libraryPickerWindow', 'width=1220,height=820,resizable=yes,scrollbars=yes');
+    }
+
+    function previewLibraryFile(targetInputId) {
+      if (!targetInputId) return;
+      var input = document.getElementById(targetInputId);
+      if (!input) return;
+      var key = safe(input.value).trim();
+      if (!key) {
+        if (hasSwal) Swal.fire({ icon: 'info', title: 'Aucun fichier', text: 'Selectionnez d abord un fichier dans la Library.' });
+        return;
+      }
+      fetch('/admin/library/presign?key=' + encodeURIComponent(key))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var previewUrl = data && data.previewUrl ? data.previewUrl : '';
+          if (!previewUrl) throw new Error('Impossible de generer l apercu pour ce fichier.');
+          window.open(previewUrl, '_blank', 'noopener');
+        })
+        .catch(function (error) {
+          if (hasSwal) Swal.fire({ icon: 'error', title: 'Preview indisponible', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+        });
+    }
+
+    function openLibraryPickerForInput(inputId) {
+      if (!inputId) return;
+      openLibraryPicker(inputId);
+    }
+
+    function previewFromInput(inputId) {
+      if (!inputId) return;
+      previewLibraryFile(inputId);
+    }
+
+    function uploadModalFile(inputId, file, folder, done) {
+      if (!inputId || !file) return;
+      var input = document.getElementById(inputId);
+      if (!input) return;
+      var row = input.closest('.rocket-modal-field');
+      var statusEl = row ? row.querySelector('.js-modal-upload-status') : null;
+      if (statusEl) {
+        statusEl.textContent = 'Upload en cours...';
+        statusEl.classList.remove('text-danger', 'text-success');
+        statusEl.classList.add('text-muted');
+      }
+      modalUploadInProgressCount += 1;
+      input.disabled = true;
+      var form = new FormData();
+      form.append('file', file);
+      form.append('folder', folder || 'Library/courses/uploads');
+      fetch('/admin/library/upload', { method: 'POST', body: form })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data || data.ok === false || !data.key) {
+            throw new Error(getApiErrorMessage(data, 'Upload impossible pour ce fichier.'));
+          }
+          var chosenKey = safe(data.scormEntryKey || data.key);
+          input.value = chosenKey;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          if (safe(data.scormIndexFile)) {
+            var scormIdx = document.getElementById('sw_interactive_file_interactive_file_name');
+            if (scormIdx && !safe(scormIdx.value).trim()) {
+              scormIdx.value = safe(data.scormIndexFile);
+            }
+          }
+          if (statusEl) {
+            if (safe(data.scormExtractError)) {
+              statusEl.textContent = 'Upload termine, mais extraction SCORM en echec: ' + safe(data.scormExtractError);
+              statusEl.classList.remove('text-muted', 'text-success');
+              statusEl.classList.add('text-danger');
+            } else {
+              statusEl.textContent = safe(data.scormEntryKey)
+                ? 'Upload + extraction SCORM termines.'
+                : 'Upload termine. Le chemin a ete rempli.';
+              statusEl.classList.remove('text-muted', 'text-danger');
+              statusEl.classList.add('text-success');
+            }
+          }
+        })
+        .catch(function (error) {
+          var msg = (error && error.message) ? error.message : 'Merci de reessayer.';
+          if (statusEl) {
+            statusEl.textContent = 'Upload echoue: ' + msg;
+            statusEl.classList.remove('text-muted', 'text-success');
+            statusEl.classList.add('text-danger');
+          }
+          if (hasSwal && typeof Swal.isVisible === 'function' && Swal.isVisible()) {
+            Swal.showValidationMessage('Upload echoue: ' + msg);
+          } else if (hasSwal) {
+            Swal.fire({ icon: 'error', title: 'Upload echec', text: msg });
+          }
+        })
+        .finally(function () {
+          modalUploadInProgressCount = Math.max(0, modalUploadInProgressCount - 1);
+          input.disabled = false;
+          if (typeof done === 'function') done();
+        });
+    }
+
+    function bindModalFileControls(type) {
+      function bindFieldControls(fieldKey, opts) {
+        var input = document.getElementById('sw_' + type + '_' + fieldKey);
+        if (!input || input.dataset.bindReady === '1') return;
+        input.dataset.bindReady = '1';
+
+        var row = input.closest('.rocket-modal-field');
+        if (!row) return;
+        var controls = document.createElement('div');
+        controls.className = 'd-flex align-items-center gap-2 mt-2';
+        controls.innerHTML = '' +
+          '<button type="button" class="btn btn-outline-secondary btn-sm js-modal-lib-btn">Library</button>' +
+          '<button type="button" class="btn btn-outline-primary btn-sm js-modal-preview-btn"><i class="fa-regular fa-eye"></i></button>' +
+          '<button type="button" class="btn btn-outline-secondary btn-sm js-modal-browse-btn">Browse</button>' +
+          '<input type="file" class="d-none js-modal-file-input"' + (opts && opts.accept ? (' accept="' + opts.accept + '"') : '') + '>' +
+          '<span class="small text-muted js-modal-upload-status"></span>';
+        row.appendChild(controls);
+
+        var libBtn = controls.querySelector('.js-modal-lib-btn');
+        var previewBtn = controls.querySelector('.js-modal-preview-btn');
+        var browseBtn = controls.querySelector('.js-modal-browse-btn');
+        var fileInput = controls.querySelector('.js-modal-file-input');
+        var sourceEl = document.getElementById('sw_' + type + '_storage');
+
+        function computeFolder() {
+          var safeCourseFolder = String(webinarId || 'general').replace(/[^a-zA-Z0-9_-]/g, '_');
+          if (opts && opts.fixedFolder) return opts.fixedFolder + '/' + safeCourseFolder;
+          var src = sourceEl ? safe(sourceEl.value).toLowerCase() : 'upload';
+          if (type === 'interactive_file') return 'Library/courses/scorm/' + safeCourseFolder;
+          return ((src === 's3' || src === 'secure_host') ? 'Library/courses/s3/' : 'Library/courses/uploads/') + safeCourseFolder;
+        }
+
+        function updateBrowseVisibility() {
+          if (opts && opts.alwaysBrowse) {
+            if (browseBtn) browseBtn.classList.remove('d-none');
+            return;
+          }
+          var src = sourceEl ? safe(sourceEl.value).toLowerCase() : 'upload';
+          var showBrowse = (type === 'interactive_file') || src === 'upload' || src === 's3' || src === 'secure_host';
+          if (browseBtn) browseBtn.classList.toggle('d-none', !showBrowse);
+        }
+
+        if (libBtn) libBtn.addEventListener('click', function () { openLibraryPickerForInput(input.id); });
+        if (previewBtn) previewBtn.addEventListener('click', function () { previewFromInput(input.id); });
+        if (browseBtn && fileInput) {
+          browseBtn.addEventListener('click', function () { fileInput.click(); });
+          fileInput.addEventListener('change', function () {
+            var file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+            if (!file) return;
+            uploadModalFile(input.id, file, computeFolder(), function () {
+              fileInput.value = '';
+            });
+          });
+        }
+        if (sourceEl) sourceEl.addEventListener('change', updateBrowseVisibility);
+        updateBrowseVisibility();
+      }
+
+      bindFieldControls('file_path');
+      if (type === 'text_lesson') {
+        bindFieldControls('image', {
+          alwaysBrowse: true,
+          fixedFolder: 'Library/courses/images',
+          accept: 'image/*'
+        });
+      }
+    }
+
+    function guardModalConfirmWhileUploading() {
+      if (modalUploadInProgressCount > 0) {
+        if (hasSwal) Swal.showValidationMessage('Upload en cours... veuillez patienter avant de sauvegarder.');
+        return false;
+      }
+      return true;
+    }
+
+    function setInlineFileUploading(root, isUploading, label) {
+      if (!root) return;
+      var saveBtn = root.querySelector('.js-save-file-inline');
+      var browseBtn = root.querySelector('.js-file-inline-browse');
+      var help = root.querySelector('.js-file-inline-path-help');
+      if (saveBtn) {
+        if (!saveBtn.dataset.defaultText) saveBtn.dataset.defaultText = saveBtn.textContent || 'Save';
+        saveBtn.disabled = !!isUploading;
+        saveBtn.textContent = isUploading ? (label || 'Uploading...') : saveBtn.dataset.defaultText;
+      }
+      if (browseBtn) browseBtn.disabled = !!isUploading;
+      if (help && isUploading) help.textContent = 'Upload en cours... merci de patienter.';
+    }
+
+    function uploadInlineLocalFile(root, file) {
+      if (!root || !file) return Promise.resolve();
+      var pathInput = root.querySelector('.js-file-inline-path');
+      var sourceEl = root.querySelector('.js-file-inline-source');
+      var src = safe((sourceEl && sourceEl.value) || 'upload').toLowerCase();
+      var folderRoot = src === 's3' ? 'Library/courses/s3' : 'Library/courses/uploads';
+      var safeCourseFolder = String(webinarId || 'general').replace(/[^a-zA-Z0-9_-]/g, '_');
+      var folder = folderRoot + '/' + safeCourseFolder;
+      setInlineFileUploading(root, true, 'Upload...');
+      var form = new FormData();
+      form.append('file', file);
+      form.append('folder', folder);
+      return fetch('/admin/library/upload', { method: 'POST', body: form })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data || data.ok === false || !data.key) {
+            throw new Error(getApiErrorMessage(data, 'Upload impossible pour ce fichier.'));
+          }
+          if (pathInput) {
+            pathInput.value = safe(data.key);
+            pathInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (hasSwal) Swal.fire({ icon: 'success', title: 'Fichier televerse', text: 'Le chemin MinIO a ete renseigne automatiquement.' });
+        })
+        .catch(function (error) {
+          if (hasSwal) Swal.fire({ icon: 'error', title: 'Upload echec', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+        })
+        .finally(function () {
+          setInlineFileUploading(root, false);
+          applyInlineFileSourceBehavior(root);
+        });
+    }
+
+    refreshBuilder();
+
+    var deepLinkProcessed = false;
+
+    function showSavedSuccess() {
+      if (hasSwal) Swal.fire({ icon: 'success', title: 'Enregistre', text: 'L element a ete ajoute avec succes.' });
+    }
+
+    function showSaveError(error) {
+      if (hasSwal) Swal.fire({ icon: 'error', title: 'Echec de l enregistrement', text: (error && error.message) ? error.message : 'Merci de verifier les champs et de reessayer.' });
+    }
+
+    function createSectionItem(type, value, chapterId) {
+      var payload = value && value.payload ? value.payload : {};
+      if (chapterId) payload.chapter_id = chapterId;
+      return fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          type: type,
+          title: value.title,
+          status: value.status,
+          payload: payload
+        })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.ok) throw new Error(getApiErrorMessage(data, 'Impossible de sauvegarder cet element pour le moment.'));
+          refreshBuilder();
+          showSavedSuccess();
+        })
+        .catch(function (error) {
+          showSaveError(error);
+        });
+    }
+
+    function clearDeepLinkQuery() {
+      var url = new URL(window.location.href);
+      ['openCreate', 'sectionAction', 'sectionId', 'fromLearning'].forEach(function (k) {
+        url.searchParams.delete(k);
+      });
+      window.history.replaceState({}, document.title, url.pathname + (url.searchParams.toString() ? ('?' + url.searchParams.toString()) : ''));
+    }
+
+    function processDeepLinkActions() {
+      if (deepLinkProcessed) return;
+      var params = new URLSearchParams(window.location.search || '');
+      if (params.get('fromLearning') !== '1') return;
+      deepLinkProcessed = true;
+
+      var openCreate = safe(params.get('openCreate'));
+      var sectionAction = safe(params.get('sectionAction'));
+      var sectionId = safe(params.get('sectionId'));
+
+      if (openCreate) {
+        if (openCreate === 'chapter') {
+          var chapterBtn = document.querySelector('.js-add-section-item[data-type="chapter"]');
+          if (chapterBtn) chapterBtn.click();
+          clearDeepLinkQuery();
+          return;
+        }
+
+        var labelMap = {
+          file: 'Fichier',
+          interactive_file: 'Fichier SCORM',
+          text_lesson: 'Lecon texte',
+          quiz: 'Quiz',
+          assignment: 'Devoir'
+        };
+        var chapterCandidate = sectionId || '';
+        buildCreateModal(openCreate, labelMap[openCreate] || openCreate, chapterCandidate).then(function (result) {
+          if (!result.isConfirmed) return;
+          createSectionItem(openCreate, result.value, chapterCandidate);
+        });
+        clearDeepLinkQuery();
+        return;
+      }
+
+      if (sectionAction && sectionId) {
+        var chapterRow = document.querySelector('[data-chapter-id="' + sectionId.replace(/"/g, '\\"') + '"]');
+        if (sectionAction === 'edit') {
+          var edit = chapterRow ? chapterRow.querySelector('.js-edit-item[data-type="chapter"]') : null;
+          if (edit) edit.click();
+        } else if (sectionAction === 'delete') {
+          var del = chapterRow ? chapterRow.querySelector('.js-delete-item[data-type="chapter"]') : null;
+          if (del) del.click();
+        } else if (sectionAction === 'sort') {
+          if (chapterRow) {
+            chapterRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          if (hasSwal) {
+            Swal.fire({
+              icon: 'info',
+              title: 'Tri de section',
+              text: 'Le tri glisser-deposer sera active dans la prochaine passe.',
+              confirmButtonText: 'OK'
+            });
+          }
+        }
+        clearDeepLinkQuery();
+      }
+    }
+
+    function getApiErrorMessage(data, fallback) {
+      if (data && typeof data.message === 'string' && data.message.trim()) return data.message.trim();
+      if (data && typeof data.status === 'number') {
+        if (data.status === 401) return 'Votre session a expire. Reconnectez-vous puis reessayez.';
+        if (data.status === 403) return 'Vous n avez pas les droits pour cette action.';
+        if (data.status >= 500) return 'Erreur serveur temporaire. Reessayez dans quelques instants.';
+      }
+      return fallback;
+    }
+
+    document.querySelectorAll('.js-add-section-item').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var type = btn.getAttribute('data-type') || '';
+        var label = btn.getAttribute('data-label') || type;
+        buildCreateModal(type, label).then(function (result) {
+          if (!result.isConfirmed) return;
+          createSectionItem(type, result.value, '');
+        });
+      });
+    });
+
+    document.getElementById('builderSections').addEventListener('click', function (event) {
+      var openLibraryBtn = event.target.closest('.js-open-library-picker');
+      if (openLibraryBtn) {
+        var targetInput = openLibraryBtn.getAttribute('data-target-input') || '';
+        openLibraryPicker(targetInput);
+        return;
+      }
+
+      var previewLibraryBtn = event.target.closest('.js-preview-library-file');
+      if (previewLibraryBtn) {
+        var previewTargetInput = previewLibraryBtn.getAttribute('data-target-input') || '';
+        previewLibraryFile(previewTargetInput);
+        return;
+      }
+
+      var browseBtn = event.target.closest('.js-file-inline-browse');
+      if (browseBtn) {
+        var browseRoot = browseBtn.closest('.rocket-file-inline');
+        if (!browseRoot) return;
+        if (browseBtn.disabled) return;
+        var fileInput = browseRoot.querySelector('.js-file-inline-device-file');
+        if (fileInput) fileInput.click();
+        return;
+      }
+
+      var ifBrowseBtn = event.target.closest('.js-if-inline-browse');
+      if (ifBrowseBtn) {
+        var ifBrowseRoot = ifBrowseBtn.closest('.rocket-inline-item');
+        if (!ifBrowseRoot) return;
+        var ifFileInput = ifBrowseRoot.querySelector('.js-if-inline-device-file');
+        if (ifFileInput) ifFileInput.click();
+        return;
+      }
+
+      var saveInlineFileBtn = event.target.closest('.js-save-file-inline');
+      if (saveInlineFileBtn) {
+        var inlineId = saveInlineFileBtn.getAttribute('data-id') || '';
+        var root = saveInlineFileBtn.closest('.rocket-file-inline');
+        if (!root || !inlineId) return;
+        var nextTitle = safe((root.querySelector('.js-file-inline-title') || {}).value || '');
+        var nextSource = safe((root.querySelector('.js-file-inline-source') || {}).value || 'upload');
+        var accessChecked = root.querySelector('.js-file-inline-accessibility input[type="radio"]:checked');
+        var nextAccessibility = safe((accessChecked && accessChecked.value) || 'free');
+        var nextPath = safe((root.querySelector('.js-file-inline-path') || {}).value || '');
+        var nextDescription = safe((root.querySelector('.js-file-inline-description') || {}).value || '');
+        var nextFileType = safe((root.querySelector('.js-file-inline-file-type') || {}).value || '');
+        var nextVolume = safe((root.querySelector('.js-file-inline-volume') || {}).value || '');
+        var nextChapter = safe((root.querySelector('.js-file-inline-chapter') || {}).value || '');
+        var onlineViewer = !!(root.querySelector('.js-file-inline-online-viewer') || {}).checked;
+        var downloadable = !!(root.querySelector('.js-file-inline-downloadable') || {}).checked;
+        var dripContent = !!(root.querySelector('.js-file-inline-drip') || {}).checked;
+        var checkPreviousParts = !!(root.querySelector('.js-file-inline-check-prev') || {}).checked;
+        var accessAfterDayRaw = safe((root.querySelector('.js-file-inline-access-after-day') || {}).value || '');
+        var activeEl = root.querySelector('.js-file-inline-active');
+        var nextStatus = activeEl && activeEl.checked ? 'ACTIVE' : 'DRAFT';
+        fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(inlineId), {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            type: 'file',
+            title: nextTitle,
+            status: nextStatus,
+            payload: {
+              chapter_id: nextChapter,
+              storage: nextSource,
+              accessibility: nextAccessibility,
+              file_path: nextPath,
+              file_type: nextFileType,
+              volume: toNullableNumber(nextVolume),
+              description: nextDescription,
+              online_viewer: onlineViewer,
+              downloadable: downloadable,
+              sequence_content: dripContent,
+              check_previous_parts: checkPreviousParts,
+              access_after_day: toNullableNumber(accessAfterDayRaw)
+            }
+          })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (!data.ok) throw new Error(getApiErrorMessage(data, 'Impossible de sauvegarder cet element.'));
+            refreshBuilder();
+            if (hasSwal) Swal.fire({ icon: 'success', title: 'Fichier mis a jour' });
+          })
+          .catch(function (error) {
+            if (hasSwal) Swal.fire({ icon: 'error', title: 'Echec de sauvegarde', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+          });
+        return;
+      }
+      var saveInlineIfBtn = event.target.closest('.js-save-if-inline');
+      if (saveInlineIfBtn) {
+        var iid = saveInlineIfBtn.getAttribute('data-id') || '';
+        var iroot = saveInlineIfBtn.closest('.rocket-inline-item');
+        if (!iroot || !iid) return;
+        var ititle = safe((iroot.querySelector('.js-if-inline-title') || {}).value || '');
+        var ichapter = safe((iroot.querySelector('.js-if-inline-chapter') || {}).value || '');
+        var itype = safe((iroot.querySelector('.js-if-inline-type') || {}).value || 'adobe_captivate');
+        var iindex = safe((iroot.querySelector('.js-if-inline-index') || {}).value || '');
+        var ipath = safe((iroot.querySelector('.js-if-inline-path') || {}).value || '');
+        var idesc = safe((iroot.querySelector('.js-if-inline-description') || {}).value || '');
+        var iactiveEl = iroot.querySelector('.js-if-inline-active');
+        var istatus = iactiveEl && iactiveEl.checked ? 'ACTIVE' : 'DRAFT';
+        fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(iid), {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            type: 'interactive_file',
+            title: ititle,
+            status: istatus,
+            payload: {
+              chapter_id: ichapter,
+              interactive_type: itype,
+              interactive_file_name: iindex,
+              file_path: ipath,
+              description: idesc
+            }
+          })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          if (!data.ok) throw new Error(getApiErrorMessage(data, 'Impossible de sauvegarder.'));
+          refreshBuilder();
+          if (hasSwal) Swal.fire({ icon: 'success', title: 'SCORM mis a jour' });
+        }).catch(function (error) {
+          if (hasSwal) Swal.fire({ icon: 'error', title: 'Echec de sauvegarde', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+        });
+        return;
+      }
+
+      var testInlineIfBtn = event.target.closest('.js-test-if-inline');
+      if (testInlineIfBtn) {
+        var testId = testInlineIfBtn.getAttribute('data-id') || '';
+        openInteractiveTest(testId);
+        return;
+      }
+      var saveInlineTlBtn = event.target.closest('.js-save-tl-inline');
+      if (saveInlineTlBtn) {
+        var tid = saveInlineTlBtn.getAttribute('data-id') || '';
+        var troot = saveInlineTlBtn.closest('.rocket-inline-item');
+        if (!troot || !tid) return;
+        var ttitle = safe((troot.querySelector('.js-tl-inline-title') || {}).value || '');
+        var tchapter = safe((troot.querySelector('.js-tl-inline-chapter') || {}).value || '');
+        var tstudy = safe((troot.querySelector('.js-tl-inline-study') || {}).value || '');
+        var tsummary = safe((troot.querySelector('.js-tl-inline-summary') || {}).value || '');
+        var tcontent = safe((troot.querySelector('.js-tl-inline-content') || {}).value || '');
+        var tactiveEl = troot.querySelector('.js-tl-inline-active');
+        var tstatus = tactiveEl && tactiveEl.checked ? 'ACTIVE' : 'DRAFT';
+        fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(tid), {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            type: 'text_lesson',
+            title: ttitle,
+            status: tstatus,
+            payload: {
+              chapter_id: tchapter,
+              study_time: tstudy,
+              summary: tsummary,
+              content: tcontent
+            }
+          })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          if (!data.ok) throw new Error(getApiErrorMessage(data, 'Impossible de sauvegarder.'));
+          refreshBuilder();
+          if (hasSwal) Swal.fire({ icon: 'success', title: 'Lecon texte mise a jour' });
+        }).catch(function (error) {
+          if (hasSwal) Swal.fire({ icon: 'error', title: 'Echec de sauvegarde', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+        });
+        return;
+      }
+      var saveInlineSsBtn = event.target.closest('.js-save-ss-inline');
+      if (saveInlineSsBtn) {
+        var sid = saveInlineSsBtn.getAttribute('data-id') || '';
+        var sroot = saveInlineSsBtn.closest('.rocket-inline-item');
+        if (!sroot || !sid) return;
+        var stitle = safe((sroot.querySelector('.js-ss-inline-title') || {}).value || '');
+        var schapter = safe((sroot.querySelector('.js-ss-inline-chapter') || {}).value || '');
+        var sprovider = safe((sroot.querySelector('.js-ss-inline-provider') || {}).value || 'local');
+        var sdate = safe((sroot.querySelector('.js-ss-inline-date') || {}).value || '');
+        var sdurationRaw = safe((sroot.querySelector('.js-ss-inline-duration') || {}).value || '');
+        var sextraTimeRaw = safe((sroot.querySelector('.js-ss-inline-extra-time-to-join') || {}).value || '');
+        var sapiSecret = safe((sroot.querySelector('.js-ss-inline-api-secret') || {}).value || '');
+        var smoderatorSecret = safe((sroot.querySelector('.js-ss-inline-moderator-secret') || {}).value || '');
+        var slink = safe((sroot.querySelector('.js-ss-inline-link') || {}).value || '');
+        var sdesc = safe((sroot.querySelector('.js-ss-inline-description') || {}).value || '');
+        var sagoraChat = !!(sroot.querySelector('.js-ss-inline-agora-chat') || {}).checked;
+        var sactiveEl = sroot.querySelector('.js-ss-inline-active');
+        var sstatus = sactiveEl && sactiveEl.checked ? 'ACTIVE' : 'DRAFT';
+        fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(sid), {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            type: 'session',
+            title: stitle,
+            status: sstatus,
+            payload: {
+              chapter_id: schapter,
+              session_api: sprovider,
+              api_secret: sapiSecret,
+              moderator_secret: smoderatorSecret,
+              date: sdate,
+              duration: toNullableNumber(sdurationRaw),
+              extra_time_to_join: toNullableNumber(sextraTimeRaw),
+              link: slink,
+              description: sdesc,
+              agora_chat: sagoraChat
+            }
+          })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          if (!data.ok) throw new Error(getApiErrorMessage(data, 'Impossible de sauvegarder.'));
+          refreshBuilder();
+          if (hasSwal) Swal.fire({ icon: 'success', title: 'Session mise a jour' });
+        }).catch(function (error) {
+          if (hasSwal) Swal.fire({ icon: 'error', title: 'Echec de sauvegarde', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+        });
+        return;
+      }
+      var saveInlineAsBtn = event.target.closest('.js-save-as-inline');
+      if (saveInlineAsBtn) {
+        var aid = saveInlineAsBtn.getAttribute('data-id') || '';
+        var aroot = saveInlineAsBtn.closest('.rocket-inline-item');
+        if (!aroot || !aid) return;
+        var atitle = safe((aroot.querySelector('.js-as-inline-title') || {}).value || '');
+        var achapter = safe((aroot.querySelector('.js-as-inline-chapter') || {}).value || '');
+        var agrade = safe((aroot.querySelector('.js-as-inline-grade') || {}).value || '');
+        var apass = safe((aroot.querySelector('.js-as-inline-pass-grade') || {}).value || '');
+        var adeadline = safe((aroot.querySelector('.js-as-inline-deadline') || {}).value || '');
+        var aattempts = safe((aroot.querySelector('.js-as-inline-attempts') || {}).value || '');
+        var adesc = safe((aroot.querySelector('.js-as-inline-description') || {}).value || '');
+        var aactiveEl = aroot.querySelector('.js-as-inline-active');
+        var astatus = aactiveEl && aactiveEl.checked ? 'ACTIVE' : 'DRAFT';
+        fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(aid), {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            type: 'assignment',
+            title: atitle,
+            status: astatus,
+            payload: {
+              chapter_id: achapter,
+              grade: toNullableNumber(agrade),
+              pass_grade: toNullableNumber(apass),
+              deadline: adeadline,
+              attempts: toNullableNumber(aattempts),
+              description: adesc
+            }
+          })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          if (!data.ok) throw new Error(getApiErrorMessage(data, 'Impossible de sauvegarder.'));
+          refreshBuilder();
+          if (hasSwal) Swal.fire({ icon: 'success', title: 'Assignment mis a jour' });
+        }).catch(function (error) {
+          if (hasSwal) Swal.fire({ icon: 'error', title: 'Echec de sauvegarde', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+        });
+        return;
+      }
+      var saveInlineQzBtn = event.target.closest('.js-save-qz-inline');
+      if (saveInlineQzBtn) {
+        var qid = saveInlineQzBtn.getAttribute('data-id') || '';
+        var qroot = saveInlineQzBtn.closest('.rocket-inline-item');
+        if (!qroot || !qid) return;
+        var qtitle = safe((qroot.querySelector('.js-qz-inline-title') || {}).value || '');
+        var qchapter = safe((qroot.querySelector('.js-qz-inline-chapter') || {}).value || '');
+        var qtime = safe((qroot.querySelector('.js-qz-inline-time') || {}).value || '');
+        var qattempt = safe((qroot.querySelector('.js-qz-inline-attempt') || {}).value || '');
+        var qpass = safe((qroot.querySelector('.js-qz-inline-pass-mark') || {}).value || '');
+        var qexpiry = safe((qroot.querySelector('.js-qz-inline-expiry-days') || {}).value || '');
+        var qdescription = safe((qroot.querySelector('.js-qz-inline-description') || {}).value || '');
+        var qrandom = !!(qroot.querySelector('.js-qz-inline-random') || {}).checked;
+        var qcertificate = !!(qroot.querySelector('.js-qz-inline-certificate') || {}).checked;
+        var qactive = !!(qroot.querySelector('.js-qz-inline-active') || {}).checked;
+        var qstatus = qactive ? 'ACTIVE' : 'DRAFT';
+        fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(qid), {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            type: 'quiz',
+            title: qtitle,
+            status: qstatus,
+            payload: {
+              chapter_id: qchapter,
+              time: toNullableNumber(qtime),
+              attempt: toNullableNumber(qattempt),
+              pass_mark: toNullableNumber(qpass),
+              expiry_days: toNullableNumber(qexpiry),
+              description: qdescription,
+              display_questions_randomly: qrandom,
+              certificate: qcertificate
+            }
+          })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          if (!data.ok) throw new Error(getApiErrorMessage(data, 'Impossible de sauvegarder.'));
+          refreshBuilder();
+          if (hasSwal) Swal.fire({ icon: 'success', title: 'Quiz mis a jour' });
+        }).catch(function (error) {
+          if (hasSwal) Swal.fire({ icon: 'error', title: 'Echec de sauvegarde', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+        });
+        return;
+      }
+
+      var addInChapter = event.target.closest('.js-add-in-chapter');
+      if (addInChapter) {
+        var directType = addInChapter.getAttribute('data-type') || '';
+        var directLabel = addInChapter.getAttribute('data-label') || directType;
+        var directChapterId = addInChapter.getAttribute('data-chapter-id') || '';
+        buildCreateModal(directType, directLabel, directChapterId).then(function (result) {
+          if (!result.isConfirmed) return;
+          createSectionItem(directType, result.value, directChapterId);
+        });
+        return;
+      }
+
+      var quickAddBtn = event.target.closest('.js-chapter-add');
+      if (quickAddBtn) {
+        var chapterId = quickAddBtn.getAttribute('data-id');
+        var existing = document.getElementById('rocketChapterQuickMenu');
+        if (existing) existing.remove();
+        var menu = document.createElement('div');
+        menu.id = 'rocketChapterQuickMenu';
+        menu.className = 'rocket-quick-menu';
+        menu.setAttribute('data-chapter-id', chapterId || '');
+        menu.innerHTML = [
+          '<button type="button" class="js-quick-add-option" data-type="file">Add File</button>',
+          '<button type="button" class="js-quick-add-option" data-type="interactive_file">New SCORM File</button>',
+          '<button type="button" class="js-quick-add-option" data-type="text_lesson">Add Text Lesson</button>',
+          '<button type="button" class="js-quick-add-option" data-type="quiz">Add Quiz</button>',
+          '<button type="button" class="js-quick-add-option" data-type="assignment">Add Assignment</button>'
+        ].join('');
+        document.body.appendChild(menu);
+        var rect = quickAddBtn.getBoundingClientRect();
+        menu.style.left = (window.scrollX + rect.left - 6) + 'px';
+        menu.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+        return;
+      }
+
+      var chapterToggleBtn = event.target.closest('.js-chapter-toggle');
+      if (chapterToggleBtn) {
+        var chapterToggleId = chapterToggleBtn.getAttribute('data-id') || '';
+        var chapterBody = document.querySelector('[data-chapter-body="' + chapterToggleId.replace(/"/g, '\\"') + '"]');
+        var icon = chapterToggleBtn.querySelector('i');
+        if (chapterBody) {
+          chapterBody.classList.toggle('d-none');
+          if (icon) {
+            icon.classList.toggle('fa-angle-up', !chapterBody.classList.contains('d-none'));
+            icon.classList.toggle('fa-angle-down', chapterBody.classList.contains('d-none'));
+          }
+        }
+        return;
+      }
+
+      var quickAddOption = event.target.closest('.js-quick-add-option');
+      if (quickAddOption) {
+        var addType = quickAddOption.getAttribute('data-type') || 'file';
+        var menuEl = document.getElementById('rocketChapterQuickMenu');
+        var chapterIdFromMenu = menuEl ? (menuEl.getAttribute('data-chapter-id') || '') : '';
+        if (menuEl) menuEl.remove();
+        buildCreateModal(addType, (typeSchemas[addType] && addType) || addType, chapterIdFromMenu).then(function (result) {
+          if (!result.isConfirmed) return;
+          createSectionItem(addType, result.value, chapterIdFromMenu);
+        });
+        return;
+      }
+
+      var inlineToggleBtn = event.target.closest('.js-inline-toggle');
+      if (inlineToggleBtn) {
+        var inlineRoot = inlineToggleBtn.closest('.rocket-file-inline, .rocket-inline-item');
+        if (!inlineRoot) return;
+        var inlineBody = inlineRoot.querySelector('.rocket-file-inline-body, .rocket-inline-item-body');
+        if (!inlineBody) return;
+        inlineBody.classList.toggle('d-none');
+        inlineToggleBtn.classList.toggle('is-collapsed', inlineBody.classList.contains('d-none'));
+        return;
+      }
+
+      var editBtn = event.target.closest('.js-edit-item');
+      if (editBtn) {
+        var type = editBtn.getAttribute('data-type');
+        var itemId = editBtn.getAttribute('data-id');
+        var sectionItems = sectionItemsByType[type] || [];
+        var item = sectionItems.find(function (x) { return safe(x.id) === safe(itemId); }) || {
+          id: itemId,
+          title: editBtn.getAttribute('data-title') || '',
+          status: editBtn.getAttribute('data-status') || 'ACTIVE',
+          payload: {}
+        };
+        buildEditModal(type, item).then(function (result) {
+          if (!result.isConfirmed) return;
+          fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(itemId), {
+            method: 'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(result.value)
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (!data.ok) throw new Error(getApiErrorMessage(data, 'Impossible de mettre a jour cet element.'));
+              refreshBuilder();
+              if (hasSwal) Swal.fire({ icon: 'success', title: 'Mise a jour effectuee' });
+            })
+            .catch(function (error) {
+              if (hasSwal) Swal.fire({ icon: 'error', title: 'Echec de la mise a jour', text: (error && error.message) ? error.message : 'Merci de reessayer.' });
+            });
+        });
+        return;
+      }
+
+      var deleteBtn = event.target.closest('.js-delete-item');
+      if (deleteBtn) {
+        var delType = deleteBtn.getAttribute('data-type');
+        var delId = deleteBtn.getAttribute('data-id');
+        if (!hasSwal) {
+          if (!window.confirm('Delete this item?')) return;
+          fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(delId) + '/delete', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ type: delType })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (!data.ok) throw new Error('delete_error');
+              refreshBuilder();
+            })
+            .catch(function () {});
+          return;
+        }
+        Swal.fire({
+          icon: 'warning',
+          title: 'Delete this item?',
+          showCancelButton: true,
+          confirmButtonText: 'Delete'
+        }).then(function (res) {
+          if (!res.isConfirmed) return;
+          fetch('/admin/webinars/' + encodeURIComponent(webinarId) + '/sections/' + encodeURIComponent(delId) + '/delete', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ type: delType })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (!data.ok) throw new Error('delete_error');
+              refreshBuilder();
+              if (hasSwal) Swal.fire({ icon: 'success', title: 'Deleted' });
+            })
+            .catch(function () { if (hasSwal) Swal.fire({ icon: 'error', title: 'Delete failed' }); });
+        });
+      }
+    });
+
+    document.getElementById('builderSections').addEventListener('change', function (event) {
+      var sourceEl = event.target.closest('.js-file-inline-source');
+      if (sourceEl) {
+        var sourceRoot = sourceEl.closest('.rocket-file-inline');
+        applyInlineFileSourceBehavior(sourceRoot);
+      }
+      var dripEl = event.target.closest('.js-file-inline-drip');
+      if (dripEl) {
+        var dripRoot = dripEl.closest('.rocket-file-inline');
+        applyInlineFileDripBehavior(dripRoot);
+      }
+      var ssProviderEl = event.target.closest('.js-ss-inline-provider');
+      if (ssProviderEl) {
+        var ssRoot = ssProviderEl.closest('.rocket-inline-item');
+        applyInlineSessionProviderBehavior(ssRoot);
+      }
+      var ifTypeEl = event.target.closest('.js-if-inline-type');
+      if (ifTypeEl) {
+        var ifTypeRoot = ifTypeEl.closest('.rocket-inline-item');
+        applyInlineInteractiveTypeBehavior(ifTypeRoot);
+      }
+      var deviceFileInput = event.target.closest('.js-file-inline-device-file');
+      if (deviceFileInput) {
+        var fileRoot = deviceFileInput.closest('.rocket-file-inline');
+        if (!fileRoot) return;
+        var file = deviceFileInput.files && deviceFileInput.files[0] ? deviceFileInput.files[0] : null;
+        var sourceEl2 = fileRoot.querySelector('.js-file-inline-source');
+        var src2 = safe((sourceEl2 && sourceEl2.value) || 'upload').toLowerCase();
+        if (!file) return;
+        if (src2 === 'upload' || src2 === 's3' || src2 === 'secure_host') {
+          uploadInlineLocalFile(fileRoot, file);
+        } else {
+          var pathInput = fileRoot.querySelector('.js-file-inline-path');
+          if (pathInput) {
+            pathInput.value = file.name;
+            pathInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+      }
+
+      var ifDeviceFileInput = event.target.closest('.js-if-inline-device-file');
+      if (ifDeviceFileInput) {
+        var ifFileRoot = ifDeviceFileInput.closest('.rocket-inline-item');
+        if (!ifFileRoot) return;
+        var ifPathInput = ifFileRoot.querySelector('.js-if-inline-path');
+        var ifFile = ifDeviceFileInput.files && ifDeviceFileInput.files[0] ? ifDeviceFileInput.files[0] : null;
+        if (!ifFile || !ifPathInput) return;
+        var safeCourseFolder2 = String(webinarId || 'general').replace(/[^a-zA-Z0-9_-]/g, '_');
+        uploadModalFile(ifPathInput.id, ifFile, 'Library/courses/scorm/' + safeCourseFolder2, function () {
+          ifDeviceFileInput.value = '';
+        });
+      }
+    });
+
+    document.addEventListener('click', function (event) {
+      var menu = document.getElementById('rocketChapterQuickMenu');
+      if (!menu) return;
+      if (event.target.closest('#rocketChapterQuickMenu') || event.target.closest('.js-chapter-add')) return;
+      menu.remove();
+    });
+
+    window.addEventListener('message', function (event) {
+      if (!event || event.origin !== window.location.origin) return;
+      var data = event.data || {};
+      if (data.type !== 'LIBRARY_FILE_SELECTED') return;
+      var targetInputId = safe(data.target || '');
+      var selectedKey = safe(data.key || '');
+      if (!targetInputId || !selectedKey) return;
+      var targetInput = document.getElementById(targetInputId);
+      if (!targetInput) return;
+      targetInput.value = selectedKey;
+      targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+      if (hasSwal) Swal.fire({ icon: 'success', title: 'Fichier selectionne', text: 'Le chemin a ete injecte dans le formulaire.' });
+    });
+  })();
+</script>

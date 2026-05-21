@@ -1,0 +1,70 @@
+<section class="bg-white border rounded-4 shadow-sm p-4">
+  <h2 class="h4 mb-3">Catalogue des formations</h2>
+  <form class="row g-3 mb-4" method="get" action="/courses">
+    <div class="col-md-5">
+      <input name="q" class="form-control" placeholder="Rechercher un cours..." value="<%= data.filters.q %>">
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" name="level">
+        <option value="all" <%= data.filters.level === 'all' ? 'selected' : '' %>>Niveau: Tous</option>
+        <option value="beginner" <%= data.filters.level === 'beginner' ? 'selected' : '' %>>Débutant</option>
+        <option value="intermediate" <%= data.filters.level === 'intermediate' ? 'selected' : '' %>>Intermédiaire</option>
+        <option value="advanced" <%= data.filters.level === 'advanced' ? 'selected' : '' %>>Avancé</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" name="status">
+        <option value="published" <%= data.filters.status === 'published' ? 'selected' : '' %>>Publié</option>
+        <option value="draft" <%= data.filters.status === 'draft' ? 'selected' : '' %>>Brouillon</option>
+        <option value="archived" <%= data.filters.status === 'archived' ? 'selected' : '' %>>Archivé</option>
+        <option value="all" <%= data.filters.status === 'all' ? 'selected' : '' %>>Tous</option>
+      </select>
+    </div>
+    <div class="col-md-1">
+      <button class="btn btn-primary w-100" type="submit">Filtrer</button>
+    </div>
+  </form>
+
+  <% if (data.listStatus !== 200) { %>
+    <div class="alert alert-warning">Le service cours est indisponible pour le moment (status <%= data.listStatus %>).</div>
+  <% } %>
+
+  <% if (!(data.rows || []).length) { %>
+    <div class="alert alert-info mb-0">Aucun cours trouvé avec ces filtres.</div>
+  <% } %>
+
+  <div class="row g-3">
+    <% (data.rows || []).forEach((row) => { %>
+      <%
+        const titleRaw = String(row.title ?? '-');
+        const title = titleRaw.replace(/^\[(COURSE|LIVE|TEXT)\]\s*/i, '').trim() || '-';
+        const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata : {};
+        const summary = String(metadata.summary ?? row.description ?? '').trim();
+        const category = String(metadata.category ?? row.category ?? 'Non classé');
+        const locale = String(metadata.locale ?? 'FR');
+        const slug = String(row.slug ?? '');
+        const status = String(row.status ?? 'DRAFT').toUpperCase();
+        const statusClass = status === 'PUBLISHED' ? 'text-bg-success' : (status === 'DRAFT' ? 'text-bg-secondary' : 'text-bg-warning');
+      %>
+      <div class="col-12 col-md-6 col-xl-4">
+        <article class="border rounded-4 bg-white p-3 h-100 shadow-sm">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <h3 class="h6 mb-0"><%= title %></h3>
+            <span class="badge <%= statusClass %>"><%= status %></span>
+          </div>
+          <div class="small text-muted mb-2"><%= category %> • <%= locale %></div>
+          <p class="small mb-3 text-muted"><%= summary || 'Aucune description disponible pour ce cours.' %></p>
+          <div class="small text-muted mb-3">
+            Créé: <%= row.createdAt ? new Date(String(row.createdAt)).toLocaleDateString() : '-' %>
+          </div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="/admin/webinars/<%= encodeURIComponent(String(row.id ?? '')) %>/edit">Voir détails</a>
+            <% if (slug) { %>
+              <a class="btn btn-sm btn-primary" href="/courses/<%= encodeURIComponent(slug) %>">Lien</a>
+            <% } %>
+          </div>
+        </article>
+      </div>
+    <% }) %>
+  </div>
+</section>

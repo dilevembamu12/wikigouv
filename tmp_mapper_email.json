@@ -1,0 +1,14 @@
+{
+    "protocolMapper":  "oidc-usermodel-property-mapper",
+    "protocol":  "openid-connect",
+    "name":  "email",
+    "consentRequired":  false,
+    "config":  {
+                   "access.token.claim":  "true",
+                   "user.attribute":  "email",
+                   "claim.name":  "email",
+                   "jsonType.label":  "String",
+                   "id.token.claim":  "true",
+                   "userinfo.token.claim":  "true"
+               }
+}

@@ -1,3 +1,13 @@
+node_modules
+dist
+.next
+.env
+apps/api/node_modules
+apps/web/node_modules
+apps/api/dist
+apps/web/.next
+
+
 # Nestjs specific
 /dist
 /node_modules

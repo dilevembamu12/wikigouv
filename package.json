@@ -1,0 +1,36 @@
+{
+  "name": "wikigouv-platform",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Wikigouv LMS + IA institutionnel (ARTF) avec SSO Keycloak",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:web dev:api",
+    "dev:web": "npm --workspace @wikigouv/web run dev",
+    "dev:api": "npm --workspace @wikigouv/api run start:dev",
+    "build": "npm-run-all build:web build:api",
+    "build:web": "npm --workspace @wikigouv/web run build",
+    "build:api": "npm --workspace @wikigouv/api run build",
+    "start": "npm --workspace @wikigouv/api run start:prod",
+    "test": "npm-run-all test:api test:web",
+    "test:api": "npm --workspace @wikigouv/api run test",
+    "test:web": "npm --workspace @wikigouv/web run test",
+    "test:e2e": "npm --workspace @wikigouv/web run test:e2e",
+    "test:visual": "npm --workspace @wikigouv/web run test:visual",
+    "test:visual:update": "npm --workspace @wikigouv/web run test:visual:update",
+    "lint": "npm-run-all lint:web lint:api",
+    "lint:web": "npm --workspace @wikigouv/web run lint",
+    "lint:api": "npm --workspace @wikigouv/api run lint",
+    "db:migrate": "npm --workspace @wikigouv/api run db:migrate",
+    "db:seed": "npm --workspace @wikigouv/api run db:seed",
+    "legacy:start": "node wikigouv.js",
+    "legacy:dev": "nodemon wikigouv.js"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "nodemon": "^3.1.14"
+  }
+}

@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WikiGouv | Inscription participant</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wikiBlue: '#123C73',
+            wikiRed: '#B91C1C',
+            wikiGold: '#D4A017',
+            wikiDark: '#0B172A',
+            wikiLight: '#F8FAFC',
+            wikiGreen: '#166534',
+            wikiTeal: '#0F766E',
+            wikiSlate: '#334155',
+            wikiIndigo: '#3730A3'
+          },
+          boxShadow: {
+            soft: '0 10px 30px rgba(0,0,0,0.08)',
+            glow: '0 14px 40px rgba(18,60,115,0.18)',
+            hero: '0 20px 60px rgba(0,0,0,0.25)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(130deg, #f8fafc, #e2e8f0 45%, #dbeafe); }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800">
+  <%
+    const currentUser = (typeof user !== 'undefined' && user) ? user : null;
+    const isLogged = typeof isAuthenticated !== 'undefined' ? isAuthenticated : !!currentUser;
+  %>
+
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3">
+        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-wikiBlue via-wikiTeal to-wikiGold text-white flex items-center justify-center shadow-soft">
+          <i class="fas fa-landmark text-lg"></i>
+        </div>
+        <div>
+          <div class="text-xl font-extrabold tracking-tight">Wiki<span class="text-wikiRed">Gouv</span></div>
+          <div class="text-xs text-slate-500 -mt-1">wikigouv.com · Centre souverain de knowledge transfer gouvernemental</div>
+        </div>
+      </a>
+
+      <div class="hidden md:flex items-center gap-7">
+        <a href="/landing#vision" class="text-slate-600 hover:text-wikiBlue font-medium">Vision</a>
+        <a href="/landing#persona" class="text-slate-600 hover:text-wikiBlue font-medium">Persona</a>
+        <a href="/landing#raghouse" class="text-slate-600 hover:text-wikiBlue font-medium">RAGHouse</a>
+        <a href="/landing#services" class="text-slate-600 hover:text-wikiBlue font-medium">Services</a>
+        <a href="/landing#security" class="text-slate-600 hover:text-wikiBlue font-medium">Sécurité</a>
+        <a href="#contact" class="text-slate-600 hover:text-wikiBlue font-medium">Contact</a>
+
+        <% if (isLogged) { %>
+          <a href="/my/" class="bg-wikiBlue text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-900 transition">
+            <i class="fas fa-graduation-cap mr-2"></i>Mon espace
+          </a>
+        <% } else { %>
+          <a href="/register" class="bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-xl font-semibold hover:bg-slate-50 transition">
+            <i class="fas fa-user-plus mr-2"></i>Inscription
+          </a>
+          <a href="/login/index.php" class="bg-wikiBlue text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-900 transition">
+            <i class="fas fa-right-to-bracket mr-2"></i>Connexion
+          </a>
+        <% } %>
+      </div>
+
+      <button id="mobileMenuBtn" class="md:hidden text-slate-700 text-2xl">
+        <i class="fas fa-bars"></i>
+      </button>
+    </nav>
+
+    <div id="mobileMenu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-3">
+      <a href="/landing#vision" class="block text-slate-700 font-medium">Vision</a>
+      <a href="/landing#persona" class="block text-slate-700 font-medium">Persona</a>
+      <a href="/landing#raghouse" class="block text-slate-700 font-medium">RAGHouse</a>
+      <a href="/landing#services" class="block text-slate-700 font-medium">Services</a>
+      <a href="/landing#security" class="block text-slate-700 font-medium">Sécurité</a>
+      <a href="#contact" class="block text-slate-700 font-medium">Contact</a>
+      <% if (isLogged) { %>
+        <a href="/my/" class="block text-center bg-wikiBlue text-white px-4 py-3 rounded-xl font-semibold">Mon espace</a>
+      <% } else { %>
+        <a href="/register" class="block text-center border border-slate-300 bg-white text-slate-700 px-4 py-3 rounded-xl font-semibold">Inscription</a>
+        <a href="/login/index.php" class="block text-center bg-wikiBlue text-white px-4 py-3 rounded-xl font-semibold">Connexion</a>
+      <% } %>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-4 md:p-8">
+    <section class="rounded-3xl bg-white/95 border border-slate-200 shadow-xl overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-900 via-cyan-800 to-emerald-700 text-white p-6 md:p-8">
+        <div class="text-sm uppercase tracking-wider opacity-90">Phase 1 - Onboarding</div>
+        <h1 class="mt-2 text-2xl md:text-4xl font-black">Inscription des participants</h1>
+        <p class="mt-3 text-white/90 max-w-3xl">
+          Remplissez ce formulaire pour enregistrer un participant sur la plateforme WikiGouv.
+        </p>
+      </div>
+
+      <form id="registerForm" class="p-5 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+        <div class="md:col-span-2">
+          <div id="formAlert" class="hidden rounded-2xl px-4 py-3 text-sm font-medium"></div>
+        </div>
+
+        <div class="md:col-span-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4" style="display: none;">
+          <div class="flex flex-col md:flex-row md:items-end gap-3">
+            <label class="block flex-1">
+              <span class="text-sm font-semibold text-slate-700">Carte NIU (Congo) - upload ou capture photo</span>
+              <input id="niu_card_file" type="file" accept="image/*" capture="environment" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2" />
+            </label>
+            <div class="flex gap-2">
+              <button id="btnStartCamera" type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 px-4 py-3 font-semibold hover:bg-slate-100 transition">
+                <i class="fas fa-video mr-2"></i>Ouvrir caméra
+              </button>
+              <button id="btnOcrNiu" type="button" class="inline-flex items-center justify-center rounded-xl bg-wikiBlue text-white px-5 py-3 font-semibold hover:bg-blue-900 transition">
+                <i class="fas fa-camera mr-2"></i>Scanner la carte
+              </button>
+            </div>
+          </div>
+          <p class="mt-2 text-xs text-slate-500">Le scan OCR tente de récupérer automatiquement: nom complet, numéro NIU/NUI et date de naissance.</p>
+          <div id="cameraWrap" class="hidden mt-3 rounded-xl border border-slate-300 bg-black/90 p-3">
+            <video id="cameraVideo" autoplay playsinline class="w-full rounded-lg max-h-80 object-contain bg-black"></video>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button id="btnCapturePhoto" type="button" class="inline-flex items-center justify-center rounded-xl bg-emerald-700 text-white px-4 py-2 font-semibold hover:bg-emerald-800 transition">
+                <i class="fas fa-camera-retro mr-2"></i>Capturer
+              </button>
+              <button id="btnStopCamera" type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 px-4 py-2 font-semibold hover:bg-slate-100 transition">
+                <i class="fas fa-xmark mr-2"></i>Fermer caméra
+              </button>
+            </div>
+          </div>
+          <canvas id="cameraCanvas" class="hidden"></canvas>
+          <div id="capturePreviewWrap" class="hidden mt-3">
+            <div class="text-xs font-semibold text-slate-600 mb-1">Aperçu capture caméra</div>
+            <img id="capturePreview" alt="Aperçu capture NIU" class="w-full max-h-64 object-contain rounded-xl border border-slate-200 bg-white" />
+          </div>
+          <details class="mt-3">
+            <summary class="cursor-pointer text-xs font-semibold text-slate-600">Afficher le texte OCR détecté</summary>
+            <pre id="ocrPreview" class="mt-2 max-h-40 overflow-auto rounded-xl bg-white border border-slate-200 p-3 text-xs text-slate-700 whitespace-pre-wrap"></pre>
+          </details>
+        </div>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Numéro NIU/NUI</span>
+          <input id="niu_number" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Nom complet *</span>
+          <input id="full_name" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Email *</span>
+          <input id="email" type="email" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Téléphone *</span>
+          <input id="phone" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Sexe</span>
+          <select id="gender" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500">
+            <option value="">Sélectionner</option>
+            <option value="F">Femme</option>
+            <option value="M">Homme</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Date de naissance</span>
+          <input id="birth_date" type="date" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Ville</span>
+          <input id="city" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Organisation *</span>
+          <input id="organization" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Direction / Département</span>
+          <input id="direction" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Fonction actuelle *</span>
+          <input id="role" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Années d'expérience</span>
+          <input id="years_experience" type="number" min="0" step="1" inputmode="numeric" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Mode de formation préféré</span>
+          <select id="preferred_mode" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500">
+            <option value="">Sélectionner</option>
+            <option value="presentiel">Présentiel</option>
+            <option value="distanciel">Distanciel</option>
+            <option value="hybride">Hybride</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="text-sm font-semibold text-slate-700">Disponibilité</span>
+          <input id="availability" placeholder="Ex: Soir, week-end, horaire bureau" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" />
+        </label>
+
+        <label class="block md:col-span-2">
+          <span class="text-sm font-semibold text-slate-700">Objectifs d'apprentissage *</span>
+          <textarea id="learning_goals" rows="4" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500" placeholder="Que voulez-vous apprendre sur la plateforme ?"></textarea>
+        </label>
+
+        <label class="md:col-span-2 flex items-start gap-3 rounded-xl bg-slate-50 border border-slate-200 p-4">
+          <input id="consent_data" type="checkbox" class="mt-1 h-5 w-5 rounded border-slate-300" />
+          <span class="text-sm text-slate-700">J'accepte que mes données soient stockées pour la gestion de ma participation. *</span>
+        </label>
+
+        <label class="md:col-span-2 flex items-start gap-3 rounded-xl bg-slate-50 border border-slate-200 p-4">
+          <input id="consent_contact" type="checkbox" class="mt-1 h-5 w-5 rounded border-slate-300" />
+          <span class="text-sm text-slate-700">J'accepte d'être contacté pour les prochaines sessions et informations de formation.</span>
+        </label>
+
+        <div class="md:col-span-2 flex flex-col sm:flex-row gap-3 pt-1">
+          <button id="submitBtn" type="submit" class="inline-flex items-center justify-center rounded-xl bg-blue-800 text-white px-6 py-3 font-semibold hover:bg-blue-900 transition">
+            Enregistrer le participant
+          </button>
+          <a href="/landing" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 px-6 py-3 font-semibold hover:bg-slate-50 transition">
+            Retour à l'accueil
+          </a>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer id="contact" class="bg-wikiDark text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="grid md:grid-cols-3 gap-10">
+        <div>
+          <h3 class="text-xl font-black mb-4">WikiGouv</h3>
+          <p class="text-slate-300 leading-relaxed">
+            Centre souverain de knowledge transfer gouvernemental, d'apprentissage métier, d'assistance IA sécurisée,
+            de protection documentaire et de transformation administrative.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-black mb-4">Liens rapides</h3>
+          <ul class="space-y-2 text-slate-300">
+            <li><a href="/landing#vision" class="hover:text-white">Vision</a></li>
+            <li><a href="/landing#persona" class="hover:text-white">Persona</a></li>
+            <li><a href="/landing#raghouse" class="hover:text-white">RAGHouse</a></li>
+            <li><a href="/landing#services" class="hover:text-white">Services souverains</a></li>
+            <li><a href="/courses" class="hover:text-white">Catalogue</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-black mb-4">Contact</h3>
+          <div class="space-y-2 text-slate-300">
+            <p><i class="fas fa-globe mr-2 text-wikiGold"></i>wikigouv.com</p>
+            <p><i class="fas fa-envelope mr-2 text-wikiGold"></i>contact@wikigouv.com</p>
+            <p><i class="fas fa-shield-check mr-2 text-wikiGold"></i>Souveraineté · Confidentialité · Knowledge transfer</p>
+          </div>
+          <div class="flex gap-4 mt-5 text-xl">
+            <a href="#" class="text-slate-300 hover:text-white"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="text-slate-300 hover:text-white"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="text-slate-300 hover:text-white"><i class="fab fa-x-twitter"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-white/10 mt-10 pt-6 text-center text-slate-400 text-sm">
+        &copy; 2026 WikiGouv · Centre souverain de knowledge transfer gouvernemental · Powered by WikiGouv.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const ocrBtn = document.getElementById('btnOcrNiu');
+    const startCameraBtn = document.getElementById('btnStartCamera');
+    const capturePhotoBtn = document.getElementById('btnCapturePhoto');
+    const stopCameraBtn = document.getElementById('btnStopCamera');
+    const ocrFileInput = document.getElementById('niu_card_file');
+    const ocrPreview = document.getElementById('ocrPreview');
+    const cameraWrap = document.getElementById('cameraWrap');
+    const cameraVideo = document.getElementById('cameraVideo');
+    const cameraCanvas = document.getElementById('cameraCanvas');
+    const capturePreviewWrap = document.getElementById('capturePreviewWrap');
+    const capturePreview = document.getElementById('capturePreview');
+    const alertBox = document.getElementById('formAlert');
+    let cameraStream = null;
+    let capturedImageBlob = null;
+    const requiredFieldIds = ['full_name', 'email', 'phone', 'organization', 'role', 'learning_goals'];
+    const fields = {
+      full_name: document.getElementById('full_name'),
+      email: document.getElementById('email'),
+      phone: document.getElementById('phone'),
+      organization: document.getElementById('organization'),
+      role: document.getElementById('role'),
+      learning_goals: document.getElementById('learning_goals'),
+      consent_data: document.getElementById('consent_data')
+    };
+    const defaultSubmitLabel = 'Enregistrer le participant';
+
+    function showAlert(message, type) {
+      alertBox.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200', 'bg-red-50', 'text-red-800', 'border-red-200');
+      if (type === 'success') {
+        alertBox.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+      } else {
+        alertBox.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+      }
+      alertBox.textContent = message;
+    }
+
+    function swalNotify(type, title, text) {
+      if (typeof Swal === 'undefined') return;
+      Swal.fire({
+        icon: type,
+        title,
+        text,
+        confirmButtonColor: '#123C73'
+      });
+    }
+
+    function getValue(id) {
+      const el = document.getElementById(id);
+      return el ? String(el.value || '').trim() : '';
+    }
+
+    function setValue(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = String(value || '').trim();
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('blur', { bubbles: true }));
+    }
+
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        swalNotify('error', 'Caméra indisponible', 'Votre navigateur ne supporte pas la capture caméra.');
+        return;
+      }
+
+      try {
+        if (cameraStream) {
+          stopCamera();
+        }
+
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+
+        cameraVideo.srcObject = cameraStream;
+        cameraWrap.classList.remove('hidden');
+      } catch (error) {
+        swalNotify('error', 'Accès caméra refusé', 'Autorisez la caméra pour capturer la carte NIU.');
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+      cameraVideo.srcObject = null;
+      cameraWrap.classList.add('hidden');
+    }
+
+    function captureFromCamera() {
+      if (!cameraStream || !cameraVideo.videoWidth || !cameraVideo.videoHeight) {
+        swalNotify('info', 'Caméra', 'Démarrez la caméra avant de capturer.');
+        return;
+      }
+
+      cameraCanvas.width = cameraVideo.videoWidth;
+      cameraCanvas.height = cameraVideo.videoHeight;
+      const ctx = cameraCanvas.getContext('2d');
+      ctx.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+
+      const dataUrl = cameraCanvas.toDataURL('image/jpeg', 0.92);
+      capturePreview.src = dataUrl;
+      capturePreviewWrap.classList.remove('hidden');
+
+      cameraCanvas.toBlob((blob) => {
+        capturedImageBlob = blob;
+      }, 'image/jpeg', 0.92);
+
+      swalNotify('success', 'Capture effectuée', 'Image capturée. Vous pouvez lancer le scan OCR.');
+    }
+
+    function ensureErrorNode(fieldId) {
+      const field = document.getElementById(fieldId);
+      if (!field) return null;
+      const parent = field.closest('label') || field.parentElement;
+      if (!parent) return null;
+
+      let errorNode = parent.querySelector(`[data-error-for="${fieldId}"]`);
+      if (!errorNode) {
+        errorNode = document.createElement('p');
+        errorNode.className = 'mt-1 text-xs text-red-600 hidden';
+        errorNode.setAttribute('data-error-for', fieldId);
+        parent.appendChild(errorNode);
+      }
+      return errorNode;
+    }
+
+    function setFieldState(fieldId, valid, message = '') {
+      const field = document.getElementById(fieldId);
+      if (!field) return;
+
+      const errorNode = ensureErrorNode(fieldId);
+      field.classList.remove('border-red-500', 'ring-red-100', 'border-emerald-500', 'ring-emerald-100');
+
+      if (valid) {
+        if (message) {
+          field.classList.add('border-emerald-500', 'ring-emerald-100');
+        }
+        if (errorNode) {
+          errorNode.textContent = '';
+          errorNode.classList.add('hidden');
+        }
+      } else {
+        field.classList.add('border-red-500', 'ring-red-100');
+        if (errorNode) {
+          errorNode.textContent = message;
+          errorNode.classList.remove('hidden');
+        }
+      }
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validatePhone(phone) {
+      const cleaned = phone.replace(/[^\d+]/g, '');
+      return cleaned.length >= 8 && cleaned.length <= 16;
+    }
+
+    function normalizeDateToInput(rawDate) {
+      if (!rawDate) return '';
+      const cleaned = rawDate.replace(/[.\-]/g, '/');
+      const parts = cleaned.split('/').map(v => v.trim()).filter(Boolean);
+      if (parts.length !== 3) return '';
+
+      let day = parts[0];
+      let month = parts[1];
+      let year = parts[2];
+
+      if (year.length === 2) {
+        year = Number(year) > 30 ? `19${year}` : `20${year}`;
+      }
+
+      if (day.length === 1) day = `0${day}`;
+      if (month.length === 1) month = `0${month}`;
+
+      if (year.length !== 4) return '';
+      return `${year}-${month}-${day}`;
+    }
+
+    function extractNamedValue(lines, keys) {
+      for (const line of lines) {
+        const normalized = line.toUpperCase();
+        for (const key of keys) {
+          if (normalized.includes(key)) {
+            const split = line.split(':');
+            if (split.length > 1) {
+              const value = split.slice(1).join(':').trim();
+              if (value) return value;
+            }
+            const stripped = line.replace(new RegExp(`.*${key}\\s*`, 'i'), '').trim();
+            if (stripped && stripped.length > 2) return stripped;
+          }
+        }
+      }
+      return '';
+    }
+
+    function parseNiuCardText(text) {
+      const lines = String(text || '')
+        .split('\n')
+        .map(l => l.trim())
+        .filter(Boolean);
+
+      const rawNiu = extractNamedValue(lines, ['NIU', 'NUI']);
+      const niuMatch = rawNiu.match(/[A-Z0-9\-]{6,24}/i) || String(text || '').match(/(?:NIU|NUI)\s*[:\-]?\s*([A-Z0-9\-]{6,24})/i);
+      const niuNumber = niuMatch ? String(niuMatch[1] || niuMatch[0]).replace(/^(NIU|NUI)\s*[:\-]?\s*/i, '').trim() : '';
+
+      const nom = extractNamedValue(lines, ['NOM', 'NOMS']);
+      const prenom = extractNamedValue(lines, ['PRENOM', 'PRENOMS', 'PRÉNOM', 'PRÉNOMS']);
+      const fullname = [nom, prenom].filter(Boolean).join(' ').trim();
+
+      const birthRaw = extractNamedValue(lines, ['DATE DE NAISSANCE', 'NE(E) LE', 'NE LE', 'NÉ(E) LE', 'NÉ LE']);
+      const dateMatch = birthRaw.match(/\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/) || String(text || '').match(/\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/);
+      const birthDate = dateMatch ? normalizeDateToInput(dateMatch[0]) : '';
+
+      return {
+        niu_number: niuNumber,
+        full_name: fullname,
+        birth_date: birthDate
+      };
+    }
+
+    async function runNiuOcr() {
+      const file = ocrFileInput?.files?.[0];
+      const source = capturedImageBlob || file;
+      if (!source) {
+        swalNotify('info', 'Carte NIU', 'Ajoutez une image de la carte NIU/NUI avant de lancer le scan.');
+        return;
+      }
+      if (typeof Tesseract === 'undefined') {
+        swalNotify('error', 'OCR indisponible', 'La librairie OCR n est pas chargee.');
+        return;
+      }
+
+      ocrBtn.disabled = true;
+      ocrBtn.classList.add('opacity-60', 'cursor-not-allowed');
+
+      Swal.fire({
+        title: 'Analyse OCR en cours...',
+        html: 'Lecture de la carte NIU/NUI',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        const result = await Tesseract.recognize(source, 'fra+eng', {
+          logger: (msg) => {
+            if (msg?.status && typeof msg.progress === 'number') {
+              const progress = Math.round(msg.progress * 100);
+              Swal.update({
+                html: `${msg.status}<br><b>${progress}%</b>`
+              });
+            }
+          }
+        });
+
+        const text = String(result?.data?.text || '').trim();
+        ocrPreview.textContent = text || 'Aucun texte détecté.';
+
+        const parsed = parseNiuCardText(text);
+
+        if (parsed.niu_number) setValue('niu_number', parsed.niu_number);
+        if (parsed.full_name) setValue('full_name', parsed.full_name);
+        if (parsed.birth_date) setValue('birth_date', parsed.birth_date);
+
+        refreshSubmitState();
+
+        Swal.close();
+        swalNotify(
+          'success',
+          'OCR terminé',
+          'Pré-remplissage effectué. Vérifiez les champs avant validation.'
+        );
+      } catch (error) {
+        Swal.close();
+        swalNotify('error', 'OCR échoué', 'Impossible de lire correctement la carte. Essayez une photo plus nette.');
+      } finally {
+        ocrBtn.disabled = false;
+        ocrBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+      }
+    }
+
+    function validateField(fieldId) {
+      const value = getValue(fieldId);
+
+      if (fieldId === 'full_name') {
+        if (!value) return { ok: false, message: 'Le nom complet est obligatoire.' };
+        if (value.length < 3) return { ok: false, message: 'Veuillez saisir un nom plus complet.' };
+        return { ok: true };
+      }
+
+      if (fieldId === 'email') {
+        if (!value) return { ok: false, message: 'L email est obligatoire.' };
+        if (!validateEmail(value)) return { ok: false, message: 'Format email invalide.' };
+        return { ok: true };
+      }
+
+      if (fieldId === 'phone') {
+        if (!value) return { ok: false, message: 'Le numero de telephone est obligatoire.' };
+        if (!validatePhone(value)) return { ok: false, message: 'Numero de telephone invalide.' };
+        return { ok: true };
+      }
+
+      if (fieldId === 'organization') {
+        if (!value) return { ok: false, message: 'L organisation est obligatoire.' };
+        return { ok: true };
+      }
+
+      if (fieldId === 'role') {
+        if (!value) return { ok: false, message: 'La fonction actuelle est obligatoire.' };
+        return { ok: true };
+      }
+
+      if (fieldId === 'learning_goals') {
+        if (!value) return { ok: false, message: 'Les objectifs d apprentissage sont obligatoires.' };
+        if (value.length < 10) return { ok: false, message: 'Merci d ajouter un peu plus de details.' };
+        return { ok: true };
+      }
+
+      return { ok: true };
+    }
+
+    function validateConsentData(showMessage = false) {
+      const consent = document.getElementById('consent_data').checked;
+      if (!consent && showMessage) {
+        swalNotify('warning', 'Consentement requis', 'Veuillez accepter le stockage des donnees.');
+      }
+      return consent;
+    }
+
+    function refreshSubmitState() {
+      const hasInvalid = requiredFieldIds.some(id => !validateField(id).ok);
+      const hasConsent = document.getElementById('consent_data').checked;
+      submitBtn.disabled = hasInvalid || !hasConsent;
+      submitBtn.classList.toggle('opacity-60', submitBtn.disabled);
+      submitBtn.classList.toggle('cursor-not-allowed', submitBtn.disabled);
+    }
+
+    function bindRealtimeValidation() {
+      requiredFieldIds.forEach((fieldId) => {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+
+        const eventName = field.tagName === 'SELECT' ? 'change' : 'input';
+        field.addEventListener(eventName, () => {
+          const result = validateField(fieldId);
+          if (getValue(fieldId).length > 0) {
+            setFieldState(fieldId, result.ok, result.message);
+          } else {
+            setFieldState(fieldId, true);
+          }
+          refreshSubmitState();
+        });
+
+        field.addEventListener('blur', () => {
+          const result = validateField(fieldId);
+          setFieldState(fieldId, result.ok, result.message);
+          refreshSubmitState();
+        });
+      });
+
+      const consent = document.getElementById('consent_data');
+      consent.addEventListener('change', refreshSubmitState);
+    }
+
+    function getFormPayload() {
+      return {
+        full_name: getValue('full_name'),
+        niu_number: getValue('niu_number'),
+        email: getValue('email'),
+        phone: getValue('phone'),
+        gender: getValue('gender'),
+        birth_date: getValue('birth_date'),
+        city: getValue('city'),
+        organization: getValue('organization'),
+        direction: getValue('direction'),
+        role: getValue('role'),
+        years_experience: getValue('years_experience'),
+        preferred_mode: getValue('preferred_mode'),
+        availability: getValue('availability'),
+        learning_goals: getValue('learning_goals'),
+        consent_data: document.getElementById('consent_data').checked,
+        consent_contact: document.getElementById('consent_contact').checked
+      };
+    }
+
+    function validateBeforeSubmit(payload) {
+      const errors = [];
+
+      requiredFieldIds.forEach((fieldId) => {
+        const result = validateField(fieldId);
+        setFieldState(fieldId, result.ok, result.message);
+        if (!result.ok) errors.push(result.message);
+      });
+
+      if (!payload.consent_data) {
+        errors.push('Le consentement de stockage des donnees est obligatoire.');
+      }
+
+      return errors;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const payload = getFormPayload();
+      const validationErrors = validateBeforeSubmit(payload);
+
+      if (validationErrors.length) {
+        showAlert(validationErrors[0], 'error');
+        swalNotify('error', 'Formulaire incomplet', validationErrors[0]);
+        validateConsentData(true);
+        refreshSubmitState();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enregistrement...';
+
+      try {
+        const response = await fetch('/api/participants/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          const errorText = data?.error || 'Inscription impossible pour le moment.';
+          showAlert(errorText, 'error');
+          swalNotify('error', 'Inscription non enregistree', errorText);
+          return;
+        }
+
+        form.reset();
+        showAlert('Inscription enregistrée avec succès. Merci !', 'success');
+        requiredFieldIds.forEach((fieldId) => setFieldState(fieldId, true));
+        swalNotify('success', 'Inscription validee', 'Le participant a bien ete enregistre.');
+      } catch (error) {
+        showAlert('Erreur réseau. Veuillez réessayer.', 'error');
+        swalNotify('error', 'Erreur reseau', 'Impossible de joindre le serveur.');
+      } finally {
+        submitBtn.textContent = defaultSubmitLabel;
+        refreshSubmitState();
+      }
+    });
+
+    bindRealtimeValidation();
+    startCameraBtn?.addEventListener('click', startCamera);
+    capturePhotoBtn?.addEventListener('click', captureFromCamera);
+    stopCameraBtn?.addEventListener('click', stopCamera);
+    ocrFileInput?.addEventListener('change', () => {
+      capturedImageBlob = null;
+      capturePreview.src = '';
+      capturePreviewWrap.classList.add('hidden');
+    });
+    ocrBtn?.addEventListener('click', runNiuOcr);
+    refreshSubmitState();
+  </script>
+</body>
+</html>

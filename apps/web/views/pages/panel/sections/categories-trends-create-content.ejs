@@ -1,0 +1,63 @@
+<%
+  const trend = data.trend || null;
+  const categories = data.categories || [];
+  const isEdit = !!trend;
+%>
+<section class="rocket-page">
+  <div class="rocket-page-header mb-4">
+    <h2 class="h2 fw-bold mb-0"><%= isEdit ? 'Modifier categorie tendance' : 'Nouvelle categorie tendance' %></h2>
+  </div>
+  <div class="rocket-card p-4 form-wrap">
+  <form method="post" action="<%= isEdit ? ('/admin/categories/trends/' + trend.id + '/update') : '/admin/categories/trends/store' %>">
+    <div class="mb-3">
+      <label class="form-label">Category</label>
+      <select name="category_id" class="form-select" required>
+        <option disabled <%= !trend ? 'selected' : '' %>>Choose Category</option>
+        <% categories.forEach((category) => { %>
+          <option value="<%= category.id %>" <%= (trend && trend.categoryId === category.id) ? 'selected' : '' %>><%= category.title %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Icon</label>
+      <div class="input-group">
+        <input type="text" name="icon" class="form-control" value="<%= trend?.icon ?? '' %>" required>
+        <button type="button" class="input-group-text">👁</button>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Background Color</label>
+      <div class="input-group">
+        <input type="text" name="color" class="form-control" value="<%= trend?.color ?? '' %>" placeholder="#99dfff" required>
+        <input type="color" id="trendColorPicker" class="form-control form-control-color" value="<%= trend?.color ?? '#99dfff' %>">
+      </div>
+    </div>
+
+    <div class="text-end">
+      <button class="btn btn-primary">Enregistrer</button>
+    </div>
+  </form>
+  </div>
+</section>
+
+<style>
+  .rocket-page-header{background:#fff;border-radius:18px;padding:22px 26px}
+  .form-wrap{max-width:760px}
+  .form-control,.form-select{min-height:52px;border-radius:12px}
+</style>
+
+<script>
+  (function () {
+    var colorInput = document.querySelector('input[name="color"]');
+    var colorPicker = document.getElementById('trendColorPicker');
+    if (!colorInput || !colorPicker) return;
+    colorPicker.addEventListener('input', function () {
+      colorInput.value = colorPicker.value;
+    });
+    colorInput.addEventListener('input', function () {
+      if (/^#[0-9A-Fa-f]{6}$/.test(colorInput.value)) colorPicker.value = colorInput.value;
+    });
+  })();
+</script>

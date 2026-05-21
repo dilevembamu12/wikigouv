@@ -1,0 +1,122 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title><%= page?.title ?? 'Wikigouv ARTF' %></title>
+<link rel="icon" href="/assets/default/img/loading.gif" />
+<link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css" />
+<style>
+  :root {
+    --rocket-blue: #1d6ef2;
+    --rocket-bg: #f3f5fa;
+    --rocket-card: #ffffff;
+    --rocket-text: #1c2442;
+    --rocket-muted: #8d95a7;
+    --rocket-border: #e9edf5;
+  }
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--rocket-bg);
+    color: var(--rocket-text);
+  }
+  .brand {
+    font-weight: 800;
+    letter-spacing: 0.3px;
+  }
+  .rocket-card {
+    background: var(--rocket-card);
+    border: 1px solid var(--rocket-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 28, 63, 0.06);
+  }
+  .rocket-pill {
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 13px;
+    background: transparent;
+    text-decoration: none;
+  }
+  .rocket-pill:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+  .rocket-metric {
+    border-radius: 14px;
+    border: 1px solid var(--rocket-border);
+    background: #fff;
+    padding: 18px;
+  }
+  .rocket-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .rocket-muted {
+    color: var(--rocket-muted);
+    font-size: 12px;
+  }
+  .rocket-title {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .rocket-sidebar-link.active {
+    background: #eef4ff;
+    color: var(--rocket-blue) !important;
+    font-weight: 600;
+  }
+  .rocket-sidebar-link {
+    border-radius: 10px;
+    color: #616b80;
+    font-size: 14px;
+    padding: 10px 12px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rocket-sidebar-link:hover {
+    background: #f6f8fd;
+    color: #2f3b56;
+  }
+  .rocket-top-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .rocket-public-topbar {
+    background: #0f63e9;
+    padding: 6px 0;
+  }
+  .rocket-public-navbar {
+    background: #0f63e9;
+    padding: 10px 0 14px;
+    border-bottom: 0;
+  }
+  .rocket-public-navbox {
+    background: #fff;
+    border-radius: 18px;
+    min-height: 64px;
+    box-shadow: 0 8px 24px rgba(18, 40, 78, 0.08);
+  }
+  .rocket-public-navbar .nav-link {
+    color: #5f6f8f;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .rocket-public-navbar .nav-link.active {
+    color: #16284a;
+    font-weight: 700;
+  }
+</style>

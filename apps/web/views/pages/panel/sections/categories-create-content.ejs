@@ -1,0 +1,107 @@
+<%
+  const category = data.category || null;
+  const subCategories = data.subCategories || [];
+  const isEdit = !!category;
+%>
+<section class="rocket-page">
+  <div class="rocket-page-header mb-4">
+    <h2 class="h2 fw-bold mb-0"><%= isEdit ? 'Modifier la categorie' : 'Nouvelle categorie' %></h2>
+  </div>
+  <div class="rocket-card p-4 form-wrap">
+
+  <form method="post" action="<%= isEdit ? ('/admin/categories/' + category.id + '/update') : '/admin/categories/store' %>" id="categoryForm">
+    <div class="mb-3">
+      <label class="form-label">Langue</label>
+      <select name="locale" class="form-select">
+        <option value="FR" selected>Francais</option>
+        <option value="EN">Anglais</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Titre</label>
+      <input type="text" name="title" id="categoryTitle" class="form-control" value="<%= category?.title ?? '' %>" placeholder="Choose Title" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">URL</label>
+      <input type="text" name="slug" id="categorySlug" class="form-control" value="<%= category?.slug ?? '' %>">
+      <div class="form-text">L URL de la categorie doit etre unique et sans espace. Une valeur par defaut sera generee automatiquement.</div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Ordre</label>
+      <input type="number" name="order" class="form-control" value="<%= category?.order ?? '' %>">
+      <div class="form-text">Utilisez des nombres pour definir l ordre de tri.</div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Icone</label>
+      <div class="input-group">
+        <input type="text" name="icon" id="categoryMainIcon" class="form-control js-icon-input" value="<%= category?.icon ?? '' %>" placeholder="/store/path/icon.png">
+        <button type="button" class="input-group-text js-open-library" data-target="categoryMainIcon">Library</button>
+      </div>
+      <input type="file" class="form-control form-control-sm mt-2 js-local-file" data-target="categoryMainIcon" accept="image/*">
+    </div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" name="has_sub" id="hasSubCategory" <%= subCategories.length ? 'checked' : '' %>>
+      <label class="form-check-label" for="hasSubCategory">Inclut des sous-categories</label>
+    </div>
+
+    <div id="subCategoriesSection" class="<%= subCategories.length ? '' : 'd-none' %>">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <strong>Ajouter des sous-categories</strong>
+        <button type="button" id="addSubCategoryBtn" class="btn btn-success btn-sm">+ Ajouter</button>
+      </div>
+      <ul id="subCategoriesList" class="list-group">
+        <% subCategories.forEach((sub) => { %>
+          <li class="list-group-item mb-2 js-sub-row" draggable="true">
+            <div class="d-flex gap-2 align-items-center">
+              <span class="text-muted cursor-move">↕</span>
+              <input type="text" name="sub_categories[<%= sub.id %>][title]" class="form-control" value="<%= sub.title ?? '' %>" placeholder="Choose Title">
+              <button type="button" class="btn btn-danger btn-sm js-remove-sub">×</button>
+            </div>
+            <input type="text" name="sub_categories[<%= sub.id %>][slug]" class="form-control mt-2 js-sub-slug" value="<%= sub.slug ?? '' %>" placeholder="Choose URL">
+            <div class="input-group mt-2">
+              <input type="text" name="sub_categories[<%= sub.id %>][icon]" class="form-control js-sub-icon" value="<%= sub.icon ?? '' %>" placeholder="Icon path">
+              <button type="button" class="input-group-text js-open-library-sub">Library</button>
+            </div>
+            <input type="file" class="form-control form-control-sm mt-2 js-local-file-sub" accept="image/*">
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+
+    <div class="text-end mt-4">
+      <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+  </form>
+
+  <template id="subCategoryTemplate">
+    <li class="list-group-item mb-2 js-sub-row" draggable="true">
+      <div class="d-flex gap-2 align-items-center">
+        <span class="text-muted cursor-move">↕</span>
+        <input type="text" class="form-control js-sub-title" placeholder="Choose Title">
+        <button type="button" class="btn btn-danger btn-sm js-remove-sub">×</button>
+      </div>
+      <input type="text" class="form-control mt-2 js-sub-slug" placeholder="Choose URL">
+      <div class="input-group mt-2">
+        <input type="text" class="form-control js-sub-icon" placeholder="Icon path">
+        <button type="button" class="input-group-text js-open-library-sub">Library</button>
+      </div>
+      <input type="file" class="form-control form-control-sm mt-2 js-local-file-sub" accept="image/*">
+    </li>
+  </template>
+  </div>
+</section>
+
+<style>
+  .rocket-page-header{background:#fff;border-radius:18px;padding:22px 26px}
+  .form-wrap{max-width:760px}
+  .form-control,.form-select{min-height:52px;border-radius:12px}
+  .list-group-item{border-radius:10px;border:1px solid #ebeff7}
+</style>
+
+<script src="/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="/js/categories-create.js"></script>

@@ -1,0 +1,312 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -520,
+        -208
+      ],
+      "id": "6ed53683-e63c-4f05-b59a-6747d48bec19",
+      "name": "When chat message received",
+      "webhookId": "3d7e409d-4c57-491d-88ce-29bdffb3be5e"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cardreader",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://wikigouv.com,https://n8n.fintrax.org,http://localhost:3000",
+          "binaryPropertyName": "binary_input",
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -520,
+        16
+      ],
+      "id": "54eedb4d-4b28-4aa3-9c35-a9436a9a51ec",
+      "name": "Webhook",
+      "webhookId": "771da29e-7f7b-47f7-9fe1-02064ec54a61"
+    },
+    {
+      "parameters": {
+        "formTitle": "Business card scanner",
+        "formDescription": "Upload a business card (PDF or image)",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "business_card",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ad4ab1ee-288b-4653-86e3-e2a248593f87",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -520,
+        -80
+      ],
+      "webhookId": "aaffb314-e319-48c3-8aa0-153af5dc288c",
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "jsCode": "const defaults = {\n  first_name: 'contenu illisible',\n  last_name: 'contenu illisible',\n  date_of_birth: 'contenu illisible',\n  document_number: 'contenu illisible',\n  document_type: 'other',\n  expiry_date: 'contenu illisible'\n};\n\nconst input = $json || {};\nconst body = input.body || {};\nconst rawSchema = body.output ?? input.output ?? '';\n\nlet parsedSchema = null;\nif (typeof rawSchema === 'string' && rawSchema.trim()) {\n  try { parsedSchema = JSON.parse(rawSchema); } catch { parsedSchema = null; }\n} else if (rawSchema && typeof rawSchema === 'object') {\n  parsedSchema = rawSchema;\n}\n\nconst schemaObj = (parsedSchema && typeof parsedSchema === 'object' && !Array.isArray(parsedSchema))\n  ? parsedSchema\n  : defaults;\n\nconst schema = {};\nfor (const k of Object.keys(schemaObj)) schema[k] = 'contenu illisible';\nif (!schema.document_type) schema.document_type = 'other';\n\nconst prompt = (input.chatInput ?? body.chatInput ?? body.prompt ?? 'carte ci-jointe').toString();\n\nreturn [{\n  json: {\n    ...input,\n    prompt,\n    schema,\n    schemaString: JSON.stringify(schema)\n  },\n  binary: $binary\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -280,
+        -112
+      ],
+      "id": "f3c3119a-947e-4bc2-b70d-5aeff9f6c571",
+      "name": "Prepare Input"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt ?? \"carte ci-jointe\" }}",
+        "options": {
+          "systemMessage": "=Tu es un extracteur OCR documentaire strict.\\n\\nREGLES:\\n1) Retourne UNIQUEMENT un JSON brut (aucun markdown, aucun texte hors JSON).\\n2) Respecte EXACTEMENT ce schema (memes cles): {{$json.schemaString}}\\n3) Si une valeur est illisible/introuvable: \\\"contenu illisible\\\".\\n4) Determine document_type parmi: id_card, passport, niu, driving_license, residence_card, student_card, bank_card, vehicle_registration, other.\\n5) N'invente jamais.\\n6) Si image non exploitable, mets \\\"contenu illisible\\\" dans tous les champs sauf document_type=other.",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        -112
+      ],
+      "id": "621cb130-cb8d-47ab-8014-5debc1c57531",
+      "name": "AI Agent",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5vl:7b",
+        "options": {
+          "format": "json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -56,
+        96
+      ],
+      "id": "7f054a94-d495-4796-8e4f-80c728a177a9",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "BgJe8mSNXSlTLL7I",
+          "name": "Server 12.75"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId ?? 1 }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        112
+      ],
+      "id": "f1947ee3-1885-4461-8676-89e6388a705d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d75cfad7-56f0-4c70-9c4c-81864c995f33",
+              "name": "res",
+              "value": "={{ ($json.output || '').toString().replaceAll('```json','').replaceAll('```','').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "83ef9da8-617b-4166-be30-e9e05c8bdbeb",
+      "name": "clean_output"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = ($json.res || '').toString().trim();\n\nfunction extractFirstJsonBlock(text) {\n  const start = text.indexOf('{');\n  if (start < 0) return null;\n  let depth = 0;\n  for (let i = start; i < text.length; i++) {\n    const ch = text[i];\n    if (ch === '{') depth++;\n    if (ch === '}') {\n      depth--;\n      if (depth === 0) return text.slice(start, i + 1);\n    }\n  }\n  return null;\n}\n\nconst jsonBlock = extractFirstJsonBlock(raw);\nlet modelObj = {};\nif (jsonBlock) {\n  try { modelObj = JSON.parse(jsonBlock); } catch { modelObj = {}; }\n}\n\nconst schema = ($json.schema && typeof $json.schema === 'object') ? $json.schema : {\n  first_name: 'contenu illisible',\n  last_name: 'contenu illisible',\n  date_of_birth: 'contenu illisible',\n  document_number: 'contenu illisible',\n  document_type: 'other',\n  expiry_date: 'contenu illisible'\n};\n\nconst out = {};\nfor (const k of Object.keys(schema)) {\n  const v = modelObj[k];\n  out[k] = (v === undefined || v === null || `${v}`.trim() === '') ? 'contenu illisible' : v;\n}\nif (!out.document_type || out.document_type === 'contenu illisible') out.document_type = 'other';\n\nreturn [{ json: { ...$json, outputJson: out } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -112
+      ],
+      "id": "f054f0eb-aee6-4f54-8c92-c6f5a6758cf2",
+      "name": "Validate Output JSON"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": true,\n  \"output\": {{ $json.outputJson || {} }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        -112
+      ],
+      "id": "1362150f-9235-421c-a33e-7e882add3347",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": false,\n  \"message\": \"temps depassee, probablement le fichier est trop volumineux ou illisible\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        272,
+        80
+      ],
+      "id": "4b81399f-ed15-4f01-91aa-215c2a270908",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Prepare Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        []
+      ]
+    },
+    "Prepare Input": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "clean_output",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clean_output": {
+      "main": [
+        [
+          {
+            "node": "Validate Output JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Output JSON": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "15308ef4961e8b5e76113433e677c47e2a99b98851a09129039aa8cb61f13644"
+  }
+}

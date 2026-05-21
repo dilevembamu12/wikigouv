@@ -1,0 +1,27 @@
+{
+  "source_file": "participants.json",
+  "source_type": "registration_form",
+  "note": "Liste des participants inscrits sur la plateforme WikiGouv.",
+  "participant_count": 1,
+  "participants": [
+    {
+      "id": "part_1777229536386_uo098e",
+      "full_name": "aaa",
+      "email": "aaa@ll.com",
+      "phone": "2437171711",
+      "gender": "F",
+      "birth_date": "1995-11-11",
+      "organization": "OK",
+      "direction": "OK",
+      "role": "OK",
+      "years_experience": "10",
+      "learning_goals": "EZZ DSKKQSLDJKS",
+      "preferred_mode": "presentiel",
+      "availability": "",
+      "city": "KIN",
+      "consent_data": true,
+      "consent_contact": true,
+      "created_at": "2026-04-26T18:52:16.387Z"
+    }
+  ]
+}

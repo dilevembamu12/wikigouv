@@ -1,0 +1,22 @@
+<div class="accordion-row bg-white rounded-sm border border-gray200 mb-2 section-card <%= sIndex === 0 ? 'is-open' : '' %>" data-section-id="<%= section.id %>">
+  <div class="d-flex align-items-center justify-content-between p-10 section-head" role="tab">
+    <button type="button" class="d-flex align-items-center js-toggle-section btn-transparent p-0">
+      <span class="chapter-icon mr-10 d-flex align-items-center justify-content-center" style="background:#49d672;color:#fff;">
+        <i class="fa-solid fa-grip" style="font-size:14px"></i>
+      </span>
+      <div>
+        <span class="font-weight-bold font-14 text-dark-blue d-block"><%= section.title %></span>
+        <span class="font-12 text-gray d-block section-count"><%= section.items.length %> Parts</span>
+      </div>
+    </button>
+    <button type="button" class="btn-transparent js-toggle-section section-toggle-btn">
+      <i class="fa-solid fa-angle-down text-gray" style="font-size:18px"></i>
+    </button>
+  </div>
+
+  <div class="panel-collapse text-gray section-body">
+    <% section.items.forEach((it, idx) => { %>
+      <%- include('./content', { it, idx, sIndex, section }) %>
+    <% }) %>
+  </div>
+</div>

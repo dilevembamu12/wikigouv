@@ -1,0 +1,345 @@
+{
+  "meta": {
+    "title": "Catalogue de formation FinTraX - Déploiement ARTF",
+    "version": "1.0.0",
+    "language": "fr",
+    "organization": "ARTF",
+    "description": "Catalogue structuré par métier, rôle, objectifs, compétences et modules pour le déploiement de FinTraX comme outil de suivi de conformité de bout en bout.",
+    "source_note": "Reconstitué à partir du document de formation ARTF fourni par l'utilisateur."
+  },
+  "themes_reference": [
+    "Thème 1 - Gouvernance et cadre réglementaire",
+    "Thème 2 - Conduite du changement",
+    "Thème 3 - Normalisation des processus réglementaires",
+    "Thème 4 - Production de livrables réglementaires exploitables / automatisation et fiabilisation",
+    "Thème 5 - Outils FinTraX : prise en main",
+    "Thème 6 - Outils FinTraX : exploitation avancée",
+    "Thème 7 - Supervision, sécurité et continuité des services"
+  ],
+  "fiches": [
+    {
+      "id": "fiche_regulation_conformite",
+      "familleMetier": "Régulation / conformité",
+      "type": "metier",
+      "roleTitle": "Agents métiers - régulation, conformité et supervision",
+      "directions": "DR, DISE, DF, AC",
+      "descriptionPoste": "Ces agents portent les exigences réglementaires, suivent les obligations déclaratives, contrôlent la conformité des opérateurs, exploitent les tableaux de bord de supervision et interprètent les résultats, anomalies et écarts.\n\n💡 IA: Voici 3 options de phrases pédagogiques :\n\n1. \"La fonction régulateur intervient en amont pour veiller à la mise en œuvre des procédures de conformité, tandis que l'instance de supervision assure un contrôle post-factum.\"\n2. \"L'objectif principal du rôle de Régulation/Conformité est d'assurer la traçabilité et la transparence des transactions financières dans le cadre de FinTraX/ARTF, en respectant les normes établies par l'Autorité de supervision.\"\n3. \"La qualité de la documentation et la bonne gestion des procédures constituent les étapes clés pour répondre aux exigences de conformité imposées par l'instance régulatrice dans le cadre du programme FinTraX/ARTF.\"\n\n💡 IA: Voici quelques phrases pédagogiques pour le cours :\n\n*   **Comprendre la réglementation** : \"La réglementation est un cadre législatif qui établit les règles de conduite obligatoires dans l'entreprise, afin d'éviter les risques et les dysfonctionnements.\"\n*   **Rôle des Agents Métiers Régulation-Conformité** : \"Les Agents Métiers en Régulation/Conformité assurent la mise en œuvre et le suivi de la réglementation FinTraX/ARTF dans l'entreprise, pour garantir que les activités sont conformes aux exigences légales.\"\n*   **Supervision par les instances réglementaires** : \"Les instances réglementaires (FinTraX/ARTF) peuvent procéder à des contrôles et audits réguliers pour s'assurer que les entreprises respectent les règles de conduite, en cas d'inconformité, cela peut conduire à des amendes ou autres sanctions.\"",
+      "objectifs": [
+        "Comprendre le cadre réglementaire et les obligations de supervision",
+        "Maîtriser le cycle de vie d'une déclaration et le parcours des assujettis",
+        "Exploiter les modules fonctionnels de FinTraX",
+        "Interpréter les alertes, indicateurs et rapports de conformité"
+      ],
+      "competences": [
+        "Lecture et interprétation des obligations réglementaires",
+        "Suivi des déclarations et des assujettis",
+        "Utilisation des tableaux de bord de supervision",
+        "Pilotage de la conformité par la donnée"
+      ],
+      "modules": [
+        {
+          "theme": "Thème 1 - Gouvernance et cadre réglementaire",
+          "titre": "Enjeux de la régulation financière à l'ère du numérique",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 2 - Conduite du changement",
+          "titre": "Passage du contrôle a posteriori à la supervision outillée",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 3 - Normalisation des processus réglementaires",
+          "titre": "Cycle de vie d'une déclaration et parcours des assujettis",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 5 - Outils FinTraX : prise en main",
+          "titre": "Supervision fonctionnelle, reporting et pilotage",
+          "reference": "Module 2"
+        },
+        {
+          "theme": "Thème 6 - Outils FinTraX : exploitation avancée",
+          "titre": "Exploitation des modules eKey, ETL et reporting",
+          "reference": "Module 1"
+        }
+      ],
+      "prerequis": "Connaissance générale des procédures ARTF et du dispositif réglementaire.",
+      "duree": "3 à 5 jours + ateliers métiers",
+      "modeFormation": "Présentiel, ateliers, cas pratiques, coaching fonctionnel",
+      "livrables": "Guide de supervision, fiches de contrôle, matrices d'analyse, tableaux de bord opérationnels",
+      "validation": "Présence, cas pratique, simulation de supervision, évaluation finale"
+    },
+    {
+      "id": "fiche_audit_inspection",
+      "familleMetier": "Audit / inspection",
+      "type": "metier",
+      "roleTitle": "Agents d'audit, de contrôle et d'inspection",
+      "directions": "AUDIT, DISE",
+      "descriptionPoste": "Ces agents détectent les anomalies, analysent les cas suspects, déclenchent ou documentent les contrôles, exploitent les traces et alertes, et contribuent aux enquêtes et à la remédiation.\n\n💡 IA: Voici quelques exemples de phrases pédagogiques pour le cours sur les agents d'audit, de contrôle et d'inspection dans le contexte FinTraX/ARTF :\n\n* L'agent d'audit doit appliquer les principes de l'indépendance et de l'impartialité tout au long du processus audit.\n* Les missions d'audit doivent respecter les règles définies par la norme ISAE 3000 (Internationally Accepted Standard for the Audit of Financial Statements) qui est applicable dans le cadre FinTraX/ARTF.\n* La mission d’inspection vise à vérifier si les éléments contrôlés sont en conformité avec les exigences du référentiel.\n\nCes phrases visent à fournir aux participants un aperçu concret de l'application des règles et principes spécifiques dans le métier d'audit/ inspection, soulignant ainsi l'importance de suivre une méthodologie rigoureuse et les exigences légales ou normatives.\n\n💡 IA: Voici quelques exemples de phrases pédagogiques pour un cours sur les Agents d'audit, de contrôle et d'inspection :\n\n1. \"Un agent d'audit doit s'appuyer sur l'expertise spécifique fournie par le cadre FinTraX/ARTF pour détecter et signaler des irrégularités en matière d'impôt.\"\n2. \"Les agents d'audit, de contrôle et d'inspection doivent appliquer une approche rigoureuse pour identifier les risques financiers liés aux opérations de l'entreprise, conformément à la réglementation FinTraX/ARTF.\"\n3. \"L'adéquation de la norme professionnelle dans le domaine de l'audit est essentielle pour s'assurer que les missions d'audit répondent aux attentes du cadre FinTraX/ARTF et sont conformes à ses exigences.\"",
+      "objectifs": [
+        "Transformer les pratiques d'audit vers une supervision continue",
+        "Utiliser FinTraX pour détecter les écarts et anomalies",
+        "Documenter les contrôles, incidents et cas de non-conformité",
+        "Exploiter les traces, journaux et alertes dans les investigations"
+      ],
+      "competences": [
+        "Contrôle orienté risque",
+        "Analyse des cas suspects",
+        "Traitement des alertes et écarts",
+        "Documentation des enquêtes et incidents"
+      ],
+      "modules": [
+        {
+          "theme": "Thème 2 - Conduite du changement",
+          "titre": "Passage du contrôle a posteriori à la supervision outillée",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 2 - Conduite du changement",
+          "titre": "Adaptation des pratiques d'exploitation et de supervision",
+          "reference": "Module 3"
+        },
+        {
+          "theme": "Thème 7 - Supervision, sécurité et continuité des services",
+          "titre": "Détection, analyse et traitement des incidents",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 7 - Supervision, sécurité et continuité des services",
+          "titre": "SSI, monitoring, continuité et résilience",
+          "reference": "Module 3"
+        }
+      ],
+      "prerequis": "Connaissances de base en audit, contrôle interne ou inspection.",
+      "duree": "3 jours + ateliers de simulation",
+      "modeFormation": "Présentiel, ateliers, jeux de rôle, analyse de cas",
+      "livrables": "Fiches d'incident, plans de traitement, dossiers de contrôle",
+      "validation": "Étude de cas, restitution, exercice d'analyse d'alerte"
+    },
+    {
+      "id": "fiche_ssi_it_admin",
+      "familleMetier": "SSI / systèmes / intégration",
+      "type": "technique",
+      "roleTitle": "Agents techniques - SSI, systèmes, intégration et administration",
+      "directions": "SSI, DR, DAJIC, AUDIT",
+      "descriptionPoste": "Ces agents assurent l'administration de la plateforme FinTraX, le paramétrage des modules, l'intégration technique, la sécurité du système, ainsi que la disponibilité, la continuité et la résilience du service.",
+      "objectifs": [
+        "Traduire les exigences réglementaires en contrôles techniques",
+        "Configurer les workflows et règles de validation",
+        "Administrer les modules et droits d'accès",
+        "Assurer la sécurité, le monitoring et la continuité de service"
+      ],
+      "competences": [
+        "Paramétrage fonctionnel et technique",
+        "Gestion des profils et habilitations",
+        "Intégration ETL et interfaçage",
+        "Supervision technique, SSI et continuité"
+      ],
+      "modules": [
+        {
+          "theme": "Thème 1 - Gouvernance et cadre réglementaire",
+          "titre": "Traduction des exigences réglementaires en mécanismes techniques",
+          "reference": "Module 3"
+        },
+        {
+          "theme": "Thème 3 - Normalisation des processus réglementaires",
+          "titre": "Implémentation technique des workflows et contrôles",
+          "reference": "Module 3"
+        },
+        {
+          "theme": "Thème 5 - Outils FinTraX : prise en main",
+          "titre": "Administration et paramétrage des modules",
+          "reference": "Module 3"
+        },
+        {
+          "theme": "Thème 6 - Outils FinTraX : exploitation avancée",
+          "titre": "Intégration, optimisation et supervision technique",
+          "reference": "Module 3"
+        },
+        {
+          "theme": "Thème 7 - Supervision, sécurité et continuité des services",
+          "titre": "SSI, monitoring, continuité et résilience",
+          "reference": "Module 3"
+        }
+      ],
+      "prerequis": "Notions en administration système, sécurité, réseaux ou support applicatif.",
+      "duree": "5 jours + laboratoire technique",
+      "modeFormation": "Présentiel, travaux pratiques, configuration encadrée, simulation d'incidents",
+      "livrables": "Procédures d'administration, matrice des droits, checklists SSI, fiches d'exploitation",
+      "validation": "Test pratique d'administration, paramétrage contrôlé, exercice de continuité"
+    },
+    {
+      "id": "fiche_data_reporting",
+      "familleMetier": "Data / reporting / pilotage",
+      "type": "metier",
+      "roleTitle": "Analystes de données, reporting et pilotage",
+      "directions": "DR, SSI, unités de reporting",
+      "descriptionPoste": "Ces agents consolident les données, produisent les rapports réglementaires, surveillent les indicateurs, analysent les tendances et écarts, et soutiennent la décision opérationnelle.",
+      "objectifs": [
+        "Produire des rapports réglementaires fiables",
+        "Analyser les données de conformité et de supervision",
+        "Construire et suivre des indicateurs de pilotage",
+        "Exploiter les flux ETL et la qualité des données"
+      ],
+      "competences": [
+        "Reporting réglementaire",
+        "Analyse des écarts et tendances",
+        "Construction d'indicateurs",
+        "Lecture des tableaux de bord de conformité"
+      ],
+      "modules": [
+        {
+          "theme": "Thème 4 - Production de livrables réglementaires exploitables / automatisation et fiabilisation",
+          "titre": "Production de livrables réglementaires exploitables",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 5 - Outils FinTraX : prise en main",
+          "titre": "Supervision fonctionnelle, reporting et pilotage",
+          "reference": "Module 2"
+        },
+        {
+          "theme": "Thème 6 - Outils FinTraX : exploitation avancée",
+          "titre": "Exploitation des modules eKey, ETL et reporting",
+          "reference": "Module 1"
+        }
+      ],
+      "prerequis": "Maîtrise basique d'Excel, reporting ou analyse de données.",
+      "duree": "3 jours + travaux dirigés",
+      "modeFormation": "Présentiel, ateliers de reporting, analyse de cas, coaching",
+      "livrables": "Modèles de rapport, tableaux de bord, référentiel d'indicateurs",
+      "validation": "Production d'un rapport type, interprétation d'indicateurs, cas pratique"
+    },
+    {
+      "id": "fiche_management",
+      "familleMetier": "Management / gouvernance",
+      "type": "management",
+      "roleTitle": "Encadrement et décideurs",
+      "directions": "Direction générale, chefs de service, responsables supervision, responsables SSI",
+      "descriptionPoste": "Les décideurs assurent le pilotage stratégique du déploiement, l'arbitrage opérationnel, la gouvernance de la conformité, le suivi des performances et la conduite du changement.\n\n💡 IA: Voici quelques exemples de phrases pédagogiques pour le cours \"Encadrement et Décideurs\" :\n\n1.  **La prise de décision financière est un processus complexe** qui nécessite une approche stratégique, des connaissances solides en finance et des compétences relationnelles pour convaincre les équipes de direction.\n2.  La gouvernance des risques dans le contexte FinTraX/ARTF impose aux dirigeants de prendre conscience de leur rôle central dans la mise en œuvre de politiques de contrôle des risques efficaces, tout en garantissant un environnement favorable à l'innovation.\n3.  En tant qu'encadrant, comprendre les normes comptables et réglementaires est essentiel pour prendre des décisions financières éclairées qui reflètent fidèlement la situation économique de l'entreprise.\n\nCes phrases visent à introduire les concepts clés liés au rôle du dirigeant dans le contexte de la gouvernance financière, tout en soulignant l'importance des connaissances et compétences requises pour exercer cet rôle.",
+      "objectifs": [
+        "Comprendre la vision stratégique de FinTraX",
+        "Piloter le déploiement et la performance",
+        "Lire et exploiter les indicateurs consolidés",
+        "Arbitrer les risques, incidents et priorités de supervision"
+      ],
+      "competences": [
+        "Pilotage stratégique",
+        "Gouvernance des risques et de la conformité",
+        "Lecture décisionnelle des tableaux de bord",
+        "Arbitrage des priorités opérationnelles"
+      ],
+      "modules": [
+        {
+          "theme": "Thème 1 - Gouvernance et cadre réglementaire",
+          "titre": "Enjeux de la régulation financière à l'ère du numérique",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 5 - Outils FinTraX : prise en main",
+          "titre": "Supervision fonctionnelle, reporting et pilotage",
+          "reference": "Module 2"
+        },
+        {
+          "theme": "Thème 6 - Outils FinTraX : exploitation avancée",
+          "titre": "Exploitation des modules eKey, ETL et reporting",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 7 - Supervision, sécurité et continuité des services",
+          "titre": "SSI, monitoring, continuité et résilience",
+          "reference": "Module 3"
+        }
+      ],
+      "prerequis": "Fonctions d'encadrement ou de décision.",
+      "duree": "2 jours + atelier de pilotage",
+      "modeFormation": "Séminaire, ateliers exécutifs, démonstrations dirigées",
+      "livrables": "Cadre de gouvernance, tableau de bord exécutif, feuille de route de pilotage",
+      "validation": "Participation active, validation d'un scénario de pilotage, revue d'indicateurs"
+    },
+    {
+      "id": "fiche_support_changement",
+      "familleMetier": "Support / conduite du changement",
+      "type": "support",
+      "roleTitle": "Équipe support, accompagnement et conduite du changement",
+      "directions": "Support fonctionnel, RH, formation, coordination projet",
+      "descriptionPoste": "Cette équipe accompagne l'adoption des nouveaux processus, la communication interne, l'assistance de premier niveau, la coordination des formations et la remontée des difficultés terrain.",
+      "objectifs": [
+        "Accompagner les utilisateurs dans l'adoption de FinTraX",
+        "Structurer la communication de changement",
+        "Organiser la montée en compétence et l'assistance",
+        "Documenter les difficultés et besoins de soutien"
+      ],
+      "competences": [
+        "Accompagnement utilisateur",
+        "Communication du changement",
+        "Support fonctionnel de premier niveau",
+        "Coordination de formation"
+      ],
+      "modules": [
+        {
+          "theme": "Thème 2 - Conduite du changement",
+          "titre": "Passage du contrôle a posteriori à la supervision outillée",
+          "reference": "Module 1"
+        },
+        {
+          "theme": "Thème 2 - Conduite du changement",
+          "titre": "Adaptation des pratiques d'exploitation et de supervision",
+          "reference": "Module 3"
+        },
+        {
+          "theme": "Thème 5 - Outils FinTraX : prise en main",
+          "titre": "Supervision fonctionnelle, reporting et pilotage",
+          "reference": "Module 2"
+        }
+      ],
+      "prerequis": "Connaissance des utilisateurs cibles et du contexte de déploiement.",
+      "duree": "2 à 3 jours",
+      "modeFormation": "Ateliers, coaching, jeux de rôle, kits de communication",
+      "livrables": "Plan d'accompagnement, supports utilisateurs, FAQ, dispositif de remontée terrain",
+      "validation": "Simulation d'assistance, restitution d'un plan de conduite du changement"
+    },
+    {
+      "id": "fiche_transversal_tronc_commun",
+      "familleMetier": "Tronc commun",
+      "type": "metier",
+      "roleTitle": "Modules transversaux ouverts à l'ensemble du personnel",
+      "directions": "Toutes directions",
+      "descriptionPoste": "Ce parcours est destiné à l'ensemble du personnel afin d'aligner les connaissances de base sur FinTraX, la conformité, les rôles et responsabilités, et la sécurité d'usage.",
+      "objectifs": [
+        "Introduire FinTraX et sa finalité dans le dispositif ARTF",
+        "Donner une culture commune de la conformité",
+        "Clarifier les rôles, responsabilités et règles d'usage",
+        "Sensibiliser à la sécurité et à la qualité des données"
+      ],
+      "competences": [
+        "Culture générale FinTraX",
+        "Sensibilisation conformité",
+        "Compréhension du rôle de chacun",
+        "Usage sécurisé de l'outil"
+      ],
+      "modules": [
+        {
+          "theme": "Thème 1 - Gouvernance et cadre réglementaire",
+          "titre": "Introduction générale et socle réglementaire",
+          "reference": "Tronc commun"
+        },
+        {
+          "theme": "Thème 5 - Outils FinTraX : prise en main",
+          "titre": "Prise en main générale de la plateforme",
+          "reference": "Tronc commun"
+        },
+        {
+          "theme": "Thème 7 - Supervision, sécurité et continuité des services",
+          "titre": "Sensibilisation à la sécurité et aux bonnes pratiques",
+          "reference": "Tronc commun"
+        }
+      ],
+      "prerequis": "Aucun.",
+      "duree": "1 à 2 jours",
+      "modeFormation": "Séances plénières, démonstrations, sensibilisation",
+      "livrables": "Support de sensibilisation, guide utilisateur de base, charte d'usage",
+      "validation": "Quiz, présence, validation du socle commun"
+    }
+  ]
+}

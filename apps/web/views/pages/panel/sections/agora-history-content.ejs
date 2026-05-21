@@ -1,0 +1,36 @@
+<section class="rocket-card p-4">
+  <h2 class="h4 fw-bold mb-3">Live Session History</h2>
+  <p class="text-muted">Track live session traces and participation timeline.</p>
+  <% if (data.listStatus !== 200) { %>
+    <div class="alert alert-warning">API indisponible (status <%= data.listStatus %>).</div>
+  <% } %>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Lesson</th>
+          <th>Status</th>
+          <th>Started</th>
+          <th>Completed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if ((data.rows ?? []).length === 0) { %>
+          <tr><td colspan="6" class="text-muted">No history found.</td></tr>
+        <% } %>
+        <% (data.rows ?? []).forEach((row) => { %>
+          <tr>
+            <td><%= String(row.id ?? '').slice(0, 8) %></td>
+            <td><%= row.userId ?? '-' %></td>
+            <td><%= row.lessonId ?? '-' %></td>
+            <td><%= row.status ?? '-' %></td>
+            <td><%= row.startedAt ? new Date(String(row.startedAt)).toLocaleString() : '-' %></td>
+            <td><%= row.completedAt ? new Date(String(row.completedAt)).toLocaleString() : '-' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>

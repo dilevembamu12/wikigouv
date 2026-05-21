@@ -1,0 +1,18 @@
+<div class="learning-panel d-none" data-panel="noticeboards">
+  <% if (!Array.isArray(noticeboards) || !noticeboards.length) { %>
+    <div class="empty">No noticeboards available.</div>
+  <% } else { %>
+    <% noticeboards.forEach((n) => { %>
+      <article class="section-card is-open mb-2">
+        <div class="section-head">
+          <div class="section-title"><%= String(n.title ?? 'Noticeboard') %></div>
+          <span class="badge bg-light text-dark"><%= String(n.priority ?? 'MEDIUM') %></span>
+        </div>
+        <div class="section-body">
+          <p class="mb-1"><%= String(n.message ?? '') %></p>
+          <small class="text-muted">Audience: <%= String(n.audience ?? 'ALL') %></small>
+        </div>
+      </article>
+    <% }) %>
+  <% } %>
+</div>

@@ -1,0 +1,73 @@
+<section class="rocket-page">
+  <div class="rocket-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="h2 fw-bold mb-0"><%= data.mode === 'edit' ? 'Modifier utilisateur' : 'Nouvel utilisateur' %></h2>
+      <a href="/admin/all-users" class="btn btn-outline-secondary rounded-pill px-4">Retour a la liste</a>
+    </div>
+  </div>
+
+  <div class="rocket-card p-4">
+    <form method="post" action="<%= data.mode === 'edit' ? '/admin/users/' + data.userItem?.id + '/update' : '/admin/users/store' %>" id="userForm">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Full Name <span class="text-danger">*</span></label>
+          <input type="text" name="fullName" class="form-control" required value="<%= data.userItem?.fullName ?? '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Email <span class="text-danger">*</span></label>
+          <input type="email" name="email" class="form-control" required value="<%= data.userItem?.email ?? '' %>">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">First Name</label>
+          <input type="text" name="firstName" class="form-control" value="<%= data.userItem?.firstName ?? '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Last Name</label>
+          <input type="text" name="lastName" class="form-control" value="<%= data.userItem?.lastName ?? '' %>">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Job Title</label>
+          <input type="text" name="jobTitle" class="form-control" value="<%= data.userItem?.jobTitle ?? '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Department</label>
+          <input type="text" name="department" class="form-control" value="<%= data.userItem?.department ?? '' %>">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Phone</label>
+          <input type="text" name="phone" class="form-control" value="<%= data.userItem?.phone ?? '' %>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Statut</label>
+          <select name="status" class="form-select">
+            <% const currentStatus = String(data.userItem?.status ?? 'ACTIVE').toUpperCase(); %>
+            <option value="ACTIVE" <%= currentStatus === 'ACTIVE' ? 'selected' : '' %>>ACTIVE</option>
+            <option value="INACTIVE" <%= currentStatus === 'INACTIVE' ? 'selected' : '' %>>INACTIVE</option>
+            <option value="STUDENT" <%= currentStatus === 'STUDENT' ? 'selected' : '' %>>STUDENT</option>
+            <option value="RESTRICTED" <%= currentStatus === 'RESTRICTED' ? 'selected' : '' %>>RESTRICTED</option>
+            <option value="PENDING_INSTRUCTOR" <%= currentStatus === 'PENDING_INSTRUCTOR' ? 'selected' : '' %>>PENDING_INSTRUCTOR</option>
+            <option value="REJECTED" <%= currentStatus === 'REJECTED' ? 'selected' : '' %>>REJECTED</option>
+          </select>
+        </div>
+
+        <% if (data.mode !== 'edit') { %>
+          <div class="col-12">
+            <label class="form-label">Keycloak User ID (optional)</label>
+            <input type="text" name="keycloakUserId" class="form-control" value="">
+            <div class="form-text">Leave empty to auto-generate local placeholder ID.</div>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-primary px-4"><%= data.mode === 'edit' ? 'Mettre a jour' : 'Enregistrer' %></button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script src="/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="/js/users-create.js"></script>

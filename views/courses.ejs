@@ -1,0 +1,556 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>FinTraX · Gestion rapide des cours</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background: #eef2ff;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      padding-bottom: 80px;
+    }
+    /* Modern cards, big tap targets */
+    .app-container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px 14px 32px 14px;
+    }
+    .hero-mini {
+      background: linear-gradient(105deg, #0f2b3d 0%, #1b4a6e 100%);
+      border-radius: 32px;
+      padding: 1.2rem 1.2rem;
+      margin-bottom: 1rem;
+      color: white;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+    }
+    .stat-card {
+      background: white;
+      border-radius: 28px;
+      padding: 12px 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
+      transition: all 0.1s;
+    }
+    .stat-number {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #1e6f5c;
+      line-height: 1.2;
+    }
+    .badge-pill-sm {
+      background: #eef2ff;
+      border-radius: 40px;
+      padding: 6px 14px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-simple {
+      background: white;
+      border-radius: 60px;
+      padding: 6px 18px;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+    .search-simple:focus-within {
+      border-color: #1e6f5c;
+      box-shadow: 0 0 0 3px rgba(30,111,92,0.2);
+    }
+    .btn-primary-mobile {
+      background: #1e6f5c;
+      border: none;
+      border-radius: 60px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: 0.15s;
+    }
+    .btn-primary-mobile:active {
+      transform: scale(0.97);
+      background: #0e4f41;
+    }
+    .btn-outline-mobile {
+      border-radius: 60px;
+      padding: 8px 16px;
+      font-weight: 500;
+    }
+    .course-card {
+      background: white;
+      border-radius: 26px;
+      margin-bottom: 14px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      transition: 0.1s ease;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .course-header {
+      padding: 16px;
+      border-bottom: 1px solid #f0f2f5;
+      background: #ffffff;
+    }
+    .course-title {
+      font-weight: 800;
+      font-size: 1.08rem;
+      margin-bottom: 4px;
+    }
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .icon-btn {
+      background: #f8fafc;
+      border-radius: 40px;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: 0.1s;
+      border: 1px solid #e2e8f0;
+    }
+    .icon-btn:active {
+      background: #eef2ff;
+      transform: scale(0.96);
+    }
+    .detail-preview {
+      padding: 12px 16px;
+      background: #fefefe;
+      font-size: 0.85rem;
+      border-top: 1px solid #f0f2f5;
+      display: none;
+    }
+    .detail-preview.show {
+      display: block;
+    }
+    .module-tag {
+      background: #eef2ff;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.7rem;
+      display: inline-block;
+      margin: 3px 4px 3px 0;
+    }
+    .empty-state {
+      background: white;
+      border-radius: 32px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .floating-add {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      background: #1e6f5c;
+      width: 56px;
+      height: 56px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 1000;
+      transition: 0.1s;
+      border: none;
+      color: white;
+    }
+    .floating-add:active {
+      transform: scale(0.94);
+      background: #0e5a49;
+    }
+    @media (max-width: 500px) {
+      .app-container { padding: 12px 12px 24px; }
+      .course-title { font-size: 1rem; }
+    }
+    .modal-custom .modal-content {
+      border-radius: 32px;
+      border: none;
+    }
+    .form-control, .form-select {
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+      padding: 10px 14px;
+    }
+    .section-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin: 12px 0 6px 0;
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <!-- Header simplifié -->
+  <div class="hero-mini d-flex justify-content-between align-items-center">
+    <div>
+      <h3 class="mb-0 fs-4">📘 Gestion cours</h3>
+      <div class="opacity-75 small">FinTraX · ARTF</div>
+    </div>
+    <div class="badge-pill-sm bg-white bg-opacity-20 text-white border-0">
+      <i class="ti ti-database"></i> <span id="apiStatus">●</span>
+    </div>
+  </div>
+
+  <!-- Stats rapides + recherche -->
+  <div class="d-flex gap-2 mb-3 flex-wrap justify-content-between align-items-center">
+    <div class="d-flex gap-2">
+      <div class="stat-card px-3"><div class="stat-number" id="totalCourses">0</div><div class="small text-muted">cours</div></div>
+      <div class="stat-card px-3"><div class="stat-number" id="totalModules">0</div><div class="small text-muted">modules</div></div>
+    </div>
+    <div class="badge-pill-sm bg-white shadow-sm">
+      <i class="ti ti-robot"></i> <span id="iaStatus">IA</span>
+    </div>
+  </div>
+
+  <!-- Barre recherche + filtre rapide -->
+  <div class="search-simple d-flex align-items-center gap-2 mb-3">
+    <i class="ti ti-search text-secondary"></i>
+    <input type="text" id="quickSearch" class="form-control border-0 p-2" placeholder="Chercher un cours, métier...">
+    <select id="typeFilter" class="form-select w-auto border-0 bg-transparent" style="max-width: 130px;">
+      <option value="">Tous</option>
+      <option value="metier">Métier</option>
+      <option value="technique">Technique</option>
+      <option value="management">Management</option>
+    </select>
+  </div>
+
+  <!-- Liste des cours (cards dynamiques) -->
+  <div id="coursesList"></div>
+
+  <!-- Modal d'édition / création rapide -->
+  <div class="modal fade modal-custom" id="courseEditModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold"><i class="ti ti-pencil me-2"></i><span id="modalTitle">Nouveau cours</span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body pt-1">
+          <input type="hidden" id="editId">
+          <div class="mb-2"><input type="text" id="editRoleTitle" class="form-control" placeholder="Titre du cours / rôle *"></div>
+          <div class="row g-2">
+            <div class="col-6"><input type="text" id="editFamille" class="form-control" placeholder="Famille métier"></div>
+            <div class="col-6"><select id="editType" class="form-select"><option value="metier">Métier</option><option value="technique">Technique</option><option value="management">Management</option><option value="support">Support</option></select></div>
+          </div>
+          <div class="mt-2"><input type="text" id="editDirections" class="form-control" placeholder="Directions / populations"></div>
+          <div class="mt-2"><textarea id="editDesc" rows="2" class="form-control" placeholder="Description courte du poste / cours"></textarea></div>
+          <div class="row g-2 mt-1">
+            <div class="col-6"><input type="text" id="editDuree" class="form-control" placeholder="Durée (ex: 2j)"></div>
+            <div class="col-6"><input type="text" id="editMode" class="form-control" placeholder="Mode (présentiel/distanciel)"></div>
+          </div>
+          <div class="section-title">🎯 Objectifs (un par ligne)</div>
+          <textarea id="editObjectifs" rows="3" class="form-control"></textarea>
+          <div class="section-title">⚡ Compétences visées (un par ligne)</div>
+          <textarea id="editCompetences" rows="3" class="form-control"></textarea>
+          <div class="section-title">📚 Modules (format: Thème | Titre module | Référence)</div>
+          <textarea id="editModules" rows="4" class="form-control" placeholder="Ex: Conformité | LCB-FT fondamentaux | REF-101"></textarea>
+          <div class="section-title">🔧 Pré-requis / Livrables / Validation</div>
+          <div class="row g-2">
+            <div class="col-12"><input type="text" id="editPrerequis" class="form-control" placeholder="Pré-requis"></div>
+            <div class="col-12"><input type="text" id="editLivrables" class="form-control" placeholder="Livrables"></div>
+            <div class="col-12"><input type="text" id="editValidation" class="form-control" placeholder="Validation / certification"></div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button class="btn btn-outline-danger" id="deleteCourseBtn">Supprimer</button>
+          <button class="btn btn-secondary rounded-4" data-bs-dismiss="modal">Annuler</button>
+          <button class="btn btn-primary-mobile rounded-4" id="saveCourseBtn">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating action button -->
+<button class="floating-add" id="fabAddCourse"><i class="ti ti-plus fs-4"></i></button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ------------------------------------------------------------------
+  // Gestion centralisée des cours + IA simplifiée (Ollama via proxy)
+  // Ollama à 192.168.12.75 (paramètres .env, mais endpoint fixe)
+  // ------------------------------------------------------------------
+  let coursesCache = [];      // liste des fiches
+  let ollamaHealthy = false;
+  const OLLAMA_ENDPOINT = "/api/ollama/chat";   // proxy back-end (configuré pour 192.168.12.75)
+  const DEFAULT_MODEL = "llama3.1:8b";
+  const API_KEY_HEADER = "regoil";  // depuis .env (par défaut)
+  
+  // helpers
+  function escapeHtml(str) { return String(str || '').replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+  function parseLines(t) { return (t || '').split('\n').filter(l=>l.trim().length>0).map(l=>l.trim()); }
+  function modulesFromText(t) {
+    return (t || '').split('\n').filter(l=>l.trim()).map(line => {
+      let parts = line.split('|').map(s=>s.trim());
+      return { theme: parts[0] || '', titre: parts[1] || '', reference: parts[2] || '' };
+    }).filter(m => m.theme || m.titre);
+  }
+  function modulesToText(mods) { return (mods || []).map(m => [m.theme, m.titre, m.reference].filter(Boolean).join(' | ')).join('\n'); }
+
+  // API Catalogue
+  async function loadCourses() {
+    try {
+      const res = await fetch('/api/catalogue');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      coursesCache = Array.isArray(data.fiches) ? data.fiches : [];
+      document.getElementById('apiStatus').innerHTML = '✓';
+      document.getElementById('apiStatus').style.color = '#86efac';
+      renderCourseList();
+      updateStats();
+    } catch(err) {
+      console.error(err);
+      document.getElementById('apiStatus').innerHTML = '⚠️';
+      document.getElementById('apiStatus').style.color = '#fda4af';
+      coursesCache = [];
+      renderCourseList();
+    }
+  }
+
+  async function testOllama() {
+    try {
+      const res = await fetch(OLLAMA_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY_HEADER },
+        body: JSON.stringify({ model: DEFAULT_MODEL, messages: [{ role: 'user', content: 'ping' }], stream: false, temperature: 0.1 })
+      });
+      if (res.ok) {
+        ollamaHealthy = true;
+        document.getElementById('iaStatus').innerHTML = '🤖 IA active';
+        document.getElementById('iaStatus').style.background = '#dcfce7';
+      } else throw new Error();
+    } catch(e) {
+      ollamaHealthy = false;
+      document.getElementById('iaStatus').innerHTML = '⚠️ IA indispo';
+      document.getElementById('iaStatus').style.background = '#ffe4e2';
+    }
+  }
+
+  function updateStats() {
+    const total = coursesCache.length;
+    let modulesCount = 0;
+    coursesCache.forEach(c => { modulesCount += (c.modules || []).length; });
+    document.getElementById('totalCourses').innerText = total;
+    document.getElementById('totalModules').innerText = modulesCount;
+  }
+
+  function getFilteredCourses() {
+    const search = document.getElementById('quickSearch').value.toLowerCase();
+    const type = document.getElementById('typeFilter').value;
+    return coursesCache.filter(c => {
+      const roleMatch = (c.roleTitle || '').toLowerCase().includes(search);
+      const famMatch = (c.familleMetier || '').toLowerCase().includes(search);
+      const dirMatch = (c.directions || '').toLowerCase().includes(search);
+      const moduleMatch = (c.modules || []).some(m => (m.titre || '').toLowerCase().includes(search) || (m.theme || '').toLowerCase().includes(search));
+      const okSearch = !search || roleMatch || famMatch || dirMatch || moduleMatch;
+      const okType = !type || c.type === type;
+      return okSearch && okType;
+    });
+  }
+
+  async function generateQuickDescription(course) {
+    if (!ollamaHealthy) return null;
+    try {
+      const prompt = `Génère 2-3 phrases pédagogiques pour le cours "${course.roleTitle}" (métier: ${course.familleMetier || 'non spécifié'}) dans le contexte FinTraX/ARTF. Style concret et professionnel.`;
+      const res = await fetch(OLLAMA_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY_HEADER },
+        body: JSON.stringify({ model: DEFAULT_MODEL, messages: [{ role: 'system', content: 'Tu es un expert formation. Réponse courte et utile.' }, { role: 'user', content: prompt }], stream: false, temperature: 0.4 })
+      });
+      const data = await res.json();
+      return data.reply || data.message?.content || "Contenu généré (non disponible)";
+    } catch(e) { return null; }
+  }
+
+  async function enrichWithAI(courseId) {
+    const course = coursesCache.find(c => c.id === courseId);
+    if (!course || !ollamaHealthy) return;
+    const cardDiv = document.getElementById(`card-${courseId}`);
+    if (cardDiv) {
+      const statusSpan = cardDiv.querySelector('.ai-status-badge');
+      if(statusSpan) statusSpan.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> IA en cours...';
+    }
+    const suggestion = await generateQuickDescription(course);
+    if (suggestion && suggestion.trim()) {
+      // Mise à jour locale et sur le serveur
+      const updated = { ...course, descriptionPoste: (course.descriptionPoste ? course.descriptionPoste + "\n\n💡 IA: " + suggestion : suggestion) };
+      await saveCourseToServer(updated, true);
+      await loadCourses(); // rafraîchir
+    } else {
+      if(cardDiv) {
+        const statusSpan = cardDiv.querySelector('.ai-status-badge');
+        if(statusSpan) statusSpan.innerHTML = '🤖 IA échec';
+        setTimeout(()=> { if(statusSpan) statusSpan.innerHTML = '✨ IA'; }, 2000);
+      }
+    }
+  }
+
+  async function saveCourseToServer(courseData, silentFail = false) {
+    const method = courseData.id && coursesCache.some(c => c.id === courseData.id) ? 'PUT' : 'POST';
+    const url = method === 'POST' ? '/api/catalogue/fiches' : `/api/catalogue/fiches/${encodeURIComponent(courseData.id)}`;
+    try {
+      const res = await fetch(url, {
+        method, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(courseData)
+      });
+      if (!res.ok && !silentFail) throw new Error(await res.text());
+      await loadCourses();
+      return true;
+    } catch(err) { if(!silentFail) alert("Erreur sauvegarde: " + err.message); return false; }
+  }
+
+  async function deleteCourseById(id) {
+    if (!confirm("Supprimer ce cours définitivement ?")) return;
+    try {
+      await fetch(`/api/catalogue/fiches/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await loadCourses();
+    } catch(e) { alert("Erreur suppression"); }
+  }
+
+  function renderCourseList() {
+    const filtered = getFilteredCourses();
+    const container = document.getElementById('coursesList');
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state"><i class="ti ti-folder-off fs-1"></i><div class="mt-2">Aucun cours trouvé</div><button class="btn btn-primary-mobile mt-3" id="emptyAddBtn">+ Créer un cours</button></div>`;
+      const btn = document.getElementById('emptyAddBtn');
+      if (btn) btn.onclick = () => openEditModal(null);
+      return;
+    }
+    container.innerHTML = filtered.map(course => `
+      <div class="course-card" id="card-${escapeHtml(course.id)}">
+        <div class="course-header">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="course-title">📌 ${escapeHtml(course.roleTitle || 'Sans titre')}</div>
+              <div class="d-flex gap-2 mt-1 flex-wrap">
+                <span class="badge-pill-sm bg-light">${escapeHtml(course.familleMetier || '—')}</span>
+                <span class="badge-pill-sm bg-light">${escapeHtml(course.type || '')}</span>
+                ${course.duree ? `<span class="badge-pill-sm bg-light"><i class="ti ti-clock"></i> ${escapeHtml(course.duree)}</span>` : ''}
+              </div>
+            </div>
+            <div class="ai-status-badge icon-btn" style="padding: 4px 12px;">✨ IA</div>
+          </div>
+          <div class="quick-actions">
+            <div class="icon-btn edit-course-btn" data-id="${escapeHtml(course.id)}"><i class="ti ti-edit"></i> Éditer</div>
+            <div class="icon-btn delete-course-btn" data-id="${escapeHtml(course.id)}"><i class="ti ti-trash"></i> Suppr</div>
+            <div class="icon-btn ai-enrich-btn" data-id="${escapeHtml(course.id)}"><i class="ti ti-sparkles"></i> Enrichir IA</div>
+            <div class="icon-btn toggle-detail" data-id="${escapeHtml(course.id)}"><i class="ti ti-eye"></i> Détail</div>
+          </div>
+        </div>
+        <div class="detail-preview" id="detail-${escapeHtml(course.id)}">
+          <div class="small mb-2"><strong>📄 Description :</strong><br>${escapeHtml(course.descriptionPoste || '—')}</div>
+          <div><strong>🎯 Objectifs :</strong> ${(course.objectifs || []).slice(0,2).map(o=>`• ${escapeHtml(o)}`).join(' ')}${(course.objectifs||[]).length > 2 ? '…' : ''}</div>
+          <div class="mt-2"><strong>📚 Modules (${(course.modules || []).length}) :</strong><br>
+            ${(course.modules || []).slice(0,3).map(m => `<span class="module-tag">${escapeHtml(m.titre || m.theme)}</span>`).join('')}
+            ${(course.modules || []).length > 3 ? '<span class="module-tag">+...</span>' : ''}
+          </div>
+          <div class="mt-2 d-flex gap-2 flex-wrap">
+            <span class="small text-muted"><i class="ti ti-building"></i> ${escapeHtml(course.directions || '—')}</span>
+            <span class="small text-muted"><i class="ti ti-certificate"></i> ${escapeHtml(course.validation || '—')}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    // bindings dynamiques
+    document.querySelectorAll('.edit-course-btn').forEach(btn => btn.onclick = () => openEditModal(btn.dataset.id));
+    document.querySelectorAll('.delete-course-btn').forEach(btn => btn.onclick = () => deleteCourseById(btn.dataset.id));
+    document.querySelectorAll('.ai-enrich-btn').forEach(btn => btn.onclick = () => enrichWithAI(btn.dataset.id));
+    document.querySelectorAll('.toggle-detail').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.id;
+        const detailDiv = document.getElementById(`detail-${id}`);
+        if (detailDiv) detailDiv.classList.toggle('show');
+      };
+    });
+  }
+
+  function openEditModal(courseId = null) {
+    const isNew = !courseId;
+    let course = isNew ? null : coursesCache.find(c => c.id === courseId);
+    if (!isNew && !course) return;
+    document.getElementById('modalTitle').innerText = isNew ? "➕ Nouveau cours" : "✏️ Modifier cours";
+    document.getElementById('editId').value = course ? course.id : '';
+    document.getElementById('editRoleTitle').value = course ? (course.roleTitle || '') : '';
+    document.getElementById('editFamille').value = course ? (course.familleMetier || '') : '';
+    document.getElementById('editType').value = course ? (course.type || 'metier') : 'metier';
+    document.getElementById('editDirections').value = course ? (course.directions || '') : '';
+    document.getElementById('editDesc').value = course ? (course.descriptionPoste || '') : '';
+    document.getElementById('editDuree').value = course ? (course.duree || '') : '';
+    document.getElementById('editMode').value = course ? (course.modeFormation || '') : '';
+    document.getElementById('editObjectifs').value = (course?.objectifs || []).join('\n');
+    document.getElementById('editCompetences').value = (course?.competences || []).join('\n');
+    document.getElementById('editModules').value = modulesToText(course?.modules || []);
+    document.getElementById('editPrerequis').value = course ? (course.prerequis || '') : '';
+    document.getElementById('editLivrables').value = course ? (course.livrables || '') : '';
+    document.getElementById('editValidation').value = course ? (course.validation || '') : '';
+    const deleteBtn = document.getElementById('deleteCourseBtn');
+    if (isNew) deleteBtn.classList.add('d-none');
+    else {
+      deleteBtn.classList.remove('d-none');
+      deleteBtn.onclick = () => {
+        if (course && course.id) {
+          bootstrap.Modal.getInstance(document.getElementById('courseEditModal')).hide();
+          deleteCourseById(course.id);
+        }
+      };
+    }
+    new bootstrap.Modal(document.getElementById('courseEditModal')).show();
+  }
+
+  async function saveFromModal() {
+    const id = document.getElementById('editId').value.trim() || ('crs_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6));
+    const payload = {
+      id: id,
+      roleTitle: document.getElementById('editRoleTitle').value.trim(),
+      familleMetier: document.getElementById('editFamille').value.trim(),
+      type: document.getElementById('editType').value,
+      directions: document.getElementById('editDirections').value.trim(),
+      descriptionPoste: document.getElementById('editDesc').value.trim(),
+      duree: document.getElementById('editDuree').value.trim(),
+      modeFormation: document.getElementById('editMode').value.trim(),
+      objectifs: parseLines(document.getElementById('editObjectifs').value),
+      competences: parseLines(document.getElementById('editCompetences').value),
+      modules: modulesFromText(document.getElementById('editModules').value),
+      prerequis: document.getElementById('editPrerequis').value.trim(),
+      livrables: document.getElementById('editLivrables').value.trim(),
+      validation: document.getElementById('editValidation').value.trim()
+    };
+    if (!payload.roleTitle) { alert("Veuillez saisir un titre de cours"); return; }
+    await saveCourseToServer(payload, false);
+    bootstrap.Modal.getInstance(document.getElementById('courseEditModal')).hide();
+    await loadCourses();
+  }
+
+  // Event listeners & init
+  function bindGlobalEvents() {
+    document.getElementById('quickSearch').addEventListener('input', () => renderCourseList());
+    document.getElementById('typeFilter').addEventListener('change', () => renderCourseList());
+    document.getElementById('fabAddCourse').addEventListener('click', () => openEditModal(null));
+    document.getElementById('saveCourseBtn').addEventListener('click', saveFromModal);
+  }
+
+  async function init() {
+    bindGlobalEvents();
+    await loadCourses();
+    await testOllama();
+    // polling rapide pour statut IA toutes les 40s
+    setInterval(() => testOllama(), 45000);
+  }
+  init();
+</script>
+</body>
+</html>

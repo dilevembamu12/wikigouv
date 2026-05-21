@@ -1,0 +1,40 @@
+<div class="rocket-public-topbar d-none d-lg-block">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div class="small text-white-50">
+      <i class="fa-solid fa-phone me-2"></i>+1 (323) 555-9876
+      <span class="mx-3">|</span>
+      <i class="fa-regular fa-envelope me-2"></i>mail@rocket-soft.org
+    </div>
+    <div class="small text-white-50 d-flex align-items-center gap-3">
+      <span><i class="fa-regular fa-moon"></i></span>
+      <span>Francais</span>
+      <span>USD</span>
+    </div>
+  </div>
+</div>
+<nav class="navbar navbar-expand-lg sticky-top rocket-public-navbar">
+  <div class="container">
+    <div class="rocket-public-navbox w-100 d-flex align-items-center justify-content-between px-3 px-lg-4">
+      <a class="navbar-brand brand text-dark m-0" href="/">
+        <i class="fa-solid fa-shield-halved me-2 text-primary"></i>Wikigouv ARTF
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <li class="nav-item"><a class="nav-link <%= page?.activeNav === 'home' ? 'active' : '' %>" href="/">Accueil</a></li>
+          <li class="nav-item"><a class="nav-link <%= page?.activeNav === 'courses' ? 'active' : '' %>" href="/courses">Formations</a></li>
+          <% if (page?.user) { %>
+            <li class="nav-item"><a class="nav-link" href="/dashboard">Tableau de bord</a></li>
+            <li class="nav-item"><a class="btn btn-primary btn-sm px-3" href="/admin/webinars?type=course">Panneau admin</a></li>
+            <li class="nav-item"><a class="btn btn-outline-danger btn-sm px-3" href="/logout">Deconnexion</a></li>
+          <% } else { %>
+            <li class="nav-item"><a class="nav-link <%= page?.activeNav === 'login' ? 'active' : '' %>" href="/login">Connexion</a></li>
+            <li class="nav-item"><a class="btn btn-primary btn-sm px-3" href="/register">Inscription</a></li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

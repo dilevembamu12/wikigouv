@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WikiGouv | Centre souverain de knowledge transfer gouvernemental</title>
+
+  <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <script src="/vendor/tailwind/tailwindcss.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wikiBlue: '#123C73',
+            wikiRed: '#B91C1C',
+            wikiGold: '#D4A017',
+            wikiDark: '#0B172A',
+            wikiLight: '#F8FAFC',
+            wikiGreen: '#166534',
+            wikiTeal: '#0F766E',
+            wikiSlate: '#334155',
+            wikiIndigo: '#3730A3'
+          },
+          boxShadow: {
+            soft: '0 10px 30px rgba(0,0,0,0.08)',
+            glow: '0 14px 40px rgba(18,60,115,0.18)',
+            hero: '0 20px 60px rgba(0,0,0,0.25)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
+  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; }
+
+    .hero-overlay {
+      background:
+        linear-gradient(120deg, rgba(11,23,42,.95), rgba(18,60,115,.80)),
+        radial-gradient(circle at top right, rgba(212,160,23,.18), transparent 35%),
+        radial-gradient(circle at bottom left, rgba(15,118,110,.18), transparent 32%);
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .hero-badge {
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .08;
+      background-image:
+        radial-gradient(circle at 20% 20%, #fff 1px, transparent 1px),
+        radial-gradient(circle at 80% 40%, #fff 1px, transparent 1px),
+        radial-gradient(circle at 40% 80%, #fff 1px, transparent 1px);
+      background-size: 120px 120px;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 100px;
+      height: 4px;
+      margin: 14px auto 0;
+      border-radius: 9999px;
+      background: linear-gradient(to right, #123C73, #D4A017, #0F766E, #B91C1C);
+    }
+
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.04);
+      transition: opacity 900ms ease, transform 1600ms ease;
+    }
+
+    .hero-slide.active {
+      opacity: .30;
+      transform: scale(1);
+    }
+
+    .hero-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background: rgba(255,255,255,.35);
+      border: 1px solid rgba(255,255,255,.55);
+      transition: all .19s ease;
+    }
+
+    .hero-dot.active {
+      width: 28px;
+      background: #fff;
+    }
+
+    .hero-nav-btn {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-nav-btn:hover { background: rgba(255,255,255,.22); }
+
+    .mini-card { transition: all .35s ease; }
+
+    .mini-card.active {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.10);
+      border-color: rgba(18,60,115,.25);
+    }
+
+    .fade-soft { animation: fadeSoft .45s ease; }
+
+    @keyframes fadeSoft {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <%
+    const currentUser = (typeof user !== 'undefined' && user) ? user : null;
+    const userName = currentUser?.fullname || currentUser?.firstname || '';
+    const orgName = currentUser?.profile?.organisation || currentUser?.organisation || '';
+    const isLogged = typeof isAuthenticated !== 'undefined' ? isAuthenticated : !!currentUser;
+  %>
+
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3">
+        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-wikiBlue via-wikiTeal to-wikiGold text-white flex items-center justify-center shadow-soft">
+          <i class="fas fa-landmark text-lg"></i>
+        </div>
+        <div>
+          <div class="text-xl font-extrabold tracking-tight">Wiki<span class="text-wikiRed">Gouv</span></div>
+          <div class="text-xs text-slate-500 -mt-1">wikigouv.com · Centre souverain de knowledge transfer gouvernemental</div>
+        </div>
+      </a>
+
+      <div class="hidden md:flex items-center gap-7">
+        <a href="#vision" class="text-slate-600 hover:text-wikiBlue font-medium">Vision</a>
+        <a href="#persona" class="text-slate-600 hover:text-wikiBlue font-medium">Persona</a>
+        <a href="#raghouse" class="text-slate-600 hover:text-wikiBlue font-medium">RAGHouse</a>
+        <a href="#services" class="text-slate-600 hover:text-wikiBlue font-medium">Services</a>
+        <a href="#security" class="text-slate-600 hover:text-wikiBlue font-medium">Sécurité</a>
+        <a href="#contact" class="text-slate-600 hover:text-wikiBlue font-medium">Contact</a>
+
+        <% if (isLogged) { %>
+          <a href="/dashboard" class="bg-wikiBlue text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-900 transition">
+            <i class="fas fa-graduation-cap mr-2"></i>Mon espace
+          </a>
+        <% } else { %>
+          <a href="/register" class="bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-xl font-semibold hover:bg-slate-50 transition">
+            <i class="fas fa-user-plus mr-2"></i>Inscription
+          </a>
+          <a href="/login" class="bg-wikiBlue text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-900 transition">
+            <i class="fas fa-right-to-bracket mr-2"></i>Connexion
+          </a>
+        <% } %>
+      </div>
+
+      <button id="mobileMenuBtn" class="md:hidden text-slate-700 text-2xl">
+        <i class="fas fa-bars"></i>
+      </button>
+    </nav>
+
+    <div id="mobileMenu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-3">
+      <a href="#vision" class="block text-slate-700 font-medium">Vision</a>
+      <a href="#persona" class="block text-slate-700 font-medium">Persona</a>
+      <a href="#raghouse" class="block text-slate-700 font-medium">RAGHouse</a>
+      <a href="#services" class="block text-slate-700 font-medium">Services</a>
+      <a href="#security" class="block text-slate-700 font-medium">Sécurité</a>
+      <a href="#contact" class="block text-slate-700 font-medium">Contact</a>
+      <% if (isLogged) { %>
+        <a href="/dashboard" class="block text-center bg-wikiBlue text-white px-4 py-3 rounded-xl font-semibold">Mon espace</a>
+      <% } else { %>
+        <a href="/register" class="block text-center border border-slate-300 bg-white text-slate-700 px-4 py-3 rounded-xl font-semibold">Inscription</a>
+        <a href="/login" class="block text-center bg-wikiBlue text-white px-4 py-3 rounded-xl font-semibold">Connexion</a>
+      <% } %>
+    </div>
+  </header>
+
+  <main>
+    <section class="relative overflow-hidden min-h-[86vh]">
+      <div class="absolute inset-0 hero-overlay z-10"></div>
+      <div class="grain z-20"></div>
+
+      <div id="heroSlides" class="absolute inset-0">
+        <div class="hero-slide active" style="background-image:url('/images/landing/hero-1.jpg');"></div>
+        <div class="hero-slide" style="background-image:url('/images/landing/hero-2.jpg');"></div>
+        <div class="hero-slide" style="background-image:url('/images/landing/hero-3.jpg');"></div>
+        <div class="hero-slide" style="background-image:url('/images/landing/hero-4.jpg');"></div>
+        <div class="hero-slide" style="background-image:url('/images/landing/hero-5.jpg');"></div>
+        <div class="hero-slide" style="background-image:url('/images/landing/hero-6.jpg');"></div>
+      </div>
+
+      <div class="absolute inset-y-0 left-4 md:left-8 z-30 flex items-center">
+        <button id="heroPrev" class="hero-nav-btn h-12 w-12 rounded-full text-white flex items-center justify-center">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      </div>
+      <div class="absolute inset-y-0 right-4 md:right-8 z-30 flex items-center">
+        <button id="heroNext" class="hero-nav-btn h-12 w-12 rounded-full text-white flex items-center justify-center">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div class="text-white">
+            <div id="heroBadge" class="inline-flex items-center gap-2 hero-badge rounded-full px-4 py-2 mb-6">
+              <i id="heroBadgeIcon" class="fas fa-building-shield text-wikiGold"></i>
+              <span id="heroBadgeText" class="text-sm md:text-base font-medium">WikiGouv · Souveraineté · Knowledge Transfer · Administration Publique</span>
+            </div>
+
+            <h1 id="heroTitle" class="text-4xl md:text-6xl font-black leading-tight mb-6 fade-soft">
+              Le centre souverain de<br>
+              <span class="text-wikiGold">knowledge transfer gouvernemental</span><br>
+              pour la <span class="text-wikiRed">transition du papier au numérique</span>
+            </h1>
+
+            <p id="heroText" class="text-lg md:text-xl text-slate-100 max-w-2xl mb-8 leading-relaxed fade-soft">
+              WikiGouv accompagne l’employé public dans l’apprentissage de son poste, la transmission des savoirs, la mobilité professionnelle, la protection des documents sensibles et l’usage d’un assistant IA sécurisé sans exposer les secrets d’État à des plateformes publiques.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="/courses" id="heroPrimaryCta" class="inline-flex items-center justify-center bg-wikiGold text-wikiDark font-bold px-7 py-3.5 rounded-full hover:bg-yellow-400 transition shadow-glow">
+                <i class="fas fa-book-open mr-2"></i>Explorer les cycles de formation
+              </a>
+              <a href="/register" class="inline-flex items-center justify-center bg-white text-slate-800 font-bold px-7 py-3.5 rounded-full hover:bg-slate-100 transition shadow-soft">
+                <i class="fas fa-user-plus mr-2"></i>S'inscrire
+              </a>
+              <a href="/login" class="inline-flex items-center justify-center bg-white text-wikiBlue font-bold px-7 py-3.5 rounded-full hover:bg-slate-100 transition shadow-soft">
+                <i class="fas fa-user-shield mr-2"></i>Accéder à WikiGouv
+              </a>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+              <div class="glass rounded-2xl p-4 text-center">
+                <div class="text-2xl font-extrabold text-wikiGold">Persona</div>
+                <div class="text-sm text-slate-100">Assistant métier dédié</div>
+              </div>
+              <div class="glass rounded-2xl p-4 text-center">
+                <div class="text-2xl font-extrabold text-wikiGold">RAGHouse</div>
+                <div class="text-sm text-slate-100">Connaissance souveraine</div>
+              </div>
+              <div class="glass rounded-2xl p-4 text-center">
+                <div class="text-2xl font-extrabold text-wikiGold">GovVault</div>
+                <div class="text-sm text-slate-100">Coffre documentaire</div>
+              </div>
+              <div class="glass rounded-2xl p-4 text-center">
+                <div class="text-2xl font-extrabold text-wikiGold">GovEncryption</div>
+                <div class="text-sm text-slate-100">Chiffrement d’État</div>
+              </div>
+            </div>
+
+            <div id="heroDots" class="flex items-center gap-2 mt-8">
+              <button class="hero-dot active" data-slide="0"></button>
+              <button class="hero-dot" data-slide="1"></button>
+              <button class="hero-dot" data-slide="2"></button>
+              <button class="hero-dot" data-slide="3"></button>
+              <button class="hero-dot" data-slide="4"></button>
+              <button class="hero-dot" data-slide="5"></button>
+            </div>
+          </div>
+
+          <div class="relative">
+            <div class="bg-white/95 rounded-3xl shadow-hero p-6 md:p-8 backdrop-blur">
+              <div class="flex items-center gap-3 mb-5">
+                <div id="heroCardIconWrap" class="h-12 w-12 rounded-2xl bg-wikiBlue/10 text-wikiBlue flex items-center justify-center">
+                  <i id="heroCardIcon" class="fas fa-book-open-reader text-xl"></i>
+                </div>
+                <div>
+                  <h3 id="heroCardTitle" class="text-xl font-extrabold text-slate-900">Apprentissage & transition</h3>
+                  <p id="heroCardSubtitle" class="text-sm text-slate-500">Du papier vers le numérique, métier par métier</p>
+                </div>
+              </div>
+
+              <div class="space-y-4 text-slate-700 leading-relaxed mb-6">
+                <p id="heroCardText1" class="fade-soft">Chaque employé peut naviguer à travers les corps de métier et les fonctions de l’administration publique, comprendre son poste actuel et se préparer à un nouveau cycle de responsabilité.</p>
+                <p id="heroCardText2" class="fade-soft">WikiGouv devient le lieu de transfert de connaissance, de mémoire opérationnelle, de standardisation des procédures et d’accompagnement numérique sécurisé.</p>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div id="heroMiniCard1" class="mini-card active rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                  <div id="heroMiniIcon1" class="text-wikiBlue text-lg mb-2"><i class="fas fa-user-graduate"></i></div>
+                  <h4 id="heroMiniTitle1" class="font-bold">Parcours agent</h4>
+                  <p id="heroMiniText1" class="text-sm text-slate-600 mt-1">Formation adaptée au poste actuel, à la fonction visée et au rythme de l’employé.</p>
+                </div>
+                <div id="heroMiniCard2" class="mini-card rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                  <div id="heroMiniIcon2" class="text-wikiGreen text-lg mb-2"><i class="fas fa-robot"></i></div>
+                  <h4 id="heroMiniTitle2" class="font-bold">AI Persona</h4>
+                  <p id="heroMiniText2" class="text-sm text-slate-600 mt-1">Un assistant souverain pour aider l’agent sans jamais exposer les documents confidentiels à ChatGPT.</p>
+                </div>
+              </div>
+
+              <div class="mt-5 flex items-center justify-between">
+                <div class="flex gap-2">
+                  <button class="w-2.5 h-2.5 rounded-full bg-wikiBlue/25"></button>
+                  <button class="w-2.5 h-2.5 rounded-full bg-wikiBlue"></button>
+                </div>
+                <div class="text-xs text-slate-500 font-medium"><span id="heroSectorLabel">Vision souveraine</span></div>
+              </div>
+            </div>
+
+            <div class="absolute -bottom-6 -left-4 bg-wikiRed text-white px-5 py-3 rounded-2xl shadow-soft hidden md:flex items-center gap-3">
+              <i class="fas fa-lock"></i>
+              <span class="font-semibold">Documents sensibles, chiffrement, notarisation digitale et traçabilité d’État.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="vision" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14">
+          <h2 class="section-title text-3xl md:text-4xl font-black text-slate-900">La vision de WikiGouv</h2>
+          <p class="mt-4 text-slate-600 max-w-4xl mx-auto text-lg">
+            WikiGouv est un centre de <strong>knowledge transfer gouvernemental</strong> où tous les employés peuvent naviguer à travers
+            les corps de métier et les fonctions de l’administration publique, s’enregistrer dans un cycle de formation adapté à leur poste actuel
+            ou se préparer à un autre poste désiré, avec l’appui d’un assistant IA souverain et sécurisé.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-slate-50 rounded-3xl p-7 shadow-soft border border-slate-100">
+            <div class="h-14 w-14 rounded-2xl bg-wikiBlue/10 text-wikiBlue flex items-center justify-center text-2xl mb-5"><i class="fas fa-arrows-rotate"></i></div>
+            <h3 class="text-xl font-bold mb-3">Transition papier → numérique</h3>
+            <p class="text-slate-600">Transformer les processus administratifs, les réflexes métier et la circulation documentaire vers une administration plus moderne, traçable et standardisée.</p>
+          </div>
+
+          <div class="bg-slate-50 rounded-3xl p-7 shadow-soft border border-slate-100">
+            <div class="h-14 w-14 rounded-2xl bg-wikiGreen/10 text-wikiGreen flex items-center justify-center text-2xl mb-5"><i class="fas fa-people-arrows"></i></div>
+            <h3 class="text-xl font-bold mb-3">Knowledge transfer</h3>
+            <p class="text-slate-600">Capitaliser les connaissances des anciens, structurer les savoirs métier, préserver les procédures critiques et faciliter le transfert intergénérationnel.</p>
+          </div>
+
+          <div class="bg-slate-50 rounded-3xl p-7 shadow-soft border border-slate-100">
+            <div class="h-14 w-14 rounded-2xl bg-wikiGold/10 text-wikiGold flex items-center justify-center text-2xl mb-5"><i class="fas fa-route"></i></div>
+            <h3 class="text-xl font-bold mb-3">Mobilité professionnelle</h3>
+            <p class="text-slate-600">Permettre à l’agent de comprendre son poste, d’élargir ses compétences et de se préparer à une nouvelle fonction dans l’administration.</p>
+          </div>
+
+          <div class="bg-slate-50 rounded-3xl p-7 shadow-soft border border-slate-100">
+            <div class="h-14 w-14 rounded-2xl bg-wikiRed/10 text-wikiRed flex items-center justify-center text-2xl mb-5"><i class="fas fa-user-shield"></i></div>
+            <h3 class="text-xl font-bold mb-3">Souveraineté informationnelle</h3>
+            <p class="text-slate-600">Aucun besoin d’exposer les documents confidentiels et secrets d’État à des plateformes publiques ou non maîtrisées.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="persona" class="py-20 bg-slate-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14">
+          <h2 class="section-title text-3xl md:text-4xl font-black text-slate-900">Blast the usage of Persona in Public Administration</h2>
+          <p class="mt-4 text-slate-600 max-w-4xl mx-auto text-lg">
+            WikiGouv introduit une nouvelle génération d’assistants IA souverains : chaque agent peut disposer d’un
+            <strong>Persona AI</strong> spécialisé selon son ministère, sa direction, son métier, ses procédures et ses documents autorisés.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="bg-white rounded-3xl p-7 shadow-soft border">
+            <div class="text-wikiBlue text-3xl mb-4"><i class="fas fa-user-gear"></i></div>
+            <h3 class="text-xl font-bold mb-2">Assistant métier personnel</h3>
+            <p class="text-slate-600">Chaque employé peut être assisté dans ses tâches quotidiennes, ses formulaires, ses circuits documentaires et ses obligations de conformité.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-7 shadow-soft border">
+            <div class="text-wikiGreen text-3xl mb-4"><i class="fas fa-brain"></i></div>
+            <h3 class="text-xl font-bold mb-2">Mémoire contextuelle</h3>
+            <p class="text-slate-600">Le Persona conserve le contexte métier, les règles, les bonnes pratiques et les connaissances propres à la fonction de l’agent.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-7 shadow-soft border">
+            <div class="text-wikiRed text-3xl mb-4"><i class="fas fa-lock"></i></div>
+            <h3 class="text-xl font-bold mb-2">Pas de fuite vers ChatGPT</h3>
+            <p class="text-slate-600">L’agent travaille dans un environnement souverain où les documents confidentiels restent dans l’infrastructure de l’État ou de l’institution autorisée.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-7 shadow-soft border">
+            <div class="text-wikiGold text-3xl mb-4"><i class="fas fa-sitemap"></i></div>
+            <h3 class="text-xl font-bold mb-2">Persona par corps de métier</h3>
+            <p class="text-slate-600">Finance, fiscalité, administration générale, archives, ressources humaines, marchés publics, santé, justice, sécurité, énergie et au-delà.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-7 shadow-soft border">
+            <div class="text-wikiIndigo text-3xl mb-4"><i class="fas fa-language"></i></div>
+            <h3 class="text-xl font-bold mb-2">Langage administratif maîtrisé</h3>
+            <p class="text-slate-600">Le Persona répond dans le style institutionnel attendu, avec terminologie métier, prudence juridique et alignement sur les procédures officielles.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-7 shadow-soft border">
+            <div class="text-cyan-700 text-3xl mb-4"><i class="fas fa-chalkboard-user"></i></div>
+            <h3 class="text-xl font-bold mb-2">Tutorat permanent</h3>
+            <p class="text-slate-600">Le Persona ne remplace pas l’encadrement, il renforce l’apprentissage, la montée en compétence et l’autonomie de l’agent.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="raghouse" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14">
+          <h2 class="section-title text-3xl md:text-4xl font-black text-slate-900">Le RAGHouse souverain</h2>
+          <p class="mt-4 text-slate-600 max-w-4xl mx-auto text-lg">
+            WikiGouv s’appuie sur un <strong>RAGHouse souverain</strong> : une maison de la connaissance où les documents,
+            procédures, lois, circulaires, manuels, archives et standards opérationnels sont indexés, sécurisés et exploitables
+            par les assistants IA sans quitter le périmètre autorisé.
+          </p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-3xl p-7 shadow-soft border border-slate-200">
+            <div class="flex items-start gap-4">
+              <div class="h-12 w-12 rounded-2xl bg-wikiBlue text-white flex items-center justify-center font-extrabold">1</div>
+              <div>
+                <h3 class="text-xl font-bold">Base de connaissance gouvernementale</h3>
+                <p class="text-slate-600 mt-2">Centralisation intelligente des savoirs métier, des textes officiels, des procédures et des documents de référence pour l’apprentissage et l’exécution des tâches.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-7 shadow-soft border border-slate-200">
+            <div class="flex items-start gap-4">
+              <div class="h-12 w-12 rounded-2xl bg-wikiGreen text-white flex items-center justify-center font-extrabold">2</div>
+              <div>
+                <h3 class="text-xl font-bold">Recherche augmentée souveraine</h3>
+                <p class="text-slate-600 mt-2">Les réponses IA sont ancrées dans les documents internes autorisés, pas dans des réponses génériques issues d’un cloud public externe.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-7 shadow-soft border border-slate-200">
+            <div class="flex items-start gap-4">
+              <div class="h-12 w-12 rounded-2xl bg-wikiRed text-white flex items-center justify-center font-extrabold">3</div>
+              <div>
+                <h3 class="text-xl font-bold">Confidentialité et cloisonnement</h3>
+                <p class="text-slate-600 mt-2">Chaque ministère, direction ou programme peut isoler ses documents, ses collections, ses modèles de réponse et ses niveaux d’accès.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-7 shadow-soft border border-slate-200">
+            <div class="flex items-start gap-4">
+              <div class="h-12 w-12 rounded-2xl bg-wikiGold text-white flex items-center justify-center font-extrabold">4</div>
+              <div>
+                <h3 class="text-xl font-bold">Traçabilité des sources</h3>
+                <p class="text-slate-600 mt-2">Les réponses peuvent être justifiées, sourcées, vérifiables et alignées avec la doctrine et les documents officiels de l’institution.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="py-20 bg-slate-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14">
+          <h2 class="section-title text-3xl md:text-4xl font-black text-slate-900">Services souverains de WikiGouv</h2>
+          <p class="mt-4 text-slate-600 max-w-4xl mx-auto text-lg">
+            WikiGouv n’est pas seulement une plateforme de formation. C’est une infrastructure de services de confiance
+            pour la connaissance, la sécurité documentaire et la transformation administrative.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="bg-gradient-to-br from-wikiBlue to-sky-800 text-white rounded-3xl p-8 shadow-glow">
+            <div class="text-3xl mb-4"><i class="fas fa-vault"></i></div>
+            <h3 class="text-2xl font-black mb-3">GovVault</h3>
+            <p class="text-white/90">Coffre-fort documentaire de l’administration pour stocker, organiser, classifier et protéger les documents sensibles, archives et référentiels stratégiques.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 shadow-soft border border-slate-200">
+            <div class="text-wikiGreen text-3xl mb-4"><i class="fas fa-key"></i></div>
+            <h3 class="text-xl font-black mb-3">GovEncryption</h3>
+            <p class="text-slate-600">Services de chiffrement, gestion des accès, protection des échanges, contrôle des consultations et sécurisation de bout en bout des contenus sensibles.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 shadow-soft border border-slate-200">
+            <div class="text-wikiRed text-3xl mb-4"><i class="fas fa-stamp"></i></div>
+            <h3 class="text-xl font-black mb-3">Digital Notary of the State</h3>
+            <p class="text-slate-600">Notarisation digitale, preuve d’intégrité, horodatage et certification d’authenticité pour les actes, décisions, rapports et documents d’État.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 shadow-soft border border-slate-200">
+            <div class="text-wikiGold text-3xl mb-4"><i class="fas fa-user-graduate"></i></div>
+            <h3 class="text-xl font-black mb-3">Learning cycles by role</h3>
+            <p class="text-slate-600">Cycles de formation alignés sur chaque métier, chaque fonction et chaque trajectoire de carrière au sein de l’administration publique.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 shadow-soft border border-slate-200">
+            <div class="text-indigo-600 text-3xl mb-4"><i class="fas fa-robot"></i></div>
+            <h3 class="text-xl font-black mb-3">AI Persona Services</h3>
+            <p class="text-slate-600">Services d’assistants IA spécialisés, paramétrés par ministère, direction, projet ou métier, avec mémoire métier et barrières de confidentialité.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 shadow-soft border border-slate-200">
+            <div class="text-cyan-700 text-3xl mb-4"><i class="fas fa-network-wired"></i></div>
+            <h3 class="text-xl font-black mb-3">Knowledge Transfer Hub</h3>
+            <p class="text-slate-600">Hub central de transmission du savoir, de capitalisation de l’expérience, de standardisation des pratiques et d’accompagnement à la transformation numérique.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="security" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14">
+          <h2 class="section-title text-3xl md:text-4xl font-black text-slate-900">Sécurité, confidentialité et souveraineté</h2>
+          <p class="mt-4 text-slate-600 max-w-4xl mx-auto text-lg">
+            WikiGouv est conçu pour protéger les documents gouvernementaux, les procédures sensibles, les archives critiques
+            et les échanges métiers contre les fuites, les usages non autorisés et les dépendances à des environnements externes.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-slate-50 rounded-3xl p-7 shadow-soft border border-slate-100">
+            <div class="h-14 w-14 rounded-2xl bg-wikiBlue/10 text-wikiBlue flex items-center justify-center text-2xl mb-5"><i class="fas fa-file-shield"></i></div>
+            <h3 class="text-xl font-bold mb-3">Documents confidentiels</h3>
+            <p class="text-slate-600">Isolation des documents classifiés, sensibles ou non publics dans des espaces de traitement autorisés.</p>
+          </div>
+
+          <div class="bg-slate-50 rounded-3xl p-7 shadow-soft border border-slate-100">
+            <div class="h-14 w-14 rounded-2xl bg-wikiGreen/10 text-wikiGreen flex items-center justify-center text-2xl mb-5"><i class="fas fa-lock-keyhole"></i></div>
+            <h3 class="text-xl font-bold mb-3">Chiffrement & accès</h3>
+            <p class="text-slate-600">Politiques d’accès, chiffrement, cloisonnement et gouvernance des usages selon la sensibilité des contenus.</p>
+          </div>
+
+          <div class="bg-slate-50 rounded-3xl p-7 shadow-soft border border-slate-100">
+            <div class="h-14 w-14 rounded-2xl bg-wikiGold/10 text-wikiGold flex items-center justify-center text-2xl mb-5"><i class="fas fa-scale-balanced"></i></div>
+            <h3 class="text-xl font-bold mb-3">Conformité institutionnelle</h3>
+            <p class="text-slate-600">Respect des exigences internes de l’État, des obligations de preuve, de conservation et de traçabilité documentaire.</p>
+          </div>
+
+          <div class="bg-slate-50 rounded-3xl p-7 shadow-soft border border-slate-100">
+            <div class="h-14 w-14 rounded-2xl bg-wikiRed/10 text-wikiRed flex items-center justify-center text-2xl mb-5"><i class="fas fa-ban"></i></div>
+            <h3 class="text-xl font-bold mb-3">Zéro exposition publique</h3>
+            <p class="text-slate-600">L’agent ne doit plus aller sur ChatGPT ou d’autres services publics pour traiter des documents confidentiels et secrets d’État.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-20 bg-gradient-to-r from-wikiDark via-wikiBlue to-wikiGreen text-white">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl md:text-5xl font-black leading-tight">
+          WikiGouv donne à l’administration publique<br>
+          <span class="text-wikiGold">sa maison souveraine de la connaissance</span>
+        </h2>
+        <p class="mt-5 text-lg text-white/90 max-w-3xl mx-auto">
+          Former, transmettre, sécuriser, assister et certifier : une infrastructure unique pour la modernisation administrative,
+          la souveraineté numérique et la continuité du savoir de l’État.
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+          <a href="/courses" class="bg-white text-wikiBlue font-extrabold px-8 py-4 rounded-full hover:bg-slate-100 transition shadow-soft">
+            <i class="fas fa-book-open mr-2"></i>Explorer WikiGouv
+          </a>
+          <a href="/login" class="bg-wikiGold text-wikiDark font-extrabold px-8 py-4 rounded-full hover:bg-yellow-400 transition shadow-soft">
+            <i class="fas fa-user-lock mr-2"></i>Se connecter
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact" class="bg-wikiDark text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="grid md:grid-cols-3 gap-10">
+        <div>
+          <h3 class="text-xl font-black mb-4">WikiGouv</h3>
+          <p class="text-slate-300 leading-relaxed">
+            Centre souverain de knowledge transfer gouvernemental, d’apprentissage métier, d’assistance IA sécurisée,
+            de protection documentaire et de transformation administrative.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-black mb-4">Liens rapides</h3>
+          <ul class="space-y-2 text-slate-300">
+            <li><a href="#vision" class="hover:text-white">Vision</a></li>
+            <li><a href="#persona" class="hover:text-white">Persona</a></li>
+            <li><a href="#raghouse" class="hover:text-white">RAGHouse</a></li>
+            <li><a href="#services" class="hover:text-white">Services souverains</a></li>
+              <li><a href="/courses" class="hover:text-white">Catalogue</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-black mb-4">Contact</h3>
+          <div class="space-y-2 text-slate-300">
+            <p><i class="fas fa-globe mr-2 text-wikiGold"></i>wikigouv.com</p>
+            <p><i class="fas fa-envelope mr-2 text-wikiGold"></i>contact@wikigouv.com</p>
+            <p><i class="fas fa-shield-check mr-2 text-wikiGold"></i>Souveraineté · Confidentialité · Knowledge transfer</p>
+          </div>
+          <div class="flex gap-4 mt-5 text-xl">
+            <a href="#" class="text-slate-300 hover:text-white"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="text-slate-300 hover:text-white"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="text-slate-300 hover:text-white"><i class="fab fa-x-twitter"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-white/10 mt-10 pt-6 text-center text-slate-400 text-sm">
+        &copy; 2026 WikiGouv · Centre souverain de knowledge transfer gouvernemental · Powered by WikiGouv.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    const heroData = [
+      {
+        badgeIcon: 'fa-building-shield',
+        badgeText: 'WikiGouv · Souveraineté · Knowledge Transfer · Administration Publique',
+        title: 'Le centre souverain de<br><span class="text-wikiGold">knowledge transfer gouvernemental</span><br>pour la <span class="text-wikiRed">transition du papier au numérique</span>',
+        text: 'WikiGouv accompagne l’employé public dans l’apprentissage de son poste, la transmission des savoirs, la mobilité professionnelle et l’usage sécurisé d’un assistant IA souverain.',
+        ctaClass: 'bg-wikiGold text-wikiDark hover:bg-yellow-400',
+        ctaIcon: 'fa-book-open',
+        ctaText: 'Explorer les cycles de formation',
+        ctaHref: '/courses',
+        cardIconWrap: 'bg-wikiBlue/10 text-wikiBlue',
+        cardIcon: 'fa-book-open-reader',
+        cardTitle: 'Apprentissage & transition',
+        cardSubtitle: 'Du papier vers le numérique, métier par métier',
+        cardText1: 'Chaque agent peut apprendre son poste actuel ou se préparer à une nouvelle fonction dans l’administration publique.',
+        cardText2: 'WikiGouv structure les savoirs, les procédures et les parcours pour accélérer la transition administrative.',
+        mini1: { icon: 'fa-user-graduate', title: 'Parcours agent', text: 'Formation selon le poste actuel ou visé.', color: 'text-wikiBlue' },
+        mini2: { icon: 'fa-arrows-rotate', title: 'Transition numérique', text: 'Modernisation des pratiques administratives.', color: 'text-wikiGreen' },
+        sectorLabel: 'Vision souveraine'
+      },
+      {
+        badgeIcon: 'fa-robot',
+        badgeText: 'WikiGouv · Persona AI · Assistance métier · Confidentialité',
+        title: 'Un <span class="text-wikiGold">Persona AI</span><br>pour chaque métier,<br>sans exposer les <span class="text-wikiRed">secrets d’État</span>',
+        text: 'Chaque employé peut être assisté par un robotAI adapté à sa fonction, à son ministère, à ses règles métier et à ses documents autorisés.',
+        ctaClass: 'bg-wikiBlue text-white hover:bg-blue-900',
+        ctaIcon: 'fa-robot',
+        ctaText: 'Découvrir Persona',
+        ctaHref: '#persona',
+        cardIconWrap: 'bg-indigo-100 text-indigo-600',
+        cardIcon: 'fa-user-gear',
+        cardTitle: 'Persona AI',
+        cardSubtitle: 'Assistant métier souverain',
+        cardText1: 'Le Persona aide l’agent dans ses tâches sans jamais sortir du périmètre documentaire autorisé.',
+        cardText2: 'Il conserve un langage métier, une mémoire contextuelle et des garde-fous institutionnels.',
+        mini1: { icon: 'fa-lock', title: 'Confidentiel', text: 'Aucune fuite vers des IA publiques.', color: 'text-wikiRed' },
+        mini2: { icon: 'fa-brain', title: 'Contextuel', text: 'Réponses alignées au métier et aux procédures.', color: 'text-wikiBlue' },
+        sectorLabel: 'En vedette · Persona'
+      },
+      {
+        badgeIcon: 'fa-database',
+        badgeText: 'WikiGouv · RAGHouse · Savoirs de l’État · Recherche augmentée',
+        title: 'Le <span class="text-wikiGold">RAGHouse souverain</span><br>pour organiser et exploiter<br>les savoirs de <span class="text-wikiRed">l’administration</span>',
+        text: 'Textes, guides, circulaires, formulaires, archives et procédures deviennent exploitables dans une base de connaissance souveraine.',
+        ctaClass: 'bg-wikiGold text-wikiDark hover:bg-yellow-400',
+        ctaIcon: 'fa-database',
+        ctaText: 'Découvrir RAGHouse',
+        ctaHref: '#raghouse',
+        cardIconWrap: 'bg-cyan-100 text-cyan-700',
+        cardIcon: 'fa-network-wired',
+        cardTitle: 'RAGHouse',
+        cardSubtitle: 'Maison de la connaissance gouvernementale',
+        cardText1: 'Les réponses IA sont ancrées dans les documents autorisés de l’institution.',
+        cardText2: 'Le savoir ne dépend plus de mémoires individuelles dispersées ou de clouds publics externes.',
+        mini1: { icon: 'fa-file-lines', title: 'Documents', text: 'Textes, archives, procédures, guides.', color: 'text-cyan-700' },
+        mini2: { icon: 'fa-scale-balanced', title: 'Traçabilité', text: 'Réponses justifiables et vérifiables.', color: 'text-wikiBlue' },
+        sectorLabel: 'En vedette · RAGHouse'
+      },
+      {
+        badgeIcon: 'fa-vault',
+        badgeText: 'WikiGouv · GovVault · GovEncryption · Sécurité documentaire',
+        title: 'GovVault,<br>GovEncryption et la<br><span class="text-wikiRed">sécurité documentaire d’État</span>',
+        text: 'WikiGouv protège les contenus critiques avec coffre documentaire, chiffrement, accès contrôlés et gouvernance des consultations.',
+        ctaClass: 'bg-wikiRed text-white hover:bg-red-700',
+        ctaIcon: 'fa-vault',
+        ctaText: 'Voir les services souverains',
+        ctaHref: '#services',
+        cardIconWrap: 'bg-wikiRed/10 text-wikiRed',
+        cardIcon: 'fa-lock-keyhole',
+        cardTitle: 'Protection des actifs informationnels',
+        cardSubtitle: 'Confidentialité, cloisonnement, maîtrise',
+        cardText1: 'Les documents sensibles de l’État doivent vivre dans un environnement sécurisé et contrôlé.',
+        cardText2: 'WikiGouv fournit les couches de stockage, de chiffrement et de preuve nécessaires.',
+        mini1: { icon: 'fa-vault', title: 'GovVault', text: 'Coffre documentaire de confiance.', color: 'text-wikiRed' },
+        mini2: { icon: 'fa-key', title: 'GovEncryption', text: 'Chiffrement et contrôle des accès.', color: 'text-wikiGreen' },
+        sectorLabel: 'En vedette · Sécurité'
+      },
+      {
+        badgeIcon: 'fa-stamp',
+        badgeText: 'WikiGouv · Digital Notary · Horodatage · Intégrité',
+        title: 'Le <span class="text-wikiGold">digital notary</span><br>de l’État pour la preuve,<br>l’intégrité et la <span class="text-wikiRed">confiance</span>',
+        text: 'Horodatage, preuve d’intégrité, certification et notarisation digitale pour les actes, décisions, rapports et documents stratégiques.',
+        ctaClass: 'bg-wikiBlue text-white hover:bg-blue-900',
+        ctaIcon: 'fa-stamp',
+        ctaText: 'Voir la notarisation',
+        ctaHref: '#services',
+        cardIconWrap: 'bg-wikiGold/10 text-wikiGold',
+        cardIcon: 'fa-certificate',
+        cardTitle: 'Preuve numérique d’État',
+        cardSubtitle: 'Intégrité et authenticité',
+        cardText1: 'Les documents officiels peuvent être protégés par des mécanismes de preuve et de certification robustes.',
+        cardText2: 'WikiGouv renforce la valeur juridique, administrative et historique des documents numériques.',
+        mini1: { icon: 'fa-clock', title: 'Horodatage', text: 'Preuve de temps et de séquence.', color: 'text-wikiGold' },
+        mini2: { icon: 'fa-shield', title: 'Intégrité', text: 'Détection des altérations et garantie d’authenticité.', color: 'text-wikiBlue' },
+        sectorLabel: 'En vedette · Notary'
+      },
+      {
+        badgeIcon: 'fa-people-arrows',
+        badgeText: 'WikiGouv · Capacity Building · Mobilité · Continuité du savoir',
+        title: 'Former, transmettre,<br>préparer et accompagner<br>chaque <span class="text-wikiRed">employé public</span>',
+        text: 'WikiGouv sécurise la continuité du savoir, professionnalise les agents, réduit la dépendance aux personnes-clés et structure la mémoire opérationnelle de l’administration.',
+        ctaClass: 'bg-wikiGold text-wikiDark hover:bg-yellow-400',
+        ctaIcon: 'fa-user-graduate',
+        ctaText: 'Voir la vision',
+        ctaHref: '#vision',
+        cardIconWrap: 'bg-wikiGreen/10 text-wikiGreen',
+        cardIcon: 'fa-people-arrows',
+        cardTitle: 'Knowledge transfer continu',
+        cardSubtitle: 'Un patrimoine immatériel mieux protégé',
+        cardText1: 'Chaque départ, mobilité ou changement de poste ne doit plus être une perte de connaissance.',
+        cardText2: 'WikiGouv crée une continuité durable du savoir administratif et opérationnel.',
+        mini1: { icon: 'fa-sitemap', title: 'Corps de métier', text: 'Navigation à travers les fonctions publiques.', color: 'text-wikiGreen' },
+        mini2: { icon: 'fa-route', title: 'Carrière', text: 'Préparation à un poste futur ou désiré.', color: 'text-wikiBlue' },
+        sectorLabel: 'En vedette · Capacity Building'
+      }
+    ];
+
+    const heroSlides = document.querySelectorAll('.hero-slide');
+    const heroDots = document.querySelectorAll('.hero-dot');
+    const heroPrev = document.getElementById('heroPrev');
+    const heroNext = document.getElementById('heroNext');
+
+    const heroBadgeIcon = document.getElementById('heroBadgeIcon');
+    const heroBadgeText = document.getElementById('heroBadgeText');
+    const heroTitle = document.getElementById('heroTitle');
+    const heroText = document.getElementById('heroText');
+    const heroPrimaryCta = document.getElementById('heroPrimaryCta');
+
+    const heroCardIconWrap = document.getElementById('heroCardIconWrap');
+    const heroCardIcon = document.getElementById('heroCardIcon');
+    const heroCardTitle = document.getElementById('heroCardTitle');
+    const heroCardSubtitle = document.getElementById('heroCardSubtitle');
+    const heroCardText1 = document.getElementById('heroCardText1');
+    const heroCardText2 = document.getElementById('heroCardText2');
+
+    const heroMiniCard1 = document.getElementById('heroMiniCard1');
+    const heroMiniCard2 = document.getElementById('heroMiniCard2');
+    const heroMiniIcon1 = document.getElementById('heroMiniIcon1');
+    const heroMiniTitle1 = document.getElementById('heroMiniTitle1');
+    const heroMiniText1 = document.getElementById('heroMiniText1');
+    const heroMiniIcon2 = document.getElementById('heroMiniIcon2');
+    const heroMiniTitle2 = document.getElementById('heroMiniTitle2');
+    const heroMiniText2 = document.getElementById('heroMiniText2');
+    const heroSectorLabel = document.getElementById('heroSectorLabel');
+
+    let currentHeroSlide = 0;
+    let heroTimer = null;
+
+    function refreshFade(el) {
+      if (!el) return;
+      el.classList.remove('fade-soft');
+      void el.offsetWidth;
+      el.classList.add('fade-soft');
+    }
+
+    function updateHeroContent(index) {
+      const item = heroData[index];
+      if (!item) return;
+
+      heroSlides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+      heroDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+
+      heroBadgeIcon.className = `fas ${item.badgeIcon} text-wikiGold`;
+      heroBadgeText.textContent = item.badgeText;
+      heroTitle.innerHTML = item.title;
+      heroText.textContent = item.text;
+
+      heroPrimaryCta.className = `inline-flex items-center justify-center font-bold px-7 py-3.5 rounded-full transition shadow-glow ${item.ctaClass}`;
+      heroPrimaryCta.href = item.ctaHref;
+      heroPrimaryCta.innerHTML = `<i class="fas ${item.ctaIcon} mr-2"></i>${item.ctaText}`;
+
+      heroCardIconWrap.className = `h-12 w-12 rounded-2xl flex items-center justify-center ${item.cardIconWrap}`;
+      heroCardIcon.className = `fas ${item.cardIcon} text-xl`;
+      heroCardTitle.textContent = item.cardTitle;
+      heroCardSubtitle.textContent = item.cardSubtitle;
+      heroCardText1.textContent = item.cardText1;
+      heroCardText2.textContent = item.cardText2;
+
+      heroMiniIcon1.className = `${item.mini1.color} text-lg mb-2`;
+      heroMiniIcon1.innerHTML = `<i class="fas ${item.mini1.icon}"></i>`;
+      heroMiniTitle1.textContent = item.mini1.title;
+      heroMiniText1.textContent = item.mini1.text;
+
+      heroMiniIcon2.className = `${item.mini2.color} text-lg mb-2`;
+      heroMiniIcon2.innerHTML = `<i class="fas ${item.mini2.icon}"></i>`;
+      heroMiniTitle2.textContent = item.mini2.title;
+      heroMiniText2.textContent = item.mini2.text;
+
+      heroSectorLabel.textContent = item.sectorLabel;
+
+      refreshFade(heroTitle);
+      refreshFade(heroText);
+      refreshFade(heroCardText1);
+      refreshFade(heroCardText2);
+
+      heroMiniCard1.classList.remove('active');
+      heroMiniCard2.classList.add('active');
+      setTimeout(() => {
+        heroMiniCard1.classList.add('active');
+        heroMiniCard2.classList.remove('active');
+      }, 350);
+    }
+
+    function goToHeroSlide(index) {
+      currentHeroSlide = (index + heroData.length) % heroData.length;
+      updateHeroContent(currentHeroSlide);
+    }
+
+    function nextHeroSlide() {
+      goToHeroSlide(currentHeroSlide + 1);
+    }
+
+    function prevHeroSlide() {
+      goToHeroSlide(currentHeroSlide - 1);
+    }
+
+    function startHeroAutoplay() {
+      clearInterval(heroTimer);
+      heroTimer = setInterval(() => {
+        nextHeroSlide();
+      }, 15000);
+    }
+
+    if (heroPrev) {
+      heroPrev.addEventListener('click', () => {
+        prevHeroSlide();
+        startHeroAutoplay();
+      });
+    }
+
+    if (heroNext) {
+      heroNext.addEventListener('click', () => {
+        nextHeroSlide();
+        startHeroAutoplay();
+      });
+    }
+
+    heroDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        goToHeroSlide(Number(dot.dataset.slide || 0));
+        startHeroAutoplay();
+      });
+    });
+
+    updateHeroContent(0);
+    startHeroAutoplay();
+  </script>
+</body>
+</html>

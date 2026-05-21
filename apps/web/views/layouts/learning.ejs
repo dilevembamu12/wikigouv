@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <%- include('../partials/head', { page }) %>
+  <link rel="stylesheet" href="/assets/default/vendors/sweetalert2/sweetalert2.min.css">
+  <link rel="stylesheet" href="/assets/default/css/app.css">
+  <link rel="stylesheet" href="/assets/default/learning_page/styles.css">
+  <link rel="stylesheet" href="/assets/default/vendors/video/video-js.min.css">
+  <link rel="stylesheet" href="/assets/vendors/nprogress/nprogress.min.css">
+  <style>
+    body.learning-layout { background: #f4f7fb; }
+    .learning-layout-main {
+      width: 100%;
+      max-width: 100%;
+      padding: 0;
+    }
+    @media (max-width: 768px) {
+      .learning-layout-main { padding: 0; }
+    }
+  </style>
+</head>
+<body class="learning-layout">
+  <main class="learning-layout-main">
+    <%- include('../partials/alerts', { page }) %>
+    <%- include(contentTemplate, { page, data }) %>
+  </main>
+  <script src="/assets/vendors/nprogress/nprogress.min.js"></script>
+  <script>
+    if (window.NProgress) {
+      NProgress.configure({ showSpinner: true, easing: 'ease', speed: 500 });
+      document.addEventListener('DOMContentLoaded', function () { NProgress.start(); });
+      window.addEventListener('load', function () { NProgress.done(); });
+    }
+  </script>
+  <script src="/assets/default/js/app.js"></script>
+  <script src="/assets/default/vendors/feather-icons/feather.min.js"></script>
+  <script src="/assets/default/vendors/moment.min.js"></script>
+  <script src="/assets/default/vendors/sweetalert2/sweetalert2.min.js"></script>
+  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/default/vendors/video/video.min.js"></script>
+  <script src="/assets/default/vendors/video/youtube.min.js"></script>
+  <script src="/assets/default/vendors/video/vimeo.js"></script>
+  <script src="/assets/default/js/parts/video_player_helpers.min.js"></script>
+  <% if (data && data.useLegacyLearningScripts === true) { %>
+    <script src="/assets/learning_page/scripts.min.js"></script>
+  <% } %>
+  <script>
+    if (typeof window.feather === 'undefined') {
+      window.feather = { replace: function () {} };
+    }
+    if (window.jQuery && typeof window.jQuery.toast !== 'function') {
+      window.jQuery.toast = function () {};
+    }
+  </script>
+  <script src="/assets/default/js/parts/main.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<%
+  const course = data.course;
+  const metadata = course && course.metadata && typeof course.metadata === 'object' ? course.metadata : {};
+  const titleRaw = String(course?.title ?? '');
+  const title = titleRaw.replace(/^\[(COURSE|LIVE|TEXT)\]\s*/i, '').trim() || 'Formation';
+  const summary = String(metadata.summary ?? course?.description ?? '').trim();
+  const description = String(course?.description ?? summary ?? '').trim();
+  const category = String(metadata.category ?? course?.category ?? 'Category');
+  const locale = String(metadata.locale ?? 'FR');
+  const status = String(course?.status ?? 'DRAFT').toUpperCase();
+  const statusClass = status === 'PUBLISHED' ? 'text-bg-success' : (status === 'DRAFT' ? 'text-bg-secondary' : 'text-bg-warning');
+  const thumbnail = String(metadata.thumbnail ?? metadata.coverImage ?? '');
+  const createdBy = String(course?.createdById ?? 'Formateur');
+  const createdByAvatarRaw = String(
+    metadata.createdByAvatar ??
+      course?.createdByAvatar ??
+      ''
+  ).trim();
+  const createdByAvatar = createdByAvatarRaw || `https://ui-avatars.com/api/?name=${encodeURIComponent(createdBy)}&background=1c73e8&color=fff`;
+  const courseThumb = thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(title)}&background=e6eefc&color=1c73e8&size=220`;
+  const extrasByType = course && typeof course.extrasByType === 'object' ? course.extrasByType : {};
+  const sections = Array.isArray(course?.sections) ? course.sections : [];
+  const quizzes = Array.isArray(course?.quizzes) ? course.quizzes : [];
+  const stats = course && typeof course.stats === 'object' ? course.stats : {};
+  const studentsCount = Number(stats.students ?? 0);
+  const sectionsCount = Number(stats.sections ?? sections.length ?? 0);
+  const lessonsCount = Number(stats.lessons ?? 0);
+  const filesCount = Number(stats.files ?? 0);
+  const assignmentsCount = Number(stats.assignments ?? 0);
+  const quizzesCount = Number(stats.quizzes ?? quizzes.length ?? 0);
+  const commentsCount = Number(stats.comments ?? 0);
+  const reviewsCount = Number(stats.reviews ?? 0);
+  const averageRating = Number(course?.averageRating ?? 0);
+  const listFromType = (type) => Array.isArray(extrasByType?.[type]) ? extrasByType[type] : [];
+  const files = listFromType('file');
+  const interactiveFiles = listFromType('interactive_file');
+  const textLessons = listFromType('text_lesson');
+  const sessions = listFromType('session');
+  const assignments = listFromType('assignment');
+  const prerequisites = listFromType('prerequisite');
+  const relatedCourses = listFromType('related_course');
+  const faqs = listFromType('faq');
+  const learningMaterials = listFromType('learning_material');
+  const companyLogos = listFromType('company_logo');
+  const comments = Array.isArray(course?.comments) ? course.comments : [];
+  const reviews = Array.isArray(course?.reviews) ? course.reviews : [];
+  const objectivesRaw = String(metadata.objectives ?? '').trim();
+  const requirementsRaw = String(metadata.requirements ?? '').trim();
+  const learnItems = objectivesRaw ? objectivesRaw.split('\n').map((x) => x.trim()).filter(Boolean) : [
+    'Comprendre les fondamentaux du sujet',
+    'Appliquer la méthodologie sur des cas réels',
+    'Structurer un plan d action opérationnel',
+    'Maîtriser les outils et bonnes pratiques'
+  ];
+  const requirementItems = requirementsRaw ? requirementsRaw.split('\n').map((x) => x.trim()).filter(Boolean) : [
+    'Connaissances de base du domaine',
+    'Accès à un navigateur web moderne',
+    'Motivation à pratiquer chaque module'
+  ];
+%>
+
+<% if (data.previewMode) { %>
+  <div class="alert alert-warning mb-3">Mode prévisualisation privée: ce cours est visible par le créateur/staff avant publication.</div>
+<% } %>
+
+<% if (data.listStatus !== 200) { %>
+  <div class="alert alert-warning">Le service cours est indisponible pour le moment (status <%= data.listStatus %>).</div>
+<% } %>
+
+<% if (!course) { %>
+  <section class="bg-white border rounded-4 shadow-sm p-4">
+    <div class="alert alert-info mb-3">Ce cours n’existe pas ou n’est plus disponible.</div>
+    <a href="/courses" class="btn btn-primary">Retour au catalogue</a>
+  </section>
+<% } else { %>
+  <style>
+    .course-shell { max-width: 1280px; margin: 0 auto; }
+    .course-hero { border-radius: 24px; overflow: hidden; position: relative; min-height: 300px; border: 1px solid #dfe8f6; }
+    .course-hero-bg {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(95deg, rgba(18,28,52,.88) 0%, rgba(18,28,52,.56) 55%, rgba(18,28,52,.26) 100%),
+        url('<%= thumbnail || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2000&auto=format&fit=crop" %>') center/cover no-repeat;
+      filter: saturate(1.02);
+    }
+    .course-hero-content { position: relative; z-index: 2; color: #fff; padding: 38px; max-width: 790px; }
+    .course-tabs { background: #fff; border-radius: 16px; border: 1px solid #e8edf5; margin-top: -12px; position: relative; z-index: 3; box-shadow: 0 8px 20px rgba(17, 39, 79, 0.05); }
+    .course-tabs .nav-link { border: 0; color: #7081a4; font-weight: 600; font-size: 14px; padding: 16px 16px; }
+    .course-tabs .nav-link.active { color: #1c73e8; border-bottom: 2px solid #1c73e8; background: transparent; }
+    .course-panel { background: #fff; border: 1px solid #e8edf5; border-radius: 18px; padding: 20px; box-shadow: 0 8px 20px rgba(17, 39, 79, 0.04); }
+    .course-right-card { background: #fff; border: 1px solid #e8edf5; border-radius: 18px; padding: 18px; box-shadow: 0 8px 20px rgba(17, 39, 79, 0.04); }
+    .course-right-thumb { width: 118px; height: 118px; border-radius: 50%; object-fit: cover; border: 2px solid #d8e2f5; }
+    .course-list-clean { list-style: none; margin: 0; padding: 0; }
+    .course-list-clean li { padding: 9px 0; border-bottom: 1px solid #eef2f8; color: #5d6b89; font-size: 13px; }
+    .course-list-clean li:last-child { border-bottom: 0; }
+    .course-sticky-cta {
+      position: sticky; bottom: 10px; z-index: 20;
+      background: #fff; border: 1px solid #dfe8f7; border-radius: 12px;
+      padding: 10px 14px; box-shadow: 0 10px 30px rgba(23,48,88,.14);
+    }
+    .course-subtle { color: #90a0be; font-size: 13px; }
+    .course-company-strip { border-top: 1px solid #edf2fa; padding-top: 10px; margin-top: 10px; }
+    .course-promo-card {
+      border-radius: 16px;
+      border: 1px solid #e4ebf8;
+      padding: 14px;
+      background: linear-gradient(150deg, #0d2a66 0%, #123d88 100%);
+      color: #fff;
+      min-height: 170px;
+    }
+    .course-newsletter {
+      border-radius: 18px;
+      border: 1px solid #dbe6f8;
+      background: #fff;
+      padding: 18px;
+    }
+  </style>
+
+  <div class="course-shell">
+    <section class="course-hero mb-3">
+      <div class="course-hero-bg"></div>
+      <div class="course-hero-content">
+        <div class="small mb-2">Courses > <%= category %></div>
+        <h1 class="display-6 fw-bold mb-2"><%= title %></h1>
+        <p class="mb-3" style="max-width:680px;"><%= summary || 'Description non disponible.' %></p>
+        <div class="d-flex align-items-center gap-3 small">
+          <span><i class="fa-regular fa-user me-1"></i> <%= studentsCount %> apprenants</span>
+          <span><i class="fa-regular fa-file-lines me-1"></i> <%= lessonsCount %> lecons</span>
+        </div>
+        <div class="mt-3 d-flex align-items-center gap-2">
+          <img src="<%= createdByAvatar %>" width="34" height="34" class="rounded-circle" alt="<%= createdBy %>" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<%= encodeURIComponent(createdBy) %>&background=1c73e8&color=fff'">
+          <div class="small">
+            <div class="fw-semibold text-white"><%= createdBy %></div>
+            <div class="text-white-50">Formateur</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="course-tabs mb-3 px-2">
+      <ul class="nav nav-tabs border-0" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-about" type="button" role="tab">A propos du cours</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-content" type="button" role="tab">Contenu</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-comments" type="button" role="tab">Commentaires <%= commentsCount ? `(${commentsCount})` : '' %></button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reviews" type="button" role="tab">Avis <%= reviewsCount ? `(${reviewsCount})` : '' %></button></li>
+      </ul>
+    </div>
+
+    <section class="tab-content">
+      <div class="tab-pane fade show active" id="tab-about" role="tabpanel">
+    <section class="row g-3">
+      <div class="col-lg-8">
+        <div class="course-panel mb-3">
+          <h3 class="h6 fw-bold mb-3">What Will You Learn?</h3>
+          <div class="row g-2">
+            <% learnItems.forEach((item) => { %>
+              <div class="col-md-6">
+                <div class="border rounded-3 px-3 py-2 text-muted small"><i class="fa-solid fa-check text-primary me-2"></i><%= item %></div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="course-panel mb-3">
+          <h3 class="h6 fw-bold mb-2">About This Course</h3>
+          <p class="text-muted mb-0"><%= description || 'Aucune description détaillée disponible.' %></p>
+        </div>
+
+        <div class="course-panel mb-3">
+          <h3 class="h6 fw-bold mb-2">Contenu</h3>
+          <% if (!sections.length) { %>
+            <div class="text-muted small">Aucune section disponible pour le moment.</div>
+          <% } else { %>
+            <% sections.forEach((section, idx) => { %>
+              <div class="border rounded-3 p-3 mb-2">
+                <div class="fw-semibold"><%= section.title ?? ('Section ' + (idx + 1)) %></div>
+                <div class="small text-muted"><%= Array.isArray(section.contentItems) ? section.contentItems.length : 0 %> items</div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+
+        <div class="course-panel mb-3">
+          <h3 class="h6 fw-bold mb-2">Requirements</h3>
+          <ul class="course-list-clean">
+            <% if (listFromType('requirement').length) { %>
+              <% listFromType('requirement').forEach((item) => { %>
+                <li><i class="fa-solid fa-check text-primary me-2"></i><%= String(item.title ?? '') %></li>
+              <% }) %>
+            <% } else { %>
+              <% requirementItems.forEach((item) => { %>
+                <li><i class="fa-solid fa-check text-primary me-2"></i><%= item %></li>
+              <% }) %>
+            <% } %>
+          </ul>
+        </div>
+
+        <div class="course-panel mb-3">
+          <h3 class="h6 fw-bold mb-2">Trusted Companies</h3>
+          <div class="course-subtle mb-2">+<%= companyLogos.length || 0 %> Companies trusted this course.</div>
+          <div class="course-company-strip d-flex flex-wrap align-items-center gap-4 opacity-75">
+            <% if (companyLogos.length) { %>
+              <% companyLogos.forEach((logo) => { %>
+                <strong><%= String(logo.title ?? 'Company') %></strong>
+              <% }) %>
+            <% } else { %>
+              <strong>VISA</strong><strong>Klarna</strong><strong>Atos</strong><strong>ECO</strong><strong>VISA</strong>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="course-right-card mb-3 text-center">
+          <img src="<%= courseThumb %>" class="course-right-thumb mb-3" alt="<%= title %>" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<%= encodeURIComponent(title) %>&background=e6eefc&color=1c73e8&size=220'">
+          <div class="h4 fw-bold mb-3">$0</div>
+          <a href="/learning/courses/<%= encodeURIComponent(String(course.id ?? '')) %>" class="btn btn-primary w-100 mb-3">Aller a la page d apprentissage</a>
+          <div class="small text-start fw-semibold mb-2">This Course Includes</div>
+          <ul class="course-list-clean text-start small">
+            <li><i class="fa-regular fa-file me-2"></i>Files: <%= files.length %></li>
+            <li><i class="fa-regular fa-file-code me-2"></i>SCORM: <%= interactiveFiles.length %></li>
+            <li><i class="fa-regular fa-rectangle-list me-2"></i>Text Lessons: <%= textLessons.length %></li>
+            <li><i class="fa-regular fa-calendar me-2"></i>Live Sessions: <%= sessions.length %></li>
+          </ul>
+        </div>
+
+        <div class="course-right-card mb-3">
+          <h4 class="h6 fw-bold mb-2">Specifications du cours</h4>
+          <ul class="course-list-clean small">
+            <li class="d-flex justify-content-between"><span>Sections</span><span><%= sectionsCount %></span></li>
+            <li class="d-flex justify-content-between"><span>Lessons</span><span><%= lessonsCount %></span></li>
+            <li class="d-flex justify-content-between"><span>Apprenants</span><span><%= studentsCount %></span></li>
+            <li class="d-flex justify-content-between"><span>Files</span><span><%= filesCount %></span></li>
+            <li class="d-flex justify-content-between"><span>Assignments</span><span><%= assignmentsCount %></span></li>
+            <li class="d-flex justify-content-between"><span>Quizzes</span><span><%= quizzesCount %></span></li>
+            <li class="d-flex justify-content-between"><span>Commentaires</span><span><%= commentsCount %></span></li>
+            <li class="d-flex justify-content-between"><span>Avis</span><span><%= reviewsCount %></span></li>
+            <li class="d-flex justify-content-between"><span>Note</span><span><%= averageRating ? averageRating + '/5' : '-' %></span></li>
+            <li class="d-flex justify-content-between"><span>Langue</span><span><%= locale %></span></li>
+            <li class="d-flex justify-content-between"><span>Date de creation</span><span><%= course.createdAt ? new Date(String(course.createdAt)).toLocaleDateString() : '-' %></span></li>
+            <li class="d-flex justify-content-between"><span>Date de mise a jour</span><span><%= course.updatedAt ? new Date(String(course.updatedAt)).toLocaleDateString() : '-' %></span></li>
+            <li class="d-flex justify-content-between"><span>Statut</span><span class="badge <%= statusClass %>"><%= status %></span></li>
+          </ul>
+        </div>
+
+        <div class="course-right-card">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <img src="<%= createdByAvatar %>" width="44" height="44" class="rounded-circle" alt="<%= createdBy %>" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<%= encodeURIComponent(createdBy) %>&background=1c73e8&color=fff'">
+            <div>
+              <div class="fw-semibold"><%= createdBy %></div>
+              <div class="small text-muted">Formateur</div>
+            </div>
+          </div>
+          <a class="btn btn-outline-primary w-100" href="/admin/webinars?instructor=<%= encodeURIComponent(createdBy) %>">Profile</a>
+        </div>
+      </div>
+    </section>
+      </div>
+
+      <div class="tab-pane fade" id="tab-content" role="tabpanel">
+        <section class="row g-3">
+          <div class="col-lg-8">
+            <div class="course-panel mb-3">
+              <h3 class="h6 fw-bold mb-2">Curriculum</h3>
+              <% if (!sections.length) { %>
+                <div class="text-muted small">Aucune section disponible pour le moment.</div>
+              <% } else { %>
+                <% sections.forEach((section) => { %>
+                  <div class="border rounded-3 p-3 mb-2">
+                    <div class="fw-semibold mb-1"><%= String(section.title ?? 'Section') %></div>
+                    <div class="small text-muted">
+                      <%= Array.isArray(section.contentItems) ? section.contentItems.length : 0 %> content items
+                    </div>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+
+            <div class="course-panel mb-3">
+              <h3 class="h6 fw-bold mb-2">FAQ</h3>
+              <% if (!faqs.length) { %>
+                <div class="text-muted small">No FAQs Available!</div>
+              <% } else { %>
+                <% faqs.forEach((f) => { %>
+                  <div class="border-bottom pb-2 mb-2">
+                    <div class="fw-semibold"><%= String(f.title ?? 'Question') %></div>
+                    <div class="small text-muted"><%= String((f.payload && f.payload.answer) ? f.payload.answer : '') %></div>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="course-right-card mb-3">
+              <h4 class="h6 fw-bold mb-2">Additional Content</h4>
+              <ul class="course-list-clean small">
+                <li class="d-flex justify-content-between"><span>Assignments</span><span><%= assignments.length %></span></li>
+                <li class="d-flex justify-content-between"><span>Prerequisites</span><span><%= prerequisites.length %></span></li>
+                <li class="d-flex justify-content-between"><span>Related Courses</span><span><%= relatedCourses.length %></span></li>
+                <li class="d-flex justify-content-between"><span>Learning Materials</span><span><%= learningMaterials.length %></span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="tab-pane fade" id="tab-comments" role="tabpanel">
+        <div class="course-panel mb-3">
+          <h3 class="h6 fw-bold mb-2">Commentaires</h3>
+          <% if (!comments.length) { %>
+            <div class="text-muted small">Aucun commentaire pour le moment.</div>
+          <% } else { %>
+            <% comments.forEach((c) => { %>
+              <div class="border-bottom pb-2 mb-2">
+                <div class="fw-semibold"><%= String(c.authorName ?? 'Learner') %></div>
+                <div class="small text-muted"><%= String(c.message ?? '') %></div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-reviews" role="tabpanel">
+        <div class="course-panel mb-3">
+          <h3 class="h6 fw-bold mb-2">Avis</h3>
+          <% if (!reviews.length) { %>
+            <div class="text-muted small">Aucun avis disponible.</div>
+          <% } else { %>
+            <% reviews.forEach((r) => { %>
+              <div class="border-bottom pb-2 mb-2">
+                <div class="fw-semibold">
+                  <%= String(r.authorName ?? 'Learner') %>
+                  <span class="text-warning ms-2"><%= '★'.repeat(Math.max(0, Math.min(5, Number(r.rating ?? 0)))) %></span>
+                </div>
+                <div class="small text-muted"><%= String(r.comment ?? '') %></div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+    </section>
+
+    <section class="row g-3 mb-3">
+      <div class="col-lg-8">
+        <div class="course-panel">
+          <div class="d-flex align-items-start gap-3">
+            <img src="<%= createdByAvatar %>" width="64" height="64" class="rounded-circle" alt="<%= createdBy %>" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<%= encodeURIComponent(createdBy) %>&background=e4edff&color=1c73e8&size=90'">
+            <div>
+              <div class="fw-bold mb-1"><%= createdBy %></div>
+              <div class="course-subtle mb-2">Profil formateur</div>
+              <p class="text-muted mb-0">
+                Experienced instructor delivering practical, structured, and institution-ready training programs focused on measurable outcomes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="course-promo-card mb-3">
+          <div class="fw-bold mb-2"><%= String(metadata.promoMeetingTitle ?? 'Book a Meeting') %></div>
+          <div class="small opacity-75 mb-3"><%= String(metadata.promoMeetingText ?? 'Discuss this course roadmap with the instructor.') %></div>
+          <a class="btn btn-light btn-sm" href="/admin/webinars?instructor=<%= encodeURIComponent(createdBy) %>">Book now</a>
+        </div>
+        <div class="course-promo-card" style="background:linear-gradient(150deg,#16295b 0%,#1a4ea0 100%);">
+          <div class="fw-bold mb-2"><%= String(metadata.promoRewardsTitle ?? 'Point Rewards') %></div>
+          <div class="small opacity-75"><%= String(metadata.promoRewardsText ?? 'Earn points as you study and complete lessons.') %></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="course-newsletter mb-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-lg-8">
+          <div class="fw-bold"><%= String(metadata.newsletterTitle ?? 'Subscribe to Our Newsletter') %></div>
+          <div class="course-subtle"><%= String(metadata.newsletterText ?? 'Receive insights and course updates directly in your inbox.') %></div>
+        </div>
+        <div class="col-lg-4">
+          <form class="d-flex gap-2">
+            <input class="form-control" type="email" placeholder="Enter your email address here">
+            <button class="btn btn-primary" type="button">Rejoindre</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <div class="course-sticky-cta mt-3 d-flex justify-content-between align-items-center">
+      <div class="small">
+        Vous consultez <strong><%= title %></strong>
+      </div>
+      <a href="/learning/courses/<%= encodeURIComponent(String(course.id ?? '')) %>" class="btn btn-primary">Aller a la page d apprentissage</a>
+    </div>
+  </div>
+<% } %>

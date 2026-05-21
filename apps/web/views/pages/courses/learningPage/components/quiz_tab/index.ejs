@@ -1,0 +1,17 @@
+<div class="learning-panel content-tab p-15 pb-50 pb-20 tab-pane fade h-100" id="quizzes" role="tabpanel" aria-labelledby="quizzes-tab" data-panel="quizzes">
+  <% if (!quizzes.length) { %>
+    <div class="learning-page-forum-empty d-flex align-items-center justify-content-center flex-column">
+      <div class="learning-page-forum-empty-icon d-flex align-items-center justify-content-center">
+        <img src="/assets/default/img/learning/quiz-empty.svg" class="img-fluid" alt="">
+      </div>
+      <div class="d-flex align-items-center flex-column mt-10 text-center">
+        <h3 class="font-20 font-weight-bold text-dark-blue text-center">No Quizzes Available!</h3>
+        <p class="font-14 font-weight-500 text-gray mt-5 text-center">You can add content to your course for students.</p>
+      </div>
+    </div>
+  <% } else { %>
+    <% quizzes.forEach((quiz) => { %>
+      <%- include('./quiz', { quiz }) %>
+    <% }) %>
+  <% } %>
+</div>

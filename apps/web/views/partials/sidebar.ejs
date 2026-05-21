@@ -1,0 +1,407 @@
+<%
+  const currentRoles = page?.user?.roles || [];
+  const hasRole = (r) => currentRoles.includes(r);
+  const isSuperAdmin = hasRole('SUPER_ADMIN');
+  const canSee = (roles = []) => isSuperAdmin || roles.length === 0 || roles.some((r) => hasRole(r));
+  const currentPath = page?.currentPath || '';
+  const normalizedPath = currentPath.split('?')[0];
+
+  const isPathActive = (href = '') => {
+    if (!href) return false;
+    const hrefPath = href.split('?')[0];
+    if (href === currentPath || hrefPath === normalizedPath) return true;
+    return currentPath.startsWith(hrefPath) && hrefPath !== '/';
+  };
+
+  const sections = [
+    {
+      header: null,
+      items: [
+        { key: 'dashboard', label: 'Tableau de bord', href: '/dashboard', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+        { label: 'Tableau marketing', href: '/admin/marketing', roles: ['SUPER_ADMIN', 'ADMIN'], comingSoon: true }
+      ]
+    },
+    {
+      header: 'Formation',
+      items: [
+        {
+          label: 'Cours',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'],
+          children: [
+            { label: 'Nouveau', href: '/admin/webinars/create', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+            { label: 'Cours', href: '/admin/webinars?type=course', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+            { label: 'Classes en direct', href: '/admin/webinars?type=webinar', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+            { label: 'Cours texte', href: '/admin/webinars?type=text_lesson', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+            { label: 'Historique sessions live', href: '/admin/agora_history', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+            { label: 'Notes de cours', href: '/admin/webinars/personal-notes', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] }
+          ]
+        },
+        { label: 'Course Bundles', href: '/admin/bundles', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'], comingSoon: true },
+        { label: 'Upcoming Courses', href: '/admin/upcoming_courses', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'DIRECTION'], comingSoon: true },
+        { label: 'Events', href: '/admin/events', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'], comingSoon: true },
+        { key: 'quizzes', label: 'Quizzes', href: '/quizzes', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+        { key: 'certificates', label: 'Certificates', href: '/certificates', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+        { label: 'Assignments', href: '/admin/assignments', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT'], comingSoon: true },
+        { key: 'forum', label: 'Course Forum', href: '/forum', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+        {
+          label: 'Course Notices',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'New', href: '/admin/course-noticeboards/send', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'List', href: '/admin/course-noticeboards', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] }
+          ]
+        },
+        {
+          label: 'Enrollment',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AUDITEUR'],
+          children: [
+            { label: 'Add Student to Course', href: '/admin/enrollments/add-student-to-class', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'History', href: '/admin/enrollments/history', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AUDITEUR'] }
+          ]
+        },
+        { label: 'Waitlists', href: '/admin/waitlists', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AUDITEUR'], comingSoon: true },
+        {
+          label: 'Categories',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'New', href: '/admin/categories/create', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'List', href: '/admin/categories', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'Trends', href: '/admin/categories/trends', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] }
+          ]
+        },
+        { label: 'Bibliotheque', href: '/admin/library', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+        {
+          label: 'Filters',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'New', href: '/admin/filters/create', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'List', href: '/admin/filters', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] }
+          ]
+        },
+        { label: 'Reviews', href: '/admin/reviews', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AUDITEUR'], comingSoon: true },
+        {
+          label: 'Attendance',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AUDITEUR'],
+          children: [
+            { label: 'History', href: '/admin/attendances', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AUDITEUR'] },
+            { label: 'Settings', href: '/admin/attendances/settings', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        }
+      ]
+    },
+    {
+      header: 'Meetings',
+      items: [
+        { label: 'Consultants', href: '/admin/consultants', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'], comingSoon: true },
+        { label: 'Meetings', href: '/admin/appointments', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'], comingSoon: true },
+        {
+          label: 'Meeting Packages',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'Create', href: '/admin/meeting-packages/create', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Lists', href: '/admin/meeting-packages', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Sold Packages', href: '/admin/meeting-packages/sold', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Settings', href: '/admin/meeting-packages/settings', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        }
+      ]
+    },
+    {
+      header: 'Utilisateurs',
+      items: [
+        {
+          label: 'Utilisateurs',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'Nouveau', href: '/admin/users/create', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Tous les utilisateurs', href: '/admin/all-users', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Staff', href: '/admin/staffs', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Students', href: '/admin/students', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Instructors', href: '/admin/instructors', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Organisations', href: '/admin/organizations', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        { label: 'Access Restricted', href: '/admin/users/not-access-to-content', roles: ['SUPER_ADMIN', 'ADMIN'] },
+        {
+          label: 'User Roles',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'New', href: '/admin/roles/create', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'List', href: '/admin/roles', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        {
+          label: 'Groupes',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'New', href: '/admin/users/groups/create', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'List', href: '/admin/users/groups', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        { label: 'Badges', href: '/admin/users/badges', roles: ['SUPER_ADMIN', 'ADMIN'] },
+        {
+          label: 'Demandes formateurs',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'Instructors', href: '/admin/users/become-instructors/instructors', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Organizations', href: '/admin/users/become-instructors/organizations', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Settings', href: '/admin/users/become-instructors/settings', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        { label: 'Demandes de suppression de compte', href: '/admin/users/delete-account-requests', roles: ['SUPER_ADMIN', 'ADMIN'] },
+        {
+          label: 'IP Management',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'AUDITEUR'],
+          children: [
+            { label: 'Logins History', href: '/admin/users/login-history', roles: ['SUPER_ADMIN', 'ADMIN', 'AUDITEUR'] },
+            { label: 'IP Restrictions', href: '/admin/users/ip-restriction', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        }
+      ]
+    },
+    {
+      header: 'Forum',
+      items: [
+        {
+          label: 'Forums',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'New', href: '/admin/forums/create', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'List', href: '/admin/forums', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'Settings', href: '/admin/forums/settings', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        {
+          label: 'Featured Topics',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'New', href: '/admin/featured-topics/create', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'List', href: '/admin/featured-topics', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] }
+          ]
+        },
+        {
+          label: 'Recommended Topics',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'New', href: '/admin/recommended-topics/create', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'List', href: '/admin/recommended-topics', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] }
+          ]
+        }
+      ]
+    },
+    {
+      header: 'CRM',
+      items: [
+        {
+          key: 'support',
+          label: 'Support Tickets',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'],
+          children: [
+            { label: 'New Support Ticket', href: '/admin/supports/create', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'List', href: '/support', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'] },
+            { label: 'Departments', href: '/admin/supports/departments', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        { label: 'Courses Support', href: '/admin/supports?type=course_conversations', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'], comingSoon: true },
+        {
+          label: 'Comments',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AUDITEUR'],
+          children: [
+            { label: 'Course Comments', href: '/admin/comments/webinars', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AUDITEUR'] },
+            { label: 'Bundle Comments', href: '/admin/comments/bundles', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'Blog Comments', href: '/admin/comments/blog', roles: ['SUPER_ADMIN', 'ADMIN', 'AUDITEUR'] }
+          ]
+        },
+        {
+          label: 'Reports',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'DIRECTION', 'AUDITEUR'],
+          children: [
+            { label: 'Courses', href: '/admin/reports/webinars', roles: ['SUPER_ADMIN', 'ADMIN', 'DIRECTION', 'AUDITEUR'] },
+            { label: 'Course Comments Reports', href: '/admin/comments/webinars/reports', roles: ['SUPER_ADMIN', 'ADMIN', 'AUDITEUR'] },
+            { label: 'Blog Comments Reports', href: '/admin/comments/blog/reports', roles: ['SUPER_ADMIN', 'ADMIN', 'AUDITEUR'] }
+          ]
+        },
+        { label: 'Contact Messages', href: '/admin/contacts', roles: ['SUPER_ADMIN', 'ADMIN'], comingSoon: true },
+        {
+          label: 'Noticeboard',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'List', href: '/admin/noticeboards', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'New', href: '/admin/noticeboards/send', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] }
+          ]
+        },
+        {
+          label: 'Notifications',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'DIRECTION'],
+          children: [
+            { label: 'History', href: '/admin/notifications', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'DIRECTION'] },
+            { label: 'Posted', href: '/admin/notifications/posted', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'New', href: '/admin/notifications/send', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] }
+          ]
+        }
+      ]
+    },
+    {
+      header: 'Content',
+      items: [
+        {
+          label: 'Blog',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'New Post', href: '/admin/blog/create', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'Posts', href: '/admin/blog', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'Categories', href: '/admin/blog/categories', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        {
+          label: 'Pages',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'New Page', href: '/admin/pages/create', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'List', href: '/admin/pages', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        { label: 'Additional Pages', href: '/admin/additional_page/contact_us', roles: ['SUPER_ADMIN', 'ADMIN'], comingSoon: true },
+        {
+          label: 'Testimonials',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'New', href: '/admin/testimonials/create', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'List', href: '/admin/testimonials', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        { label: 'Tags', href: '/admin/tags', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'], comingSoon: true },
+        {
+          label: 'Localization',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'Countries', href: '/admin/regions/countries', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Provinces', href: '/admin/regions/provinces', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Cities', href: '/admin/regions/cities', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Districts', href: '/admin/regions/districts', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        {
+          label: 'Form Builder',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'New', href: '/admin/forms/create', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'List', href: '/admin/forms', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Submissions', href: '/admin/forms/submissions', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        {
+          label: 'AI Content',
+          roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'],
+          children: [
+            { label: 'New Template', href: '/admin/ai-contents/templates/create', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Service Template', href: '/admin/ai-contents/templates', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'Generated Contents', href: '/admin/ai-contents/lists', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR'] },
+            { label: 'Settings', href: '/admin/ai-contents/settings', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        { label: 'Content Deletion Requests', href: '/admin/content-delete-requests', roles: ['SUPER_ADMIN', 'ADMIN', 'AUDITEUR'], comingSoon: true },
+        {
+          label: 'Tutor Finder',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'Settings', href: '/admin/instructor-finder/settings', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        }
+      ]
+    },
+    {
+      header: 'Settings',
+      items: [
+        {
+          label: 'Bulk Import',
+          roles: ['SUPER_ADMIN', 'ADMIN'],
+          children: [
+            { label: 'New', href: '/admin/imports', roles: ['SUPER_ADMIN', 'ADMIN'] },
+            { label: 'History', href: '/admin/imports/history', roles: ['SUPER_ADMIN', 'ADMIN'] }
+          ]
+        },
+        { label: 'Translator', href: '/admin/translator', roles: ['SUPER_ADMIN', 'ADMIN'], comingSoon: true },
+        { label: 'Settings', href: '/admin/settings', roles: ['SUPER_ADMIN', 'ADMIN'], comingSoon: true },
+        { key: 'audit', label: 'Audit Logs', href: '/audit-logs', roles: ['SUPER_ADMIN', 'ADMIN', 'AUDITEUR'] },
+        { key: 'iam', label: 'IAM / Roles dynamiques', href: '/admin/iam', roles: ['SUPER_ADMIN'] },
+        { label: 'Log Out', href: '/logout', roles: ['SUPER_ADMIN', 'ADMIN', 'FORMATEUR', 'AGENT', 'DIRECTION', 'AUDITEUR'], danger: true }
+      ]
+    }
+  ];
+%>
+
+<aside id="sidebar-wrapper" class="h-100 d-flex flex-column px-3 py-4 overflow-auto">
+  <div class="sidebar-brand text-center mb-2">
+    <a href="/" class="text-decoration-none fw-bold">WIKIGouv</a>
+  </div>
+  <div class="sidebar-brand sidebar-brand-sm text-center mb-3">
+    <a href="/" class="text-decoration-none fw-bold"></a>
+  </div>
+
+  <ul class="sidebar-menu list-unstyled mb-0">
+    <% sections.forEach((section) => { %>
+      <% const visibleItems = section.items.filter((item) => canSee(item.roles)); %>
+      <% if (visibleItems.length > 0) { %>
+        <% if (section.header) { %>
+          <li class="menu-header text-uppercase small text-muted mt-3 mb-2"><%= section.header %></li>
+        <% } %>
+
+        <% visibleItems.forEach((item) => { %>
+          <% if (item.children && item.children.length > 0) { %>
+            <% const visibleChildren = item.children.filter((child) => canSee(child.roles)); %>
+            <% if (visibleChildren.length > 0) { %>
+              <% const childActive = visibleChildren.some((child) => isPathActive(child.href)); %>
+              <li class="nav-item dropdown <%= childActive ? 'active' : '' %> mb-1">
+                <a href="#" class="rocket-sidebar-link nav-link has-dropdown <%= childActive ? 'active' : '' %>" data-toggle="dropdown" aria-expanded="<%= childActive ? 'true' : 'false' %>">
+                  <span><%= item.label %></span>
+                  <span class="ms-auto small">▾</span>
+                </a>
+                <ul class="dropdown-menu list-unstyled ps-3 mt-1 <%= childActive ? 'open' : '' %>" style="<%= childActive ? 'display:block;' : 'display:none;' %>">
+                  <% visibleChildren.forEach((child) => { %>
+                    <% const activeChild = isPathActive(child.href); %>
+                    <li class="mb-1">
+                      <a class="rocket-sidebar-link nav-link <%= activeChild ? 'active' : '' %>" href="<%= child.href %>"><%= child.label %></a>
+                    </li>
+                  <% }) %>
+                </ul>
+              </li>
+            <% } %>
+          <% } else { %>
+            <% const activeItem = (item.key && page?.activeNav === item.key) || isPathActive(item.href); %>
+            <li class="mb-1">
+              <a href="<%= item.href %>" class="rocket-sidebar-link <%= activeItem ? 'active' : '' %> <%= item.danger ? 'text-danger' : '' %>">
+                <span><%= item.label %></span>
+                <% if (item.comingSoon) { %><small class="text-muted ms-2">Soon</small><% } %>
+              </a>
+            </li>
+          <% } %>
+        <% }); %>
+      <% } %>
+    <% }); %>
+  </ul>
+</aside>
+
+<style>
+  #sidebar-wrapper .nav-item.dropdown {
+    position: static;
+  }
+
+  #sidebar-wrapper .dropdown-menu {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    float: none !important;
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0.25rem 0 0.25rem 0.75rem;
+    margin: 0;
+  }
+
+  #sidebar-wrapper .dropdown-menu.open {
+    display: block;
+  }
+</style>

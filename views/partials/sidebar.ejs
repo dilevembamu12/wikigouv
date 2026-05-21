@@ -1,0 +1,18 @@
+<aside class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h6 class="text-uppercase text-muted">Espace</h6>
+    <div class="list-group list-group-flush">
+      <a href="/dashboard" class="list-group-item list-group-item-action sidebar-link <%= page?.activeNav === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/courses" class="list-group-item list-group-item-action sidebar-link <%= page?.activeNav === 'courses' ? 'active' : '' %>">Formations</a>
+      <a href="/quizzes" class="list-group-item list-group-item-action sidebar-link <%= page?.activeNav === 'quizzes' ? 'active' : '' %>">Quiz</a>
+      <a href="/certificates" class="list-group-item list-group-item-action sidebar-link <%= page?.activeNav === 'certificates' ? 'active' : '' %>">Certificats</a>
+      <a href="/documents" class="list-group-item list-group-item-action sidebar-link <%= page?.activeNav === 'documents' ? 'active' : '' %>">Documents</a>
+      <a href="/forum" class="list-group-item list-group-item-action sidebar-link <%= page?.activeNav === 'forum' ? 'active' : '' %>">Forum</a>
+      <a href="/support" class="list-group-item list-group-item-action sidebar-link <%= page?.activeNav === 'support' ? 'active' : '' %>">Support</a>
+      <% if (page?.user?.roles?.includes('ADMIN') || page?.user?.roles?.includes('SUPER_ADMIN') || page?.user?.roles?.includes('AUDITEUR')) { %>
+        <a href="/audit-logs" class="list-group-item list-group-item-action sidebar-link <%= page?.activeNav === 'audit' ? 'active' : '' %>">Audit logs</a>
+      <% } %>
+    </div>
+  </div>
+</aside>
+

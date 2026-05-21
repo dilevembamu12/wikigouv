@@ -1,0 +1,17 @@
+<div class="learning-panel d-none" data-panel="forum">
+  <% if (!Array.isArray(forumTopics) || !forumTopics.length) { %>
+    <div class="empty">No forum questions yet.</div>
+  <% } else { %>
+    <% forumTopics.forEach((topic) => { %>
+      <article class="section-card is-open mb-2">
+        <div class="section-head">
+          <div class="section-title"><%= String(topic.title ?? 'Question') %></div>
+          <span class="badge bg-light text-dark"><%= String(topic.status ?? 'ACTIVE') %></span>
+        </div>
+        <div class="section-body">
+          <p class="mb-0"><%= String(topic.content ?? '') %></p>
+        </div>
+      </article>
+    <% }) %>
+  <% } %>
+</div>

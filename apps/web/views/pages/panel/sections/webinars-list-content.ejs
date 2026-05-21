@@ -1,0 +1,229 @@
+<section class="row g-3 mb-4">
+  <div class="col-md-6 col-xl-3">
+    <div class="rocket-card p-3">
+      <div class="rocket-muted">Total <%= data.type === 'webinar' ? 'Classe en direct' : data.type === 'text_lesson' ? 'Cours texte' : 'Cours' %></div>
+      <div class="fs-2 fw-bold mt-2"><%= data.metrics.total %></div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="rocket-card p-3">
+      <div class="rocket-muted">Pending Review</div>
+      <div class="fs-2 fw-bold mt-2"><%= data.metrics.pending %></div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="rocket-card p-3">
+      <div class="rocket-muted">Total Durations</div>
+      <div class="fs-2 fw-bold mt-2"><%= data.metrics.totalDurations %></div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="rocket-card p-3">
+      <div class="rocket-muted">Total Sales</div>
+      <div class="fs-2 fw-bold mt-2"><%= data.metrics.totalSales %></div>
+    </div>
+  </div>
+</section>
+
+<section class="rocket-card p-4 mb-4">
+  <form method="get" action="/admin/webinars" class="row g-3">
+    <input type="hidden" name="type" value="<%= data.type %>">
+    <div class="col-md-6 col-xl-3">
+      <label class="form-label">Recherche</label>
+      <input name="q" value="<%= data.query.q %>" class="form-control">
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <label class="form-label">Date debut</label>
+      <input type="date" name="dateFrom" value="<%= data.query.dateFrom %>" class="form-control">
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <label class="form-label">Date fin</label>
+      <input type="date" name="dateTo" value="<%= data.query.dateTo %>" class="form-control">
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <label class="form-label">Filtres</label>
+      <select name="filterType" class="form-select">
+        <option value="">Filtrer par type</option>
+        <option value="course" <%= data.query.filterType === 'course' ? 'selected' : '' %>>Cours</option>
+        <option value="webinar" <%= data.query.filterType === 'webinar' ? 'selected' : '' %>>Classe en direct</option>
+        <option value="text_lesson" <%= data.query.filterType === 'text_lesson' ? 'selected' : '' %>>Cours texte</option>
+      </select>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <label class="form-label">Formateur</label>
+      <input name="instructor" value="<%= data.query.instructor %>" class="form-control" placeholder="Rechercher un formateur">
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <label class="form-label">Categorie</label>
+      <input name="category" value="<%= data.query.category %>" class="form-control" placeholder="Toutes les categories">
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <label class="form-label">Statut</label>
+      <select name="status" class="form-select">
+        <option value="">Tous les statuts</option>
+        <option value="DRAFT" <%= data.query.status === 'DRAFT' ? 'selected' : '' %>>Brouillon</option>
+        <option value="PUBLISHED" <%= data.query.status === 'PUBLISHED' ? 'selected' : '' %>>Publie</option>
+        <option value="ARCHIVED" <%= data.query.status === 'ARCHIVED' ? 'selected' : '' %>>Archive</option>
+      </select>
+    </div>
+    <div class="col-md-6 col-xl-3 d-flex align-items-end">
+      <button class="btn btn-primary px-4">Afficher</button>
+    </div>
+  </form>
+</section>
+
+<section class="rocket-card p-4">
+  <%
+    function safe(v) { return String(v == null ? '' : v); }
+    function cleanCourseTitle(title) { return safe(title).replace(/^\[(COURSE|LIVE|TEXT)\]\s*/i, '').trim() || '-'; }
+    function metaValue(row, key, fallback) {
+      if (row && typeof row === 'object' && row.metadata && typeof row.metadata === 'object' && row.metadata[key] != null) {
+        return String(row.metadata[key]);
+      }
+      return fallback == null ? '' : String(fallback);
+    }
+    function shortId(id) { return safe(id).slice(0, 8); }
+    function statusClass(status) {
+      const s = safe(status).toUpperCase();
+      if (s === 'PUBLISHED' || s === 'ACTIVE') return 'text-bg-success';
+      if (s === 'DRAFT' || s === 'INACTIVE') return 'text-bg-secondary';
+      return 'text-bg-warning';
+    }
+  %>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="h5 mb-1"><%= data.type === 'webinar' ? 'Classes en direct' : data.type === 'text_lesson' ? 'Cours texte' : 'Cours' %></h3>
+      <div class="rocket-muted">Gerez tous les cours depuis un seul ecran.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/api/admin/education/courses/export.csv">Exporter Excel</a>
+      <a class="btn btn-primary" href="/admin/webinars/create">+ Nouveau cours</a>
+    </div>
+  </div>
+
+  <% if (data.listStatus !== 200) { %>
+    <div class="alert alert-warning">API indisponible (status <%= data.listStatus %>).</div>
+  <% } %>
+
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cours</th>
+          <th>Categorie</th>
+          <th>Formateur</th>
+          <th>Apprenants</th>
+          <th>Cree le</th>
+          <th>Mis a jour</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if ((data.rows ?? []).length === 0) { %>
+          <tr><td colspan="9" class="text-muted">Aucun cours trouve.</td></tr>
+        <% } %>
+        <% (data.rows ?? []).forEach((row) => { %>
+          <% const slug = safe(row.slug || metaValue(row, 'slug', '')); %>
+          <% const categoryName = safe(metaValue(row, 'category', row.category || '-')); %>
+          <% const locale = safe(metaValue(row, 'locale', '')); %>
+          <% const instructorDisplay = safe(metaValue(row, 'teacherId', row.createdById || '-')); %>
+          <% const publicHref = slug ? `/courses/${encodeURIComponent(slug)}` : `/admin/webinars/${encodeURIComponent(safe(row.id))}/edit`; %>
+          <tr>
+            <td><%= shortId(row.id) %></td>
+            <td>
+              <div class="fw-semibold"><%= cleanCourseTitle(row.title) %></div>
+              <small class="rocket-muted d-block"><%= data.type %><% if (locale) { %> • <%= locale %><% } %></small>
+              <% if (slug) { %><small class="rocket-muted d-block">/<%= slug %></small><% } %>
+            </td>
+            <td><%= categoryName || '-' %></td>
+            <td><%= instructorDisplay || '-' %></td>
+            <td>0</td>
+            <td><%= row.createdAt ? new Date(String(row.createdAt)).toLocaleString() : '-' %></td>
+            <td><%= row.updatedAt ? new Date(String(row.updatedAt)).toLocaleString() : '-' %></td>
+            <td><span class="badge <%= statusClass(row.status) %>"><%= row.status ?? '-' %></span></td>
+            <td>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fa-solid fa-ellipsis"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="/admin/webinars/<%= encodeURIComponent(safe(row.id)) %>/edit">Modifier le contenu</a></li>
+                  <li><a class="dropdown-item" href="<%= publicHref %>" target="_blank" rel="noopener">Ouvrir le lien du cours</a></li>
+                  <li><a class="dropdown-item" href="/courses/preview/<%= encodeURIComponent(safe(row.id)) %>" target="_blank" rel="noopener">Previsualisation (privee)</a></li>
+                  <li><a class="dropdown-item" href="/admin/webinars/<%= encodeURIComponent(safe(row.id)) %>/edit?tab=status">Configuration du statut</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><h6 class="dropdown-header">Statut rapide</h6></li>
+                  <li>
+                    <form method="post" action="/admin/webinars/status" class="px-2 py-1">
+                      <input type="hidden" name="id" value="<%= row.id %>">
+                      <input type="hidden" name="type" value="<%= data.type %>">
+                      <input type="hidden" name="status" value="PUBLISHED">
+                      <input type="hidden" name="page" value="<%= data.pageNumber %>">
+                      <input type="hidden" name="pageSize" value="<%= data.pageSize %>">
+                      <input type="hidden" name="q" value="<%= data.query.q %>">
+                      <input type="hidden" name="filterStatus" value="<%= data.query.status %>">
+                      <input type="hidden" name="dateFrom" value="<%= data.query.dateFrom %>">
+                      <input type="hidden" name="dateTo" value="<%= data.query.dateTo %>">
+                      <input type="hidden" name="instructor" value="<%= data.query.instructor %>">
+                      <input type="hidden" name="category" value="<%= data.query.category %>">
+                      <input type="hidden" name="filterType" value="<%= data.query.filterType %>">
+                      <button type="submit" class="dropdown-item">Mettre en publie</button>
+                    </form>
+                  </li>
+                  <li>
+                    <form method="post" action="/admin/webinars/status" class="px-2 py-1">
+                      <input type="hidden" name="id" value="<%= row.id %>">
+                      <input type="hidden" name="type" value="<%= data.type %>">
+                      <input type="hidden" name="status" value="DRAFT">
+                      <input type="hidden" name="page" value="<%= data.pageNumber %>">
+                      <input type="hidden" name="pageSize" value="<%= data.pageSize %>">
+                      <input type="hidden" name="q" value="<%= data.query.q %>">
+                      <input type="hidden" name="filterStatus" value="<%= data.query.status %>">
+                      <input type="hidden" name="dateFrom" value="<%= data.query.dateFrom %>">
+                      <input type="hidden" name="dateTo" value="<%= data.query.dateTo %>">
+                      <input type="hidden" name="instructor" value="<%= data.query.instructor %>">
+                      <input type="hidden" name="category" value="<%= data.query.category %>">
+                      <input type="hidden" name="filterType" value="<%= data.query.filterType %>">
+                      <button type="submit" class="dropdown-item">Mettre en brouillon</button>
+                    </form>
+                  </li>
+                  <li>
+                    <form method="post" action="/admin/webinars/status" class="px-2 py-1" onsubmit="return confirm('Archiver ce cours ?');">
+                      <input type="hidden" name="id" value="<%= row.id %>">
+                      <input type="hidden" name="type" value="<%= data.type %>">
+                      <input type="hidden" name="status" value="ARCHIVED">
+                      <input type="hidden" name="page" value="<%= data.pageNumber %>">
+                      <input type="hidden" name="pageSize" value="<%= data.pageSize %>">
+                      <input type="hidden" name="q" value="<%= data.query.q %>">
+                      <input type="hidden" name="filterStatus" value="<%= data.query.status %>">
+                      <input type="hidden" name="dateFrom" value="<%= data.query.dateFrom %>">
+                      <input type="hidden" name="dateTo" value="<%= data.query.dateTo %>">
+                      <input type="hidden" name="instructor" value="<%= data.query.instructor %>">
+                      <input type="hidden" name="category" value="<%= data.query.category %>">
+                      <input type="hidden" name="filterType" value="<%= data.query.filterType %>">
+                      <button type="submit" class="dropdown-item text-danger">Archiver</button>
+                    </form>
+                  </li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (data.totalPages > 1) { %>
+    <nav class="mt-3" aria-label="Courses pagination">
+      <ul class="pagination mb-0 justify-content-end">
+        <% for (let i = 1; i <= data.totalPages; i++) { %>
+          <li class="page-item <%= i === data.pageNumber ? 'active' : '' %>">
+            <a class="page-link" href="/admin/webinars?type=<%= data.type %>&page=<%= i %>&pageSize=<%= data.pageSize %>&q=<%= encodeURIComponent(data.query.q || '') %>&status=<%= encodeURIComponent(data.query.status || '') %>&dateFrom=<%= encodeURIComponent(data.query.dateFrom || '') %>&dateTo=<%= encodeURIComponent(data.query.dateTo || '') %>&instructor=<%= encodeURIComponent(data.query.instructor || '') %>&category=<%= encodeURIComponent(data.query.category || '') %>&filterType=<%= encodeURIComponent(data.query.filterType || '') %>"><%= i %></a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  <% } %>
+</section>

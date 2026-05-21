@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <%- include('../partials/head', { page }) %>
+</head>
+<body>
+  <%- include('../partials/navbar', { page }) %>
+  <main class="container py-4">
+    <%- include('../partials/alerts', { page }) %>
+    <div class="row g-4">
+      <div class="col-lg-3">
+        <%- include('../partials/sidebar', { page }) %>
+      </div>
+      <div class="col-lg-9">
+        <%- include('../partials/breadcrumbs', { page }) %>
+        <%- include(contentTemplate, { page, data }) %>
+      </div>
+    </div>
+  </main>
+  <%- include('../partials/footer', { page }) %>
+</body>
+</html>
+

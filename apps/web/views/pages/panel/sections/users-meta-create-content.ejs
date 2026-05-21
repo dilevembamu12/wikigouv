@@ -1,0 +1,72 @@
+<section class="rocket-page users-meta-page">
+  <div class="rocket-page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="h2 fw-bold mb-0"><%= data.featureTitle %></h2>
+      <% if (data.type === 'roles') { %><a href="/admin/roles" class="btn btn-outline-secondary rounded-pill px-4">Retour a la liste</a><% } %>
+      <% if (data.type === 'groups') { %><a href="/admin/users/groups" class="btn btn-outline-secondary rounded-pill px-4">Retour a la liste</a><% } %>
+      <% if (data.type === 'badges') { %><a href="/admin/users/badges" class="btn btn-outline-secondary rounded-pill px-4">Retour a la liste</a><% } %>
+    </div>
+  </div>
+
+  <% const isEdit = !!data.item?.id; %>
+  <% let formAction = ''; %>
+  <% if (data.type === 'roles') formAction = isEdit ? '/admin/roles/' + data.item.id + '/update' : '/admin/roles/store'; %>
+  <% if (data.type === 'groups') formAction = isEdit ? '/admin/users/groups/' + data.item.id + '/update' : '/admin/users/groups/store'; %>
+  <% if (data.type === 'badges') formAction = isEdit ? '/admin/users/badges/' + data.item.id + '/update' : '/admin/users/badges/store'; %>
+
+  <div class="rocket-card p-0 overflow-hidden">
+    <div class="p-4 border-bottom">
+      <h3 class="h5 fw-bold mb-1">Basic Information</h3>
+      <div class="text-muted">Fill the required fields to save this item.</div>
+    </div>
+    <div class="p-4">
+    <form method="post" action="<%= formAction %>" id="metaCreateForm">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Title <span class="text-danger">*</span></label>
+          <input type="text" name="title" class="form-control" required value="<%= data.item?.title ?? '' %>">
+        </div>
+
+        <% if (data.type === 'badges') { %>
+          <div class="col-12">
+            <label class="form-label">Icon</label>
+            <div class="input-group">
+              <button type="button" class="btn btn-outline-secondary js-library-picker" data-target="metaIconInput">Bibliotheque</button>
+              <input type="text" id="metaIconInput" name="icon" class="form-control" value="<%= data.item?.icon ?? '' %>">
+            </div>
+          </div>
+        <% } %>
+
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          <textarea name="description" rows="4" class="form-control"><%= data.item?.description ?? '' %></textarea>
+        </div>
+
+        <% if (data.type === 'roles') { %>
+          <div class="col-12">
+            <label class="form-label">Permissions (comma separated)</label>
+            <input type="text" name="permissionsRaw" class="form-control" value="<%= Array.isArray(data.item?.permissions) ? data.item.permissions.join(', ') : '' %>">
+            <input type="hidden" name="permissions" id="permissionsSerialized">
+          </div>
+        <% } %>
+
+        <div class="col-md-6">
+          <label class="form-label">Statut</label>
+          <% const currentStatus = String(data.item?.status ?? 'ACTIVE').toUpperCase(); %>
+          <select name="status" class="form-select">
+            <option value="ACTIVE" <%= currentStatus === 'ACTIVE' ? 'selected' : '' %>>ACTIVE</option>
+            <option value="INACTIVE" <%= currentStatus === 'INACTIVE' ? 'selected' : '' %>>INACTIVE</option>
+          </select>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-primary px-4"><%= isEdit ? 'Mettre a jour' : 'Enregistrer' %></button>
+      </div>
+    </form>
+    </div>
+  </div>
+</section>
+
+<script src="/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+<link rel="stylesheet" href="/css/users-meta.css">
+<script src="/js/users-meta-create.js"></script>
