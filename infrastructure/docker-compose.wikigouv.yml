@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  wikigouv-mysql:
+    image: mysql:8.4
+    container_name: wikigouv-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_change_me}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-wikigouv}
+      MYSQL_USER: ${MYSQL_USER:-wikigouv}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wikigouv_change_me}
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - wikigouv_mysql_data:/var/lib/mysql
+    ports:
+      - "13306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root_change_me}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  wikigouv-keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: wikigouv-keycloak
+    restart: unless-stopped
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin_change_me}
+    volumes:
+      - /www/wwwroot/wikigouv.gouvgpt.com/infrastructure/keycloak/realm-wikigouv.json:/opt/keycloak/data/import/realm-wikigouv.json:ro
+    ports:
+      - "18080:8080"
+    depends_on:
+      wikigouv-mysql:
+        condition: service_healthy
+
+  wikigouv-api:
+    image: node:20-alpine
+    container_name: wikigouv-api
+    restart: unless-stopped
+    working_dir: /app
+    env_file:
+      - /www/wwwroot/wikigouv.gouvgpt.com/.env
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_HOST: wikigouv-mysql
+      DB_PORT: 3306
+    volumes:
+      - /www/wwwroot/wikigouv.gouvgpt.com:/app
+    command: sh -lc "npm ci && npm run build && npm run db:migrate && npm run db:seed || true && npm --workspace @wikigouv/api run start:prod"
+    ports:
+      - "14000:4000"
+    depends_on:
+      wikigouv-mysql:
+        condition: service_healthy
+      wikigouv-keycloak:
+        condition: service_started
+
+  wikigouv-web:
+    image: node:20-alpine
+    container_name: wikigouv-web
+    restart: unless-stopped
+    working_dir: /app
+    env_file:
+      - /www/wwwroot/wikigouv.gouvgpt.com/.env
+    environment:
+      NODE_ENV: production
+    volumes:
+      - /www/wwwroot/wikigouv.gouvgpt.com:/app
+    command: sh -lc "npm ci && npm run build && npm --workspace @wikigouv/web run start"
+    ports:
+      - "13000:3000"
+    depends_on:
+      wikigouv-api:
+        condition: service_started
+
+volumes:
+  wikigouv_mysql_data:
