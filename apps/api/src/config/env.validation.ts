@@ -18,6 +18,8 @@ const schema = z.object({
   KEYCLOAK_ADMIN_CLIENT_ID: z.string().default('wikigouv-admin-service'),
   KEYCLOAK_ADMIN_CLIENT_SECRET: z.string().min(1),
   JWKS_URI: z.string().url(),
+  AUTH_FALLBACK_ENABLED: z.string().default('false'),
+  AUTH_FALLBACK_TOKEN: z.string().default(''),
   AI_RATE_LIMIT_MAX: z.string().default('20'),
   AI_RATE_LIMIT_WINDOW_MS: z.string().default('60000')
 });

@@ -7,6 +7,14 @@ type RequestWithAuth = Request & { authUser?: AuthUser };
 
 @Controller()
 export class AuthController {
+  private isFallbackEnabled(): boolean {
+    return String(process.env.AUTH_FALLBACK_ENABLED ?? 'false').toLowerCase() === 'true';
+  }
+
+  private getFallbackToken(): string {
+    return String(process.env.AUTH_FALLBACK_TOKEN ?? '').trim();
+  }
+
   private sanitizeReturnTo(input?: string): string {
     const fallback = '/dashboard';
     if (!input || !String(input).trim()) return fallback;
@@ -175,6 +183,8 @@ export class AuthController {
 
     return {
       page,
+      fallbackEnabled: this.isFallbackEnabled() && this.getFallbackToken().length > 0,
+      fallbackLoginUrl: `/auth/fallback?returnTo=${encodeURIComponent(safeReturnTo)}`,
       keycloakLoginUrl: this.getKeycloakLoginUrl({
         state,
         nonce,
@@ -182,6 +192,32 @@ export class AuthController {
         redirectUri
       })
     };
+  }
+
+  @Get('/auth/fallback')
+  fallbackLogin(
+    @Req() req: RequestWithAuth,
+    @Res() res: Response,
+    @Query('returnTo') returnTo?: string
+  ) {
+    const fallbackToken = this.getFallbackToken();
+    if (!this.isFallbackEnabled() || !fallbackToken) {
+      return res.redirect('/login?error=fallback_disabled');
+    }
+
+    const safeReturnTo =
+      this.sanitizeReturnTo(returnTo) === '/dashboard' && !returnTo
+        ? (this.getSafeReturnToFromReferer(req) ?? '/dashboard')
+        : this.sanitizeReturnTo(returnTo);
+
+    res.cookie('wg_access_token', fallbackToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      path: '/'
+    });
+    res.clearCookie('wg_id_token', { path: '/' });
+    return res.redirect(safeReturnTo);
   }
 
   @Get('/auth/callback')

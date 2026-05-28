@@ -1,8 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { existsSync } from 'fs';
 import helmet from 'helmet';
 import { resolve } from 'path';
+import { config as loadEnv } from 'dotenv';
 import { AppModule } from './app.module';
+
+const envCandidates = [
+  resolve(process.cwd(), '.env'),
+  resolve(process.cwd(), '..', '.env'),
+  resolve(process.cwd(), '..', '..', '.env')
+];
+
+for (const envPath of envCandidates) {
+  if (existsSync(envPath)) {
+    loadEnv({ path: envPath });
+    break;
+  }
+}
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   wikigouv-mysql:
-    image: mysql:8.4
+    image: mysql:8.0
     container_name: wikigouv-mysql
     restart: unless-stopped
     environment:
@@ -10,7 +10,6 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-wikigouv}
       MYSQL_USER: ${MYSQL_USER:-wikigouv}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wikigouv_change_me}
-    command: --default-authentication-plugin=mysql_native_password
     volumes:
       - wikigouv_mysql_data:/var/lib/mysql
     ports:
@@ -51,7 +50,7 @@ services:
       DB_PORT: 3306
     volumes:
       - /www/wwwroot/wikigouv.gouvgpt.com:/app
-    command: sh -lc "npm ci && npm run build && npm run db:migrate && npm run db:seed || true && npm --workspace @wikigouv/api run start:prod"
+    command: sh -lc "npm ci --include=dev && npm run build && npm run db:migrate && npm run db:seed || true && npm --workspace @wikigouv/api run start:prod"
     ports:
       - "14000:4000"
     depends_on:

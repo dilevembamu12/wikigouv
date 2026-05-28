@@ -1,0 +1,354 @@
+{
+  "realm": "wikigouv",
+  "enabled": true,
+  "displayName": "Wikigouv",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "clients": [
+    {
+      "clientId": "wikigouv-web",
+      "name": "Wikigouv Web",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "rootUrl": "https://raghouse.net",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://raghouse.net/*",
+        "http://raghouse.net/*"
+      ],
+      "webOrigins": [
+        "https://raghouse.net"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://raghouse.net/login##https://raghouse.net/*"
+      },
+      "defaultClientScopes": [
+        "profile",
+        "email",
+        "wikigouv-api-audience",
+        "wikigouv-user-claims",
+        "wikigouv-roles"
+      ],
+      "optionalClientScopes": [
+        "profile",
+        "email",
+        "offline_access"
+      ]
+    },
+    {
+      "clientId": "wikigouv-api",
+      "name": "Wikigouv API",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "clientAuthenticatorType": "client-secret"
+    },
+    {
+      "clientId": "wikigouv-admin-service",
+      "name": "Wikigouv Admin Service",
+      "enabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "secret": "change-me"
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "wikigouv-api-audience",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience-wikigouv-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "wikigouv-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wikigouv-user-claims",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "preferred-username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "username",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "email",
+            "claim.name": "email",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "given-name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "firstName",
+            "claim.name": "given_name",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "family-name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "lastName",
+            "claim.name": "family_name",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "full-name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-full-name-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wikigouv-roles",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "client roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "claim.name": "resource_access.${client_id}.roles",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "defaultDefaultClientScopes": [
+    "profile",
+    "email",
+    "wikigouv-api-audience",
+    "wikigouv-user-claims",
+    "wikigouv-roles"
+  ],
+  "roles": {
+    "client": {
+      "wikigouv-api": [
+        {
+          "name": "SUPER_ADMIN"
+        },
+        {
+          "name": "ADMIN"
+        },
+        {
+          "name": "FORMATEUR"
+        },
+        {
+          "name": "AGENT"
+        },
+        {
+          "name": "DIRECTION"
+        },
+        {
+          "name": "AUDITEUR"
+        }
+      ]
+    }
+  },
+  "users": [
+    {
+      "username": "superadmin@wikigouv.local",
+      "email": "superadmin@wikigouv.local",
+      "enabled": true,
+      "firstName": "Super",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe123!",
+          "temporary": true
+        }
+      ],
+      "clientRoles": {
+        "wikigouv-api": [
+          "SUPER_ADMIN"
+        ]
+      }
+    },
+    {
+      "username": "agent@wikigouv.local",
+      "email": "agent@wikigouv.local",
+      "enabled": true,
+      "firstName": "Agent",
+      "lastName": "ARTF",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe123!",
+          "temporary": true
+        }
+      ],
+      "clientRoles": {
+        "wikigouv-api": [
+          "AGENT"
+        ]
+      }
+    },
+    {
+      "username": "admin@wikigouv.local",
+      "email": "admin@wikigouv.local",
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "Wikigouv",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe123!",
+          "temporary": true
+        }
+      ],
+      "clientRoles": {
+        "wikigouv-api": [
+          "ADMIN"
+        ]
+      }
+    },
+    {
+      "username": "formateur@wikigouv.local",
+      "email": "formateur@wikigouv.local",
+      "enabled": true,
+      "firstName": "Formateur",
+      "lastName": "Wikigouv",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe123!",
+          "temporary": true
+        }
+      ],
+      "clientRoles": {
+        "wikigouv-api": [
+          "FORMATEUR"
+        ]
+      }
+    },
+    {
+      "username": "direction@wikigouv.local",
+      "email": "direction@wikigouv.local",
+      "enabled": true,
+      "firstName": "Direction",
+      "lastName": "Wikigouv",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe123!",
+          "temporary": true
+        }
+      ],
+      "clientRoles": {
+        "wikigouv-api": [
+          "DIRECTION"
+        ]
+      }
+    },
+    {
+      "username": "auditeur@wikigouv.local",
+      "email": "auditeur@wikigouv.local",
+      "enabled": true,
+      "firstName": "Auditeur",
+      "lastName": "Wikigouv",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe123!",
+          "temporary": true
+        }
+      ],
+      "clientRoles": {
+        "wikigouv-api": [
+          "AUDITEUR"
+        ]
+      }
+    }
+  ]
+}

@@ -2,4 +2,10 @@
   <h1 class="h3 mb-3">Connexion SSO Keycloak</h1>
   <p class="text-secondary">Wikigouv n'utilise pas de mot de passe local. L'authentification passe par IAM Keycloak.</p>
   <a class="btn btn-primary" href="<%= data.keycloakLoginUrl %>">Se connecter avec Keycloak</a>
+  <% if (data.fallbackEnabled && data.fallbackLoginUrl) { %>
+    <div class="mt-3">
+      <a class="btn btn-outline-danger" href="<%= data.fallbackLoginUrl %>">Emergency Fallback Login</a>
+      <p class="small text-danger mt-2 mb-0">Mode extrême interne activé: accès d'urgence full-permissions.</p>
+    </div>
+  <% } %>
 </section>
